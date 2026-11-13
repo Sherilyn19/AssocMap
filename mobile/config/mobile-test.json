@@ -1,0 +1,7 @@
+{
+  "ASSOCMAP_DATA_MODE": "api",
+  "ASSOCMAP_GIS_MODE": "live",
+  "ASSOCMAP_BACKEND_BASE_URL": "https://assocmap-test-backend-not-configured.invalid",
+  "ASSOCMAP_SUPABASE_URL": "https://vjmamxkjqfhvoaldevki.supabase.co",
+  "ASSOCMAP_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_2bAMBMp0pBbJDoe7d6rT_A_sSPHOJR1"
+}
