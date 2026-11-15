@@ -6,6 +6,11 @@ use App\Http\Controllers\Api\V1\MeController;
 
 
 Route::prefix('v1')->group(function () {
+    Route::middleware([\App\Http\Middleware\ApiRequestGuard::class, 'throttle:api-auth', 'supabase.api.auth', 'mobile.association', 'throttle:30,1'])
+        ->prefix('association')->name('api.association.')->group(function () {
+            Route::get('/members', [\App\Http\Controllers\Api\V1\AssociationRecordsController::class, 'members'])->name('members');
+            Route::get('/trainings', [\App\Http\Controllers\Api\V1\AssociationRecordsController::class, 'trainings'])->name('trainings');
+        });
     Route::middleware([\App\Http\Middleware\ApiRequestGuard::class, 'throttle:api-auth', 'supabase.api.auth', 'mobile.association'])
         ->prefix('association/member-applications')->name('api.association.member-applications.')->group(function () {
             Route::get('/options', [\App\Http\Controllers\Api\V1\MemberApplicationController::class, 'options'])->middleware('throttle:30,1')->name('options');

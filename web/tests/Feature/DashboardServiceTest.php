@@ -693,5 +693,37 @@ class DashboardServiceTest extends TestCase
         $this->assertStringContainsString(e($dashboard['association']['municipality']), $html);
         $this->assertSame(0, $xpath->query('//section[@aria-labelledby="dashboard-association-title"]//script | //section[@aria-labelledby="dashboard-association-title"]//img')->length);
     }
+    public function test_mobile_list_totals_match_active_members_and_retained_training_summary(): void
+    {
+        DB::table('user_profiles')->where('id', self::USER)->update(['role_id' => 3]);
+        DB::table('association_accounts')->insert(['id' => self::OWN, 'user_id' => self::USER,
+            'association_id' => self::OWN, 'is_active' => true]);
+        Schema::table('members', function (Blueprint $table) {
+            $table->string('first_name')->default('Synthetic'); $table->string('last_name')->default('Member');
+            $table->string('middle_name')->nullable(); $table->string('suffix')->nullable();
+        });
+        Schema::table('trainings', function (Blueprint $table) {
+            $table->uuid('related_project_id')->nullable(); $table->string('title')->default('Synthetic training');
+            $table->text('description')->nullable(); $table->integer('program_year')->default(2026);
+            $table->date('start_date')->nullable(); $table->date('end_date')->nullable();
+            $table->string('venue')->nullable(); $table->string('conducted_by')->nullable(); $table->timestamp('archived_at')->nullable();
+        });
+        DB::table('trainings')->where('id', 2)->update(['archived_at' => '2026-01-01']);
+        $auth = \Mockery::mock(\App\Services\Auth\SupabaseAuthService::class);
+        $auth->shouldReceive('verifyApiIdentity')->with('synthetic-count-token')->andReturn([
+            'outcome' => 'verified', 'identity' => ['id' => self::USER, 'email' => 'counts@example.test'],
+        ]);
+        $this->app->instance(\App\Services\Auth\SupabaseAuthService::class, $auth);
+        $this->withToken('synthetic-count-token');
+        $dashboard = $this->getJson('/api/v1/association/dashboard')->assertOk()->json('data');
+        $this->assertSame(1, $this->metrics($dashboard)['members_active']);
+        $this->getJson('/api/v1/association/members')->assertOk()
+            ->assertJsonPath('data.total', $this->metrics($dashboard)['members_active']);
+        $trainings = $this->getJson('/api/v1/association/trainings')->assertOk()->json('data');
+        $this->assertSame($dashboard['training']['records'], $trainings['total']);
+        $this->assertSame($dashboard['training']['completed'], count(array_filter($trainings['trainings'],
+            fn ($training) => $training['status'] === 'completed')));
+    }
+
 }
 

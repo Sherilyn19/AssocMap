@@ -353,4 +353,148 @@ class AssociationProgramReadTest extends TestCase
             $this->assertSame($before, $count());
         }
     }
+    private function mobileRecords(): void
+    {
+        $this->flushSession();
+        $auth = Mockery::mock(SupabaseAuthService::class);
+        $auth->shouldReceive('verifyApiIdentity')->with('synthetic-records-token')->andReturnUsing(fn () => [
+            'outcome' => 'verified', 'identity' => ['id' => $this->identity, 'email' => 'synthetic@example.test'],
+        ]);
+        $this->app->instance(SupabaseAuthService::class, $auth);
+        $this->withToken('synthetic-records-token');
+    }
+
+    public function test_mobile_roster_is_names_only_active_official_records_not_applications(): void
+    {
+        $this->mobileRecords();
+        DB::table('members')->insert([
+            ['id' => $this->id(304), 'association_id' => $this->id(10), 'first_name' => 'Ana', 'middle_name' => 'M',
+                'last_name' => 'alpha', 'suffix' => 'Jr', 'member_status' => 'active'],
+            ['id' => $this->id(305), 'association_id' => $this->id(10), 'first_name' => 'Inactive', 'middle_name' => null,
+                'last_name' => 'Excluded', 'suffix' => null, 'member_status' => 'inactive'],
+        ]);
+        DB::table('members')->insert(['id' => $this->id(306), 'association_id' => $this->id(10),
+            'first_name' => 'Archived active', 'last_name' => 'Excluded', 'member_status' => 'active', 'archived_at' => now()]);
+        // Applications never constitute official membership, regardless of review status.
+        Schema::create('member_applications', function (Blueprint $table) {
+            $table->id(); $table->uuid('association_id'); $table->string('first_name'); $table->string('status');
+        });
+        foreach (['pending', 'rejected', 'approved'] as $status) {
+            DB::table('member_applications')->insert(['association_id' => $this->id(10), 'first_name' => 'Application canary', 'status' => $status]);
+        }
+        $response = $this->getJson('/api/v1/association/members')->assertOk()->assertExactJson(['data' => [
+            'association_id' => $this->id(10), 'members' => [['name' => 'alpha, Ana M Jr'], ['name' => 'Present, Synthetic']],
+            'page' => 1, 'last_page' => 1, 'total' => 2,
+        ]])->assertHeader('X-Content-Type-Options', 'nosniff');
+        $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
+        $response->assertDontSee('PRIVATE-CONTACT-CANARY')->assertDontSee('1990-01-01')->assertDontSee('Application canary');
+        $this->assertSame(3, DB::table('member_applications')->count());
+        $this->assertSame(6, DB::table('members')->count());
+        // The other account sees only its association, never the first account's members.
+        $this->identity = $this->id(2);
+        $this->getJson('/api/v1/association/members')->assertOk()->assertJsonPath('data.total', 1)
+            ->assertJsonPath('data.members.0.name', 'Foreign attendee, Synthetic')->assertDontSee('alpha, Ana');
+    }
+
+    public function test_mobile_roster_pagination_has_stable_alphabetic_order_and_total(): void
+    {
+        $this->mobileRecords();
+        for ($id = 1; $id <= 27; $id++) {
+            DB::table('members')->insert(['id' => $this->id(3000 + $id), 'association_id' => $this->id(10),
+                'first_name' => 'Roster', 'last_name' => sprintf('Member %02d', $id)]);
+        }
+        $this->getJson('/api/v1/association/members')->assertOk()->assertJsonCount(25, 'data.members')
+            ->assertJsonPath('data.total', 28)->assertJsonPath('data.last_page', 2)
+            ->assertJsonPath('data.members.0.name', 'Member 01, Roster')->assertJsonPath('data.members.24.name', 'Member 25, Roster');
+        $this->getJson('/api/v1/association/members?page=2')->assertOk()->assertJsonCount(3, 'data.members')
+            ->assertJsonPath('data.total', 28)->assertJsonPath('data.members.2.name', 'Present, Synthetic');
+    }
+
+    public function test_mobile_training_register_matches_web_fields_and_retained_history_without_private_fields(): void
+    {
+        $this->mobileRecords();
+        DB::table('trainings')->where('id', $this->id(101))->update(['start_date' => '2026-01-01', 'end_date' => '2026-01-02']);
+        DB::table('trainings')->where('id', $this->id(102))->update(['start_date' => '2027-01-01', 'status' => 'scheduled']);
+        DB::table('trainings')->where('id', $this->id(104))->update(['start_date' => '2025-01-01', 'status' => 'cancelled']);
+        $page = $this->getJson('/api/v1/association/trainings')->assertOk()->assertJsonCount(3, 'data.trainings')
+            ->assertJsonPath('data.total', 3)->assertJsonPath('data.trainings.0.title', 'Retained link record')
+            ->assertJsonPath('data.trainings.0.status', 'scheduled')->assertJsonPath('data.trainings.0.related_project', null)
+            ->assertJsonPath('data.trainings.1.start_date', '2026-01-01')->assertJsonPath('data.trainings.1.end_date', '2026-01-02')
+            ->assertJsonPath('data.trainings.1.status', 'completed')->assertJsonPath('data.trainings.1.venue', 'Saved venue')
+            ->assertJsonPath('data.trainings.1.conducted_by', 'Saved conductor')
+            ->assertJsonPath('data.trainings.1.related_project', 'Own related project')
+            ->assertJsonPath('data.trainings.2.is_archived', true)
+            ->assertDontSee('Foreign saved record')->assertDontSee('Foreign related project')->assertDontSee('Private internal remarks')
+            ->assertDontSee('Private attendance remarks')->assertDontSee('PRIVATE-CONTACT-CANARY');
+        $this->assertSame(['id', 'title', 'description', 'program_year', 'start_date', 'end_date', 'venue',
+            'conducted_by', 'status', 'is_archived', 'related_project'], array_keys($page->json('data.trainings.1')));
+        $this->identity = $this->id(2);
+        $this->getJson('/api/v1/association/trainings')->assertOk()->assertJsonCount(1, 'data.trainings')
+            ->assertJsonPath('data.trainings.0.title', 'Foreign saved record')->assertDontSee('Own saved record');
+    }
+
+    public function test_mobile_training_pagination_keeps_undated_records_last_and_does_not_write(): void
+    {
+        $this->mobileRecords();
+        for ($id = 1; $id <= 27; $id++) $this->record('trainings', 5000 + $id, ['start_date' => '2026-01-01']);
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+        try {
+            $this->getJson('/api/v1/association/trainings')->assertOk()->assertJsonPath('data.total', 30)->assertJsonCount(25, 'data.trainings');
+            $this->getJson('/api/v1/association/trainings?page=2')->assertOk()->assertJsonCount(5, 'data.trainings')
+                ->assertJsonPath('data.trainings.4.start_date', null);
+            $this->getJson('/api/v1/association/members')->assertOk();
+            foreach (DB::getQueryLog() as $query) {
+                $this->assertMatchesRegularExpression('/^select\\s/i', $query['query']);
+            }
+        } finally { DB::disableQueryLog(); }
+    }
+
+    public function test_mobile_records_fail_closed_for_wrong_roles_revoked_links_and_lifecycle(): void
+    {
+        $this->mobileRecords();
+        foreach ([3, 4] as $user) {
+            $this->identity = $this->id($user);
+            foreach (['members', 'trainings'] as $module) $this->getJson('/api/v1/association/'.$module)->assertForbidden();
+        }
+        $this->identity = $this->id(1);
+        DB::table('association_accounts')->where('user_id', $this->identity)->update(['is_active' => false]);
+        foreach (['members', 'trainings'] as $module) $this->getJson('/api/v1/association/'.$module)->assertForbidden();
+        DB::table('association_accounts')->where('user_id', $this->identity)->update(['is_active' => true]);
+        DB::table('associations')->where('id', $this->id(10))->update(['archived_at' => now()]);
+        foreach (['members', 'trainings'] as $module) $this->getJson('/api/v1/association/'.$module)->assertForbidden();
+    }
+
+    public function test_mobile_records_recheck_access_after_reading(): void
+    {
+        $this->mobileRecords();
+        $revoked = false;
+        DB::listen(function ($event) use (&$revoked) {
+            if (! $revoked && str_contains($event->sql, 'from "members"')) {
+                $revoked = true;
+                DB::table('association_accounts')->where('user_id', $this->identity)->update(['is_active' => false]);
+            }
+        });
+        $this->getJson('/api/v1/association/members')->assertForbidden()->assertDontSee('Present, Synthetic');
+        $this->assertTrue($revoked);
+    }
+
+    public function test_mobile_records_reject_client_scope_invalid_pages_and_writes_and_return_safe_failures(): void
+    {
+        $this->mobileRecords();
+        foreach (['members', 'trainings'] as $module) {
+            $url = '/api/v1/association/'.$module;
+            foreach (['association_id='.$this->id(11), 'user_id='.$this->id(2), 'page=0', 'page=100001', 'page[]=1'] as $query) {
+                $this->getJson($url.'?'.$query)->assertUnprocessable();
+            }
+            $this->postJson($url)->assertStatus(405);
+            $this->patchJson($url)->assertStatus(405);
+            $this->deleteJson($url)->assertStatus(405);
+            DB::table($module)->delete();
+            $this->getJson($url)->assertOk()->assertJsonPath('data.total', 0)->assertJsonCount(0, 'data.'.$module);
+            Schema::drop($module);
+            $this->getJson($url)->assertStatus(503)->assertJsonPath('error.code', 'service_unavailable')->assertDontSee('SQLSTATE');
+        }
+    }
+
 }
