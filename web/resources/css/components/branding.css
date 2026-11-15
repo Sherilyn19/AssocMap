@@ -9,3 +9,29 @@
     .public-page .public-brand-mark { width: 38px; height: 38px; }
     .public-page.staff-login-page .public-brand-official .assocmap-logo { width: 112px; }
 }
+
+
+/* PUBLIC HEADER — BRAND INTERACTION */
+.public-page .public-header .assocmap-brand-link { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+.public-page .public-header .assocmap-brand-link .public-brand-mark { display: grid; place-items: center; flex-shrink: 0; overflow: hidden; border-radius: 50%; }
+.public-page .public-header .assocmap-brand-link .assocmap-mark { display: block; width: 100%; height: 100%; object-fit: contain; transform-origin: center; }
+.public-page .public-header .assocmap-brand-link .public-brand-copy { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.public-page .public-header .assocmap-brand-link .assocmap-wordmark { display: inline-flex; transform: translateX(0); }
+.public-page .public-header .assocmap-brand-link .public-brand-copy small { margin-top: 4px; }
+
+/* Footer-inspired smooth motion */
+@media (prefers-reduced-motion: no-preference) {
+    .public-page .public-header .assocmap-brand-link .public-brand-mark { transition: transform 260ms ease; }
+    .public-page .public-header .assocmap-brand-link .assocmap-mark { transition: transform 350ms cubic-bezier(.22, 1, .36, 1); }
+    .public-page .public-header .assocmap-brand-link .assocmap-wordmark { transition: transform 260ms ease; }
+
+    .public-page .public-header .assocmap-brand-link:is(:hover, :focus-visible) .public-brand-mark { transform: translateY(-3px); }
+    .public-page .public-header .assocmap-brand-link:is(:hover, :focus-visible) .assocmap-mark { transform: rotate(-6deg) scale(1.07); }
+    .public-page .public-header .assocmap-brand-link:is(:hover, :focus-visible) .assocmap-wordmark { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .public-page .public-header .assocmap-brand-link .public-brand-mark,
+    .public-page .public-header .assocmap-brand-link .assocmap-mark,
+    .public-page .public-header .assocmap-brand-link .assocmap-wordmark { transition: none; transform: none; }
+}

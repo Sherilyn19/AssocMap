@@ -1,0 +1,30 @@
+
+/* Shared AssocMap wordmark */
+.assocmap-wordmark { display: inline-flex; align-items: baseline; white-space: nowrap; font-family: inherit; font-size: 30px; font-weight: 800; line-height: 1.1; letter-spacing: -.055em; }
+.assocmap-wordmark__initial { color: #2996d2; }
+.assocmap-wordmark__middle { color: #113a68; }
+.assocmap-wordmark__end { color: #0b427b; }
+
+/* Placement-specific sizing */
+.public-page .public-navbar .assocmap-wordmark { font-size: 29px; }
+.public-page.staff-login-page:not(.invitation-page) .assocmap-wordmark { font-size: 42px; }
+.invitation-page .assocmap-wordmark { font-size: 34px; }
+
+/* Smooth footer-inspired interactions */
+@media (prefers-reduced-motion: no-preference) {
+    .assocmap-brand-link .assocmap-wordmark { transition: transform 220ms ease; }
+    .assocmap-brand-link .assocmap-wordmark > span { transition: color 220ms ease; }
+    .assocmap-brand-link .public-brand-mark, .assocmap-brand-link .staff-login-emblem, .assocmap-brand-link .invitation-brand-symbol { transition: transform 220ms ease; }
+    .assocmap-brand-link:hover .assocmap-wordmark, .assocmap-brand-link:focus-visible .assocmap-wordmark { transform: translateX(3px); }
+    .assocmap-brand-link:hover .assocmap-wordmark__initial, .assocmap-brand-link:focus-visible .assocmap-wordmark__initial { color: #197fba; }
+    .assocmap-brand-link:hover .assocmap-wordmark__middle, .assocmap-brand-link:focus-visible .assocmap-wordmark__middle { color: #285e91; }
+    .assocmap-brand-link:hover .assocmap-wordmark__end, .assocmap-brand-link:focus-visible .assocmap-wordmark__end { color: #35679d; }
+    .assocmap-brand-link:hover .public-brand-mark, .assocmap-brand-link:hover .staff-login-emblem, .assocmap-brand-link:hover .invitation-brand-symbol, .assocmap-brand-link:focus-visible .public-brand-mark, .assocmap-brand-link:focus-visible .staff-login-emblem, .assocmap-brand-link:focus-visible .invitation-brand-symbol { transform: translateY(-3px) rotate(-6deg); }
+}
+
+@media (max-width: 600px) {
+    .public-page .public-navbar .assocmap-wordmark { font-size: 24px; }
+    .public-page.staff-login-page:not(.invitation-page) .assocmap-wordmark { font-size: 36px; }
+    .invitation-page .assocmap-wordmark { font-size: 30px; }
+}
+

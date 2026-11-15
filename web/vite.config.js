@@ -5,7 +5,8 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/js/pages/monitoring-quarter-availability.js', 'resources/js/pages/monitoring-row-template.js'],
+            
+input: ['resources/css/app.css', 'resources/css/pages/invitation-restart.css', 'resources/js/app.js', 'resources/js/pages/monitoring-quarter-availability.js', 'resources/js/pages/monitoring-row-template.js'],
             refresh: true,
         }),
         tailwindcss(),

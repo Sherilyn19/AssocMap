@@ -6,6 +6,11 @@
     <meta name="referrer" content="no-referrer">
     <meta name="color-scheme" content="light">
     <title>@yield('title', 'Account Activation') · AssocMap</title>
+
+    @if(request()->is('invitation/restart'))
+        @vite('resources/css/pages/invitation-restart.css')
+    @endif
+
     <script nonce="{{ request()->attributes->get('activation_nonce') }}">
         (() => {
             const hashes = new URLSearchParams(window.location.hash.slice(1)).getAll('token_hash');
@@ -68,7 +73,7 @@
         main { min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: 32px 16px; }
         .staff-login-wrap { width: min(100%, 440px); }
         .staff-login-brand { text-align: center; margin-bottom: 24px; font-size: 26px; font-weight: 750; }
-        .staff-login-brand span { color: #19734c; }
+        .staff-login-brand > span { color: #19734c; }
         .staff-login-card { padding: 32px; background: white; border: 1px solid #dbe5df; border-radius: 14px; box-shadow: 0 8px 28px #1539240d; }
         h1 { margin: 0; font-size: 26px; }
         p { line-height: 1.6; }
@@ -96,13 +101,35 @@
         @media (max-width: 480px) { .staff-login-card { padding: 24px 20px; } }
     </style>
 </head>
-<body class="public-page staff-login-page">
+<body class="public-page staff-login-page{{ request()->is('invitation/restart') ? ' invitation-page' : '' }}">
     <main aria-labelledby="activation-title">
         <div class="staff-login-wrap">
-            <div class="staff-login-brand">Assoc<span>Map</span></div>
+            
+            <div class="staff-login-brand">
+                @if(request()->is('invitation/restart'))
+                    <a href="{{ route('home') }}" class="invitation-brand-link assocmap-brand-link" aria-label="AssocMap home">
+                        
+                        <span class="invitation-brand-symbol">
+                            <img
+                                src="https://res.cloudinary.com/dibojpqg2/image/upload/v1790480817/AssocMap-Logo-Without_title_muyzbt.png"
+                                alt=""
+                                width="98"
+                                height="98"
+                                decoding="async"
+                            >
+                        </span>
+                        <x-assocmap-wordmark />
+                    </a>
+                @else
+                    Assoc<span>Map</span>
+                @endif
+            </div>
+
             <section class="staff-login-card" aria-labelledby="activation-title">
                 @yield('content')
-                <a class="staff-login-back" href="{{ route('login') }}">Go to sign in</a>
+                @unless(request()->is('invitation/restart'))
+                    <a class="staff-login-back" href="{{ route('login') }}">Go to sign in</a>
+                @endunless
             </section>
         </div>
     </main>

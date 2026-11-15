@@ -1,0 +1,71 @@
+@import '../components/assocmap-wordmark.css';
+@reference "tailwindcss";
+
+/* ASSOCMAP — RESUME ACCOUNT ACTIVATION */
+
+.invitation-page { background: #f7f9fb; color: #102f50; }
+.invitation-page main { @apply grid place-items-center; min-height: 100vh; min-height: 100svh; padding: 48px 20px; }
+.invitation-page .staff-login-wrap { width: min(100%, 560px); }
+
+/* OFFICIAL BRANDING */
+.invitation-page .staff-login-brand { margin-bottom: 28px; animation: invitation-enter 550ms ease both; }
+.invitation-page .invitation-brand-link { @apply flex flex-col items-center; gap: 8px; color: #102f50; text-decoration: none; transition: transform 220ms ease; }
+.invitation-page .invitation-brand-link:hover { transform: translateY(-2px); }
+.invitation-page .invitation-brand-symbol { display: block; width: 98px; height: 98px; }
+.invitation-page .invitation-brand-symbol img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.invitation-page .invitation-brand-text { font-size: 29px; font-weight: 750; letter-spacing: -1.1px; line-height: 1.2; }
+.invitation-page .invitation-brand-assoc { color: #102f50; }
+.invitation-page .invitation-brand-map { color: #176b54; }
+
+/* CARD */
+.invitation-page .staff-login-card { padding: 42px; border: 1px solid #e2e8f0; border-radius: 20px; background: #ffffff; box-shadow: 0 14px 36px rgb(16 47 80 / 7%); animation: invitation-enter 620ms 70ms ease both; }
+.invitation-page .invitation-restart-panel { @apply grid; gap: 24px; }
+.invitation-page .invitation-restart-panel h1 { margin: 0; color: #102f50; font-size: 27px; font-weight: 750; line-height: 1.3; letter-spacing: -.6px; }
+.invitation-page .invitation-lead { margin: 0; color: #64748b; font-size: 15px; line-height: 1.75; }
+.invitation-page .invitation-help { margin: 0; color: #64748b; font-size: 14px; line-height: 1.8; }
+
+/* STATUS MESSAGES */
+.invitation-page .invitation-alert { @apply flex items-start; gap: 13px; padding: 18px; border: 1px solid #ead9ac; border-radius: 14px; background: #fdfaf2; color: #725221; transition: transform 220ms ease, box-shadow 220ms ease; }
+.invitation-page .invitation-alert:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgb(80 65 30 / 6%); }
+.invitation-page .invitation-alert-icon { display: block; width: 22px; height: 22px; flex: 0 0 22px; margin-top: 2px; color: #b77918; }
+.invitation-page .invitation-alert-copy { @apply grid; gap: 3px; min-width: 0; }
+.invitation-page .invitation-alert-copy strong { color: #725221; font-size: 14px; font-weight: 700; line-height: 1.6; }
+.invitation-page .invitation-alert-copy span { display: block; color: #795f38; font-size: 14px; line-height: 1.6; }
+.invitation-page .invitation-alert-success { background: #f2f8f5; border-color: #c9e0d3; }
+.invitation-page .invitation-alert-success .invitation-alert-icon, .invitation-page .invitation-alert-success .invitation-alert-copy strong, .invitation-page .invitation-alert-success .invitation-alert-copy span { color: #216653; }
+.invitation-page .invitation-alert-error { background: #fcf5f5; border-color: #e8cbcf; }
+.invitation-page .invitation-alert-error .invitation-alert-icon, .invitation-page .invitation-alert-error .invitation-alert-copy strong, .invitation-page .invitation-alert-error .invitation-alert-copy span { color: #9b3342; }
+
+/* RECOVERY FORM */
+.invitation-page .invitation-restart-form { @apply grid; gap: 18px; }
+.invitation-page .invitation-field { margin: 0; }
+.invitation-page .invitation-field > label { margin-bottom: 9px; color: #526478; font-size: 12px; font-weight: 700; letter-spacing: .5px; }
+.invitation-page .invitation-input-wrap { @apply flex items-center; position: relative; }
+.invitation-page .invitation-input-wrap .staff-field-icon { position: absolute; left: 14px; width: 19px; height: 19px; color: #94a3b8; pointer-events: none; }
+.invitation-page .invitation-input-wrap input { padding-left: 44px; border: 1px solid #dce5ec; border-radius: 11px; background: #f8fafc; transition: border-color 200ms ease, box-shadow 200ms ease; }
+.invitation-page .invitation-input-wrap input:focus { outline: none; border-color: #35679d; box-shadow: 0 0 0 3px rgb(53 103 157 / 12%); }
+.invitation-page .invitation-submit { @apply flex items-center justify-center; gap: 12px; min-height: 50px; border-radius: 11px; background: #0b427b; color: #ffffff; transition: transform 220ms ease, background-color 220ms ease, box-shadow 220ms ease; }
+.invitation-page .invitation-submit:hover { background: #0d527d; transform: translateY(-2px); box-shadow: 0 8px 16px rgb(11 66 123 / 14%); }
+.invitation-page .invitation-submit .icon { width: 18px; height: 18px; }
+
+/* BOTTOM NAVIGATION */
+.invitation-page .invitation-divider { border-top: 1px solid #e2e8f0; }
+.invitation-page .invitation-signin-link { @apply flex items-center justify-center; min-height: 44px; color: #216653; font-size: 15px; font-weight: 700; text-decoration: none; transition: color 200ms ease, transform 200ms ease; }
+.invitation-page .invitation-signin-link:hover { color: #164b3d; text-decoration: underline; transform: translateY(-1px); }
+.invitation-page :focus-visible { outline: 3px solid #35679d; outline-offset: 3px; }
+
+/* ANIMATION */
+@keyframes invitation-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+.invitation-page main { padding: 30px 16px; }
+.invitation-page .staff-login-card { padding: 29px 22px; border-radius: 16px; }
+.invitation-page .invitation-restart-panel { gap: 21px; }
+.invitation-page .invitation-restart-panel h1 { font-size: 24px; }
+}
+
+/* ACCESSIBILITY */
+@media (prefers-reduced-motion: reduce) {
+.invitation-page *, .invitation-page *::before, .invitation-page *::after { animation: none !important; transition: none !important; }
+}

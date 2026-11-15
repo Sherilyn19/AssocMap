@@ -1,3 +1,6 @@
+
+@reference "tailwindcss";
+
 /* Public presentation only; authenticated workspace tokens remain unchanged. */
 .public-page {
     --public-primary: #0b427b;
@@ -20,6 +23,7 @@
 .public-page :focus-visible { outline: 3px solid #35679d; outline-offset: 5px; }
 .public-page .public-header { position: relative; top: 0; z-index: 40; border-bottom: 1px solid var(--public-border); background: #fffffffa; }
 .public-page .public-header.is-enhanced { position: sticky; }
+.public-page .public-header.is-scrolled { background: #fff; box-shadow: 0 5px 22px rgb(16 47 80 / 12%); }
 .public-page .public-navbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; min-height: 88px; padding-block: 16px; }
 .public-page .public-brand { display: inline-flex; align-items: center; gap: 11px; color: var(--public-primary); }
 .public-page .public-brand-mark { width: 43px; height: 43px; display: grid; place-items: center; border: 1px solid #c4d6e5; border-radius: 50%; background: #edf4fa; }
@@ -39,6 +43,11 @@
 .public-page .public-hero { position: relative; isolation: isolate; overflow: hidden; background: #183752; color: #fff; }
 .public-page .public-hero-photo, .public-page .public-hero-overlay { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
 .public-page .public-hero-photo { object-fit: cover; object-position: 50% 45%; transform: scaleX(-1); }
+@media (prefers-reduced-motion: no-preference) {
+    .public-page .public-header { transition: background-color 240ms ease, box-shadow 240ms ease; }
+    .public-page .public-hero-photo { transform: scaleX(-1) scale(1.08) translateY(var(--hero-scroll, 0px)); animation: public-photo-enter 900ms ease-out both; }
+}
+@keyframes public-photo-enter { from { opacity: .65; } to { opacity: 1; } }
 .public-page .public-hero-overlay { background: linear-gradient(0deg, rgb(5 29 53 / 84%), transparent 30%), linear-gradient(90deg, rgb(5 29 53 / 90%) 0%, rgb(7 37 66 / 80%) 36%, rgb(9 42 70 / 32%) 72%, rgb(9 42 70 / 12%) 100%); }
 .public-page .public-hero-content { display: flex; flex-direction: column; min-height: 760px; padding-top: 31px; }
 .public-page .public-hero-topline { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #d5e3ef; letter-spacing: .4px; }
@@ -441,4 +450,42 @@
     .public-page.staff-login-page .public-brand strong { font-size: 23px; }
     .public-page.staff-login-page .public-brand small { font-size: 9px; }
     .public-page.staff-login-page .public-brand-mark { width: 35px; height: 39px; }
+}
+
+
+/* ASSOCMAP PUBLIC PAGE — CTA AND FOOTER REFINEMENT */
+
+/* 1. Green GIS call-to-action section */
+.public-page .public-access-section { @apply text-white; background-color: #216653; }
+.public-page .public-access-panel .public-eyebrow, .public-page .public-access-panel p:not(.public-eyebrow) { color: #ddefe7; }
+.public-page .public-access-panel p a { @apply text-white; }
+.public-page .public-access-panel p a:hover { text-decoration-thickness: 2px; }
+
+/* 2. Deep blue footer */
+.public-page .public-footer { @apply text-white; background-color: #0b427b; }
+.public-page .public-footer-identity .public-brand, .public-page .public-footer-identity .public-brand strong { @apply text-white; }
+.public-page .public-footer .public-footer-identity .public-brand:hover, .public-page .public-footer .public-footer-identity .public-brand:focus-visible, .public-page .public-footer .public-footer-identity .public-brand:hover strong, .public-page .public-footer .public-footer-identity .public-brand:focus-visible strong { @apply text-white; }
+.public-page .public-footer-identity p, .public-page .public-footer-bottom > p { color: #dae5ef; }
+.public-page .public-footer-label { @apply text-white; }
+.public-page .public-footer nav a { color: #e5f1fc; }
+.public-page .public-footer nav a:hover, .public-page .public-footer nav a:focus-visible { @apply text-white underline; text-underline-offset: 4px; }
+.public-page .public-footer :focus-visible { outline-color: #ddefe7; }
+
+/* 3. Bottom footer organization */
+.public-page .public-footer-bottom { @apply grid items-center gap-6; grid-template-columns: minmax(0, 1fr) auto auto; border-top: 1px solid rgb(255 255 255 / 24%); }
+.public-page .public-footer .public-footer-legal { @apply flex flex-row flex-wrap items-center justify-center; gap: 8px 18px; }
+.public-page .public-footer .public-footer-legal a { @apply min-h-11 whitespace-nowrap py-2; }
+.public-page .public-footer-bottom > a { @apply bg-white; color: #0b427b; border-color: #bdd4e6; }
+.public-page .public-footer-bottom > a:hover, .public-page .public-footer-bottom > a:focus-visible { @apply no-underline; background-color: #eaf3f8; color: #0b427b; border-color: #ffffff; }
+
+/* 4. Responsive footer layout */
+@media (max-width: 950px) {
+.public-page .public-footer-bottom { grid-template-columns: 1fr auto; }
+.public-page .public-footer-bottom > p { grid-column: 1 / -1; }
+.public-page .public-footer .public-footer-legal { @apply justify-start; }
+}
+@media (max-width: 540px) {
+.public-page .public-footer-bottom { @apply justify-items-start; grid-template-columns: 1fr; gap: 12px; }
+.public-page .public-footer-bottom > p { grid-column: auto; }
+.public-page .public-footer .public-footer-legal { @apply justify-start; }
 }

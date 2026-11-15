@@ -39,6 +39,28 @@ export function initPublicNavigation() {
         syncMenu();
         publicNavbar.classList.add('is-enhanced');
 
+        const hero = document.querySelector('.public-hero');
+        const photo = hero?.querySelector('.public-hero-photo');
+        const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        let scrollFrame = null;
+        const updateScrollEffects = () => {
+            scrollFrame = null;
+            publicNavbar.classList.toggle('is-scrolled', window.scrollY > 12);
+            if (photo && !motion.matches) {
+                const distance = Math.max(0, Math.min(window.scrollY, hero.offsetHeight));
+                photo.style.setProperty('--hero-scroll', `${distance * 0.035}px`);
+            }
+        };
+        const scheduleScrollEffects = () => {
+            if (scrollFrame === null) scrollFrame = requestAnimationFrame(updateScrollEffects);
+        };
+        window.addEventListener('scroll', scheduleScrollEffects, { passive: true });
+        motion.addEventListener('change', () => {
+            if (motion.matches) photo?.style.removeProperty('--hero-scroll');
+            scheduleScrollEffects();
+        });
+        updateScrollEffects();
+
         const sections = [...document.querySelectorAll('.public-main section[id]')];
         const sectionLinks = [...navigation.querySelectorAll('a[href*="#"]')];
         if (sections.length && 'IntersectionObserver' in window) {
