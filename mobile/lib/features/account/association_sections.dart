@@ -4,6 +4,8 @@ import '../../core/widgets/assocmap_widgets.dart';
 import '../../data/models/association_dashboard.dart';
 import '../../data/models/auth_session.dart';
 import '../../data/repositories/dashboard_repository.dart';
+import '../../data/repositories/association_records_repository.dart';
+import 'association_record_list.dart';
 import 'association_data_view.dart';
 import 'association_dashboard_screen.dart';
 
@@ -12,12 +14,14 @@ class AssociationSections extends StatefulWidget {
     super.key,
     required this.section,
     required this.repository,
+    this.recordsRepository = const UnavailableAssociationRecordsRepository(),
     required this.session,
     required this.onSessionExpired,
     required this.onOpenSection,
   });
   final String section;
   final DashboardRepository repository;
+  final AssociationRecordsRepository recordsRepository;
   final AuthSession session;
   final VoidCallback onSessionExpired;
   final ValueChanged<String> onOpenSection;
@@ -34,7 +38,7 @@ class _AssociationSectionsState extends State<AssociationSections> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Icon(Icons.info_outline, color: AppTheme.blue),
+        const Icon(Icons.info_outline, color: AppTheme.green),
         const SizedBox(height: 10),
         Text(title, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
@@ -73,21 +77,24 @@ class _AssociationSectionsState extends State<AssociationSections> {
           Text(data.name, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 16),
           if (widget.section == 'members')
-            ..._members(data)
+            ..._members(data, refresh)
           else
-            ..._programs(data),
+            ..._programs(data, refresh),
         ],
       ],
     ),
   );
 
   List<Widget> _association(AssociationDashboard data) => [
-    const PhotoPlaceholder(height: 140, label: 'Association photo unavailable'),
-    const SizedBox(height: 16),
+    const Align(
+      alignment: Alignment.centerLeft,
+      child: Icon(Icons.apartment_outlined, size: 36, color: AppTheme.green),
+    ),
+    const SizedBox(height: 12),
     const Text(
       'ACTIVE ASSOCIATION',
       style: TextStyle(
-        color: AppTheme.blue,
+        color: AppTheme.green,
         fontSize: 11,
         fontWeight: FontWeight.w700,
       ),
@@ -99,7 +106,7 @@ class _AssociationSectionsState extends State<AssociationSections> {
     const SizedBox(height: 20),
     MetricStrip(
       values: {
-        'Members': dashboardCount(data, 'members_total'),
+        'Members': dashboardCount(data, 'members_active'),
         'Projects': dashboardCount(data, 'projects_total'),
         'Trainings': data.training?.records,
       },
@@ -116,16 +123,15 @@ class _AssociationSectionsState extends State<AssociationSections> {
           const Divider(),
           Text('Status', style: Theme.of(context).textTheme.bodySmall),
           Text(data.status),
-          const Divider(),
-          const Text(
-            'Additional profile information is currently unavailable.',
-          ),
         ],
       ),
     ),
   ];
 
-  List<Widget> _members(AssociationDashboard data) => [
+  List<Widget> _members(
+    AssociationDashboard data,
+    Future<void> Function() refresh,
+  ) => [
     _tabs(
       ['Members', 'Registrations'],
       _registrations ? 'Registrations' : 'Members',
@@ -152,23 +158,11 @@ class _AssociationSectionsState extends State<AssociationSections> {
         'Open applications submitted by this account to check their review status.',
       ),
     ] else ...[
-      const TextField(
-        enabled: false,
-        decoration: InputDecoration(
-          hintText: 'Search members unavailable',
-          prefixIcon: Icon(Icons.search),
-        ),
-      ),
-      const SizedBox(height: 16),
-      InformationCard(
-        child: MetricStrip(
-          values: {'Official members': dashboardCount(data, 'members_total')},
-        ),
-      ),
-      const SizedBox(height: 16),
-      _unavailable(
-        'Member roster unavailable',
-        'Official member records are unavailable to Association Accounts. Contact your assigned Field Officer for roster assistance.',
+      AssociationRecordList(
+        repository: widget.recordsRepository,
+        onRefresh: refresh,
+        session: widget.session,
+        onSessionExpired: widget.onSessionExpired,
       ),
     ],
     const SizedBox(height: 16),
@@ -178,7 +172,10 @@ class _AssociationSectionsState extends State<AssociationSections> {
     ),
   ];
 
-  List<Widget> _programs(AssociationDashboard data) {
+  List<Widget> _programs(
+    AssociationDashboard data,
+    Future<void> Function() refresh,
+  ) {
     final training = widget.section == 'trainings';
     final projects = data.projects
         ?.where(
@@ -210,10 +207,13 @@ class _AssociationSectionsState extends State<AssociationSections> {
             },
           ),
         ),
-        const SectionHeading('Activity calendar'),
-        _unavailable(
-          'Training calendar unavailable',
-          'Dated training activities and attendance details are currently unavailable on mobile. These totals include retained training history.',
+        const SizedBox(height: 16),
+        AssociationRecordList(
+          repository: widget.recordsRepository,
+          onRefresh: refresh,
+          session: widget.session,
+          onSessionExpired: widget.onSessionExpired,
+          trainings: true,
         ),
       ] else ...[
         TextField(
@@ -226,7 +226,13 @@ class _AssociationSectionsState extends State<AssociationSections> {
         ),
         const SizedBox(height: 10),
         _tabs(
-          ['All', 'Ongoing', 'Completed'],
+          [
+            'All',
+            ...{
+              for (final project in data.projects ?? <DashboardProject>[])
+                project.status,
+            },
+          ],
           _status,
           (value) => setState(() => _status = value),
         ),
@@ -254,11 +260,6 @@ class _AssociationSectionsState extends State<AssociationSections> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(
-                      width: 52,
-                      child: PhotoPlaceholder(height: 56),
-                    ),
-                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,10 +269,8 @@ class _AssociationSectionsState extends State<AssociationSections> {
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 5),
-                          Text(
-                            project.status,
-                            style: const TextStyle(color: AppTheme.blue),
-                          ),
+                          StatusBadge(status: project.status),
+                          const SizedBox(height: 8),
                           Text(
                             'Program year ${project.programYear}',
                             style: Theme.of(context).textTheme.bodySmall,

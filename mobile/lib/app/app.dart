@@ -8,10 +8,12 @@ import '../core/authentication/association_guard.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/analytics_repository.dart';
 import '../data/repositories/dashboard_repository.dart';
+import '../data/repositories/association_records_repository.dart';
 import '../data/repositories/repository_factory.dart';
 import '../data/repositories/public_projects_repository.dart';
 import '../data/remote/api_auth_repository.dart';
 import '../data/remote/api_dashboard_repository.dart';
+import '../data/remote/api_association_records_repository.dart';
 import '../data/remote/api_analytics_repository.dart';
 import '../data/remote/api_member_applications_repository.dart';
 import '../data/repositories/member_applications_repository.dart';
@@ -28,6 +30,7 @@ class AssocMapApp extends StatefulWidget {
     this.authentication,
     this.analytics,
     this.dashboard,
+    this.associationRecords,
     this.memberApplications,
     this.tileProviderFactory,
   });
@@ -37,6 +40,7 @@ class AssocMapApp extends StatefulWidget {
   final AuthRepository? authentication;
   final AnalyticsRepository? analytics;
   final DashboardRepository? dashboard;
+  final AssociationRecordsRepository? associationRecords;
   final MemberApplicationsRepository? memberApplications;
   final TileProvider Function()? tileProviderFactory;
 
@@ -49,6 +53,7 @@ class _AssocMapAppState extends State<AssocMapApp> with WidgetsBindingObserver {
   late final AuthRepository _repository;
   late final AnalyticsRepository _analytics;
   late final DashboardRepository _dashboard;
+  late final AssociationRecordsRepository _associationRecords;
   late final MemberApplicationsRepository _memberApplications;
 
   @override
@@ -74,6 +79,14 @@ class _AssocMapAppState extends State<AssocMapApp> with WidgetsBindingObserver {
                 read: repository.read,
               )
             : const UnavailableDashboardRepository());
+    _associationRecords =
+        widget.associationRecords ??
+        (repository is ApiAuthRepository
+            ? ApiAssociationRecordsRepository(
+                config: widget.config,
+                read: repository.read,
+              )
+            : const UnavailableAssociationRecordsRepository());
     _auth = AuthController(repository: _repository, mode: widget.config.mode);
     _memberApplications =
         widget.memberApplications ??
@@ -128,6 +141,7 @@ class _AssocMapAppState extends State<AssocMapApp> with WidgetsBindingObserver {
         controller: _auth,
         analytics: _analytics,
         dashboard: _dashboard,
+        associationRecords: _associationRecords,
         memberApplications: _memberApplications,
       ),
       AppRoutes.associationHome: (_) => AssociationGuard(
@@ -135,6 +149,7 @@ class _AssocMapAppState extends State<AssocMapApp> with WidgetsBindingObserver {
         controller: _auth,
         analytics: _analytics,
         dashboard: _dashboard,
+        associationRecords: _associationRecords,
         memberApplications: _memberApplications,
       ),
     },

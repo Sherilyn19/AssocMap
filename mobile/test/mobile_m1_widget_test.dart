@@ -17,6 +17,7 @@ import 'package:mobile/features/account/association_home_screen.dart';
 import 'mobile_m1_auth_test.dart' show config, me, json, providerSession;
 import 'association_dashboard_test.dart' show dashboard;
 import 'support/member_application_fixtures.dart';
+import 'support/association_record_fixtures.dart';
 
 class _EmptyPublicRepository implements PublicProjectsRepository {
   @override
@@ -68,7 +69,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     Navigator.of(
-      tester.element(find.text('Explore map')),
+      tester.element(find.text('Log in')),
     ).pushNamed(AppRoutes.associationHome);
     await tester.pumpAndSettle();
   }
@@ -157,13 +158,55 @@ void main() {
   }
 
   testWidgets(
+    'Live app wires authorized members and trainings through the session coordinator',
+    (tester) async {
+      final paths = <String>[];
+      apiReply = (request) {
+        paths.add(request.url.path);
+        final key = request.url.path.split('/').last;
+        return json({
+          'data': {'members', 'trainings'}.contains(key)
+              ? recordPage(key: key)
+              : dashboard(),
+        });
+      };
+      await open(tester);
+      await signIn(tester);
+      await tester.tap(find.byKey(const ValueKey('workspace-tab-1')));
+      await tester.pumpAndSettle();
+      expect(find.text('Alpha, Ana'), findsOneWidget);
+      await tester.tap(find.text('Registrations').last);
+      await tester.pumpAndSettle();
+      expect(find.text('View my applications'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('workspace-tab-2')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Trainings').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Coastal skills training'), findsOneWidget);
+      expect(
+        paths,
+        containsAll([
+          '/api/v1/association/members',
+          '/api/v1/association/trainings',
+        ]),
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
     'live app wiring displays authorized zero and empty data, then guards logout',
     (tester) async {
       await open(tester);
       expect(find.text('Fill demo credentials'), findsNothing);
       await signIn(tester);
       expect(find.byType(AssociationHomeScreen), findsOneWidget);
-      expect(find.text('Official members'), findsOneWidget);
+      await tester.ensureVisible(find.text('Association summary'));
+      await tester.tap(find.text('Association summary'));
+      await tester.pumpAndSettle();
+      expect(find.text('Retained member records'), findsOneWidget);
+      expect(find.text('Active official members'), findsOneWidget);
       expect(find.text('Synthetic association'), findsWidgets);
       await tester.tap(find.byKey(const ValueKey('workspace-tab-4')));
       await tester.pumpAndSettle();
@@ -177,6 +220,95 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(AssociationHomeScreen), findsNothing);
       expect(provider.currentSession, isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
+    'Authorized dashboard exposes existing statistics, monitoring and activities at large text',
+    (tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final data = dashboard()
+        ..['charts'] = [
+          {
+            'key': 'project_status',
+            'title': 'Project portfolio status',
+            'note': 'Unarchived projects only.',
+            'rows': [
+              {'label': 'Suspended', 'value': 1},
+            ],
+          },
+        ]
+        ..['monitoring'] = {
+          'records': 1,
+          'periods': 1,
+          'visits': {'total': 0, 'legacy_imports': 0},
+          'recent': [
+            {
+              'title': 'Synthetic monitored project',
+              'year': 2026,
+              'quarter_number': 3,
+              'monitoring_date': '2026-09-30',
+              'project_status': 'suspended',
+            },
+          ],
+        }
+        ..['activities'] = [
+          {
+            'title': 'Synthetic program activity',
+            'activity_date': '2026-10-01',
+            'status': 'completed',
+          },
+        ];
+      apiReply = (_) => json({'data': data});
+      await open(tester);
+      await signIn(tester);
+      expect(find.text('Project portfolio status'), findsOneWidget);
+      expect(find.text('Synthetic monitored project'), findsOneWidget);
+      expect(find.text('Recorded status: suspended'), findsOneWidget);
+      expect(find.text('Synthetic program activity'), findsOneWidget);
+      await tester.ensureVisible(find.text('Synthetic program activity'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
+    'Project summary filters include every returned status and reset to All',
+    (tester) async {
+      final data = dashboard()
+        ..['recent_projects'] = [
+          for (final status in ['planned', 'suspended', 'terminated'])
+            {
+              'title': 'Synthetic $status project',
+              'status': status,
+              'program_year': 2026,
+              'created_at': '2026-10-01T12:00:00+08:00',
+            },
+        ];
+      apiReply = (_) => json({'data': data});
+      await open(tester);
+      await signIn(tester);
+      await tester.tap(find.byKey(const ValueKey('workspace-tab-2')));
+      await tester.pumpAndSettle();
+      final suspended = find.widgetWithText(ChoiceChip, 'suspended');
+      await tester.ensureVisible(suspended);
+      await tester.tap(suspended);
+      await tester.pumpAndSettle();
+      expect(find.text('Synthetic suspended project'), findsOneWidget);
+      expect(find.text('Synthetic planned project'), findsNothing);
+      await tester.tap(find.widgetWithText(ChoiceChip, 'All'));
+      await tester.pumpAndSettle();
+      for (final status in ['planned', 'suspended', 'terminated']) {
+        expect(find.text('Synthetic $status project'), findsOneWidget);
+      }
+      expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );

@@ -28,6 +28,7 @@ import 'association_dashboard_test.dart' show dashboard;
 import 'analytics_report_test.dart' show report;
 import 'support/test_tile_provider.dart';
 import 'support/member_application_fixtures.dart';
+import 'support/association_record_fixtures.dart';
 
 final _activeSession = AuthSession(
   userId: '11111111-1111-4111-8111-111111111111',
@@ -74,6 +75,12 @@ Map<String, dynamic> _dashboard() {
       'label': 'Official members',
       'value': 4,
       'note': 'All retained official records, including archived members.',
+    },
+    {
+      'key': 'members_active',
+      'label': 'Official members',
+      'value': 1,
+      'note': 'Active unarchived official members.',
     },
     {
       'key': 'projects_total',
@@ -222,16 +229,19 @@ void main() {
           File(
             Platform.resolvedExecutable,
           ).parent.parent.parent.parent.parent.parent.path;
-      final loader = FontLoader('Roboto');
-      for (final weight in ['regular', 'bold']) {
-        final file = File(
-          '$sdkRoot/bin/cache/artifacts/material_fonts/roboto-$weight.ttf',
-        );
-        loader.addFont(
-          Future.value(ByteData.sublistView(file.readAsBytesSync())),
-        );
+      // Android's default font is Roboto; avoid Ahem blocks in captured labels.
+      for (final family in ['Roboto', 'Ahem']) {
+        final loader = FontLoader(family);
+        for (final weight in ['regular', 'bold']) {
+          final file = File(
+            '$sdkRoot/bin/cache/artifacts/material_fonts/roboto-$weight.ttf',
+          );
+          loader.addFont(
+            Future.value(ByteData.sublistView(file.readAsBytesSync())),
+          );
+        }
+        await loader.load();
       }
-      await loader.load();
       final icons = FontLoader('MaterialIcons');
       icons.addFont(
         Future.value(
@@ -279,6 +289,7 @@ void main() {
           dashboard: repository ?? _Dashboard(),
           analytics: reports,
           memberApplications: TestMemberApplicationsRepository(),
+          associationRecords: TestAssociationRecordsRepository(),
         ),
         scale: scale,
       ),
@@ -303,7 +314,7 @@ void main() {
     () {
       expect(const AppConfig.fromEnvironment().mode, DataMode.api);
       expect(const AppConfig.fromEnvironment().gisMode, GisDataMode.live);
-      expect(AppTheme.blue, const Color(0xFF0B4C8C));
+      expect(AppTheme.light.colorScheme.primary, AppTheme.green);
     },
   );
 
@@ -328,7 +339,7 @@ void main() {
   });
 
   testWidgets(
-    'ten reference screens retain hierarchy and honest unavailable states',
+    'workspace screens retain hierarchy and authorized member and training lists',
     (tester) async {
       tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1;
@@ -384,21 +395,35 @@ void main() {
       await tester.pumpAndSettle();
       await _snapshot(tester, '02-login');
       final reports = await workspace(tester);
+      expect(
+        find.descendant(
+          of: find.byType(MetricStrip).first,
+          matching: find.text('1'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(MetricStrip).first,
+          matching: find.text('4'),
+        ),
+        findsNothing,
+      );
       await _snapshot(tester, '03-dashboard');
       await quick(tester, 'Association');
-      expect(find.byType(PhotoPlaceholder), findsOneWidget);
+      expect(find.byType(PhotoPlaceholder), findsNothing);
       await _snapshot(tester, '04-association');
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
-      expect(find.text('Maayong adlaw!'), findsOneWidget);
+      expect(find.text('Maayong Adlaw!'), findsOneWidget);
       await tab(tester, 1);
-      expect(find.text('Member roster unavailable'), findsOneWidget);
+      expect(find.text('Alpha, Ana'), findsOneWidget);
       await _snapshot(tester, '05-members');
       await tester.tap(find.text('Registrations').last);
       await tester.pumpAndSettle();
       await tester.tap(find.text('View my applications'));
       await tester.pumpAndSettle();
-      expect(find.text('My member applications'), findsNWidgets(2));
+      expect(find.text('My member applications'), findsOneWidget);
       expect(find.text('Status: pending'), findsOneWidget);
       await _snapshot(tester, '05b-registrations');
       await tab(tester, 2);
@@ -413,7 +438,7 @@ void main() {
       expect(find.text('Bangus livelihood project'), findsOneWidget);
       await tester.tap(find.text('Trainings').first);
       await tester.pumpAndSettle();
-      expect(find.text('Training calendar unavailable'), findsOneWidget);
+      expect(find.text('Coastal skills training'), findsOneWidget);
       await _snapshot(tester, '07-trainings');
       await tester.ensureVisible(find.text('Production monitoring').last);
       await tester.tap(find.text('Production monitoring').last);
@@ -479,7 +504,7 @@ void main() {
       await tester.ensureVisible(find.text('Trainings').first);
       await tester.tap(find.text('Trainings').first);
       await tester.pumpAndSettle();
-      expect(find.text('Training calendar unavailable'), findsOneWidget);
+      expect(find.text('Coastal skills training'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.ensureVisible(find.text('Production monitoring').last);
       await tester.tap(find.text('Production monitoring').last);

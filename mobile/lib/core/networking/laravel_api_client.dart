@@ -46,6 +46,8 @@ class LaravelApiClient {
         ![
           '$prefix/api/v1/me',
           '$prefix/api/v1/association/dashboard',
+          '$prefix/api/v1/association/members',
+          '$prefix/api/v1/association/trainings',
           '$prefix/api/v1/association/reports',
           '$prefix/api/v1/association/reports/options',
           '$prefix/api/v1/association/member-applications',

@@ -8,6 +8,7 @@ Map<String, dynamic> dashboard() => {
   'association': {'id': '33333333-3333-4333-8333-333333333333', 'name': 'Synthetic association', 'municipality': 'Synthetic town', 'status': 'active'},
   'metrics': [
     {'key': 'members_total', 'label': 'Official members', 'value': 0, 'note': 'Synthetic test count'},
+    {'key': 'members_active', 'label': 'Active official members', 'value': 0, 'note': 'Active and unarchived'},
     {'key': 'training_records', 'label': 'Training records', 'value': null, 'note': 'Synthetic unavailable widget'},
   ],
   'charts': <dynamic>[], 'recent_projects': <dynamic>[], 'activities': null,
