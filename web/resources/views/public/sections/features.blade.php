@@ -3,7 +3,9 @@
         <div class="public-section-label" data-public-reveal><span>02 / The capabilities</span><span>Connected by design</span></div>
         <div class="public-features-layout">
             <div class="public-feature-intro public-section-heading" data-public-reveal>
-                <span class="public-feature-intro-icon"><x-icon name="layers" /></span>
+                <div class="public-feature-intro-top">
+                    <span class="public-feature-intro-icon"><x-icon name="layers" /></span>
+                </div>
                 <h2 id="public-features-title">Less scattered.<br>More connected.</h2>
                 <p>One system for the different parts of program management, from community records to a view of progress.</p>
                 <div class="public-feature-access"><x-icon name="shield" /><p>Management tools require an authorized account. Public visitors can explore eligible published locations.</p></div>
