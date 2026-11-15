@@ -1,0 +1,10 @@
+
+/* ASSOCMAP — GLOBAL SCROLLBAR */
+html { scrollbar-width: thin; scrollbar-color: #35679d #edf3f8; }
+
+/* Chromium and Safari */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #edf3f8; border-radius: 999px; }
+::-webkit-scrollbar-thumb { background: #35679d; border: 2px solid #edf3f8; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #0b427b; }
+::-webkit-scrollbar-corner { background: #edf3f8; }

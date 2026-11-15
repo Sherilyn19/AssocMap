@@ -1,9 +1,17 @@
 <header class="public-header" data-public-navbar>
     <div class="public-container public-navbar">
-        <a href="{{ route('home') }}#home" class="public-brand" aria-label="AssocMap home">
-            <span class="public-brand-mark"><x-assocmap-mark /></span>
-            <span><strong>Assoc<span>Map</span></strong><small>Community. Connected.</small></span>
+        
+        <a href="{{ route('home') }}#home" class="public-brand assocmap-brand-link" aria-label="AssocMap home">
+            <span class="public-brand-mark">
+                <x-assocmap-mark />
+            </span>
+
+            <span class="public-brand-copy">
+                <x-assocmap-wordmark />
+                <small>Community. Connected.</small>
+            </span>
         </a>
+
         <button type="button" class="public-menu-toggle" data-public-menu-toggle aria-controls="public-navigation" aria-expanded="false" hidden>
             <x-icon name="menu" /> <span>Menu</span>
         </button>

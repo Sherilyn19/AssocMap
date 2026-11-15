@@ -42,7 +42,12 @@ class ProtectInvitationActivation
         $response->headers->set('Referrer-Policy', 'no-referrer');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-Frame-Options', 'DENY');
-        $response->headers->set('Content-Security-Policy', "default-src 'none'; script-src 'nonce-{$nonce}'; style-src 'nonce-{$nonce}'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'; connect-src 'none'; img-src 'none'; font-src 'none'");
+
+        $isRestartPage = $request->is('invitation/restart') && $request->isMethod('GET');
+        $styleSource = $isRestartPage ? "'nonce-{$nonce}' 'self'" : "'nonce-{$nonce}'";
+        $imageSource = $isRestartPage ? "'self' https://res.cloudinary.com" : "'none'";
+        $response->headers->set('Content-Security-Policy', "default-src 'none'; script-src 'nonce-{$nonce}'; style-src {$styleSource}; form-action 'self'; base-uri 'none'; frame-ancestors 'none'; connect-src 'none'; img-src {$imageSource}; font-src 'none'");
+
 
         return $response;
     }
