@@ -22,6 +22,6 @@ class AreaController extends Controller
 
         return redirect()
             ->route('admin.areas.index')
-            ->with('success', 'Area added successfully.');
+            ->with('success', 'Area added successfully.')->with('area_created', true);
     }
 }

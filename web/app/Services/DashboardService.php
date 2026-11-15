@@ -126,13 +126,16 @@ class DashboardService
         }
         array_push($charts, ...$this->projectCharts($currentProjects));
 
+        $associationPage = $role === 'system_admin'
+            ? min(max(1, (int) ceil($summaryCounts->associations_total / 10)), filter_var($request->query('association_page', 1), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) ?: 1)
+            : 1;
         $overview = $role === 'association_account' ? null : $this->optional('associations', fn () => (clone $associations)
             ->select(['a.id', 'a.name', 'a.status', 'a.archived_at', 'mu.name as municipality'])
             ->selectSub(fn ($query) => $query->from('members as m')->selectRaw('COUNT(*)')->whereColumn('m.association_id', 'a.id')
                 ->where('m.member_status', 'active')->whereNull('m.archived_at'), 'active_members')
             ->selectSub(fn ($query) => $query->from('projects as p')->selectRaw('COUNT(*)')->whereColumn('p.association_id', 'a.id')
                 ->whereNull('p.archived_at'), 'unarchived_projects')
-            ->orderBy('a.name')->orderBy('a.id')->limit(10)->get()->map(fn ($row) => [
+            ->orderBy('a.name')->orderBy('a.id')->offset(($associationPage - 1) * 10)->limit(10)->get()->map(fn ($row) => [
                 'id' => $row->id, 'name' => $row->name, 'municipality' => $row->municipality,
                 'status' => $row->archived_at !== null ? 'archived' : $row->status,
                 'active_members' => (int) $row->active_members, 'unarchived_projects' => (int) $row->unarchived_projects,
@@ -148,8 +151,11 @@ class DashboardService
             ->whereNotExists(fn ($query) => $query->selectRaw('1')->from('user_profiles as u')->join('roles as r', 'r.id', '=', 'u.role_id')
                 ->whereColumn('u.id', 'a.primary_field_officer_id')->where('u.is_active', true)->where('r.is_active', true)->where('r.code', 'field_officer'))
             ->count()) : null;
+        $projectPage = $role === 'system_admin'
+            ? min(max(1, (int) ceil($summaryCounts->projects_unarchived / 10)), filter_var($request->query('project_page', 1), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) ?: 1)
+            : 1;
         $recentProjects = $this->optional('recent_projects', fn () => (clone $currentProjects)->join('associations as a', 'a.id', '=', 'p.association_id')
-            ->orderByDesc('p.created_at')->orderBy('p.id')->limit(6)
+            ->orderByDesc('p.created_at')->orderBy('p.id')->offset(($projectPage - 1) * 10)->limit($role === 'system_admin' ? 10 : 6)
             ->get(['p.id', 'p.title', 'p.status', 'p.program_year', 'p.created_at', 'a.name as association'])
             ->map(fn ($row) => (array) $row)->all());
         $activities = $this->optional('activities', function () use ($ids, $role) {
@@ -171,9 +177,10 @@ class DashboardService
             'version' => 'assocmap.dashboard.v1', 'role' => $role,
             'generated_at' => now('Asia/Manila')->toIso8601String(), 'timezone' => 'Asia/Manila',
             'scope_count' => (int) $summaryCounts->associations_total, 'association' => $association,
-            'metrics' => $metrics, 'charts' => $charts, 'associations' => $overview,
+            'metrics' => $metrics, 'charts' => $charts, 'associations' => $overview, 'association_page' => $associationPage,
             'training' => $training, 'monitoring' => $monitoring, 'applications' => $applications,
-            'officer_attention' => $attention, 'recent_projects' => $recentProjects, 'activities' => $activities,
+            'officer_attention' => $attention, 'recent_projects' => $recentProjects, 'project_page' => $projectPage,
+            'project_count' => (int) $summaryCounts->projects_unarchived, 'activities' => $activities,
         ];
     }
 

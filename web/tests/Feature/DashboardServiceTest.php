@@ -110,6 +110,51 @@ class DashboardServiceTest extends TestCase
         return $request;
     }
 
+    public function test_admin_project_register_paginates_unarchived_projects(): void
+    {
+        DB::table('user_profiles')->where('id', self::USER)->update(['role_id' => 2]);
+        for ($i = 10; $i < 20; $i++) {
+            DB::table('projects')->insert(['id' => $i, 'association_id' => self::OWN, 'saad_activity_id' => 1,
+                'title' => 'Project '.$i, 'status' => 'ongoing', 'program_year' => 2026, 'created_at' => '2026-01-02', 'archived_at' => null]);
+        }
+        $request = $this->request();
+        $service = app(DashboardService::class);
+        $first = $service->load($request);
+        $request->query->set('project_page', 2);
+        $second = $service->load($request);
+        $this->assertSame(12, $first['project_count']);
+        $this->assertCount(10, $first['recent_projects']);
+        $this->assertCount(2, $second['recent_projects']);
+        $this->assertSame([], array_intersect(array_column($first['recent_projects'], 'id'), array_column($second['recent_projects'], 'id')));
+        $request->query->set('project_page', 999);
+        $this->assertSame(2, $service->load($request)['project_page']);
+    }
+
+    public function test_admin_association_overview_loads_each_page_and_clamps_invalid_pages(): void
+    {
+        DB::table('user_profiles')->where('id', self::USER)->update(['role_id' => 2]);
+        for ($i = 1; $i <= 10; $i++) {
+            DB::table('associations')->insert([
+                'id' => sprintf('aaaaaaaa-aaaa-4aaa-8aaa-%012d', $i), 'area_id' => 1,
+                'primary_field_officer_id' => self::USER, 'name' => sprintf('Association %02d', $i),
+                'status' => 'active', 'saad_phase2_join_date' => '2024-01-01', 'archived_at' => null,
+            ]);
+        }
+        $request = $this->request();
+        $service = app(DashboardService::class);
+        $first = $service->load($request);
+        $request->query->set('association_page', 2);
+        $second = $service->load($request);
+        $this->assertSame(13, $first['scope_count']);
+        $this->assertCount(10, $first['associations']);
+        $this->assertCount(3, $second['associations']);
+        $this->assertSame([], array_intersect(array_column($first['associations'], 'id'), array_column($second['associations'], 'id')));
+        $request->query->set('association_page', 999);
+        $this->assertSame(2, $service->load($request)['association_page']);
+        $request->query->set('association_page', -1);
+        $this->assertSame(1, $service->load($request)['association_page']);
+    }
+
     public function test_cutover_dashboard_keeps_area_less_associations_in_existing_contract_and_scope(): void
     {
         Schema::table('associations', function (Blueprint $table) {

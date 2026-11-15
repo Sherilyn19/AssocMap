@@ -1,19 +1,61 @@
 /* Association registers, related records and officer management. */
+#association-editor { width: min(650px, calc(100% - 30px)); padding: 26px; border-radius: 14px; background: #fff; }
+#association-editor .modal-heading { gap: 12px; margin-bottom: 22px; }
+#association-editor .modal-heading h2 { flex: 1; text-transform: uppercase; }
+#association-editor .area-modal-icon { display: grid; place-items: center; width: 38px; height: 38px; flex: none; border-radius: 9px; background: #e8f2fb; color: #135c91; }
+#association-editor .area-modal-icon .icon { width: 19px; height: 19px; }
+#association-editor .form-grid { gap: 16px; }
+#association-editor label, #association-editor legend { color: #193650; font-size: 13px; font-weight: 600; }
+#association-editor :is(input:not([type="hidden"]):not([type="checkbox"]), select, textarea) { min-height: 44px; border: 1px solid #dce7f1; border-radius: 8px; background-color: #f2f7fc; color: #263f58; }
+#association-editor [data-association-registration] { margin-top: 22px; padding: 16px; border: 1px solid #dce7f1; border-radius: 9px; background: #f8fbfe; }
+#association-editor .association-registration-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-bottom: 8px; }
+#association-editor .association-registration-heading h3 { margin: 0; color: #193650; font-size: 14px; }
+#association-editor [data-association-registration] > label { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; }
+#association-editor [data-registration-fields] { margin-top: 14px; }
+#association-editor [data-registration-fields]:disabled { opacity: .65; }
+#association-editor small { color: #5b7187; font-size: 12px; line-height: 1.5; }
+#association-editor .area-info { position: relative; flex: none; }
+#association-editor .area-info button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #386a96; cursor: pointer; }
+#association-editor .area-info button:hover, #association-editor .area-info button[aria-expanded="true"] { background: #e5eff8; }
+#association-editor .area-info svg { width: 18px; height: 18px; }
+#association-editor .area-info-popover { display: none; position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; width: min(280px, calc(100vw - 90px)); padding: 12px; border: 1px solid #cfdeeb; border-radius: 8px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 16%); color: #334b63; font-size: 12px; line-height: 1.55; }
+#association-editor .area-info button[aria-expanded="true"] + .area-info-popover { display: block; }
+@media (hover: hover) { #association-editor .area-info:hover .area-info-popover { display: block; } }
+#association-editor :is(button, input, select, textarea):focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+@media (max-width: 480px) { #association-editor { padding: 20px; } }
+@media (prefers-reduced-motion: no-preference) { #association-editor[open] { animation: association-arrive 250ms ease-out both; } }
 .association-management { display: grid; gap: 22px; min-width: 0; }
 .association-management .association-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding: 24px; border-top: 3px solid var(--primary); }
 .association-management .association-heading > div:first-child { flex: 1 1 280px; min-width: 0; overflow-wrap: anywhere; }
 .association-management .association-heading p:not(.eyebrow) { margin-top: 8px; font-size: 13px; }
 .association-management .association-heading-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.admin-workspace .association-management .association-heading h1, .admin-workspace .association-management .association-section-heading h2, .admin-workspace .association-management .association-table thead th { text-transform: uppercase; }
+.admin-workspace .association-management .association-heading-actions { justify-content: flex-end; margin-top: -10px; gap: 8px; }
+.admin-workspace .association-management .association-heading-actions .contextual-report { flex: 0 1 auto; }
+.admin-workspace .association-management .association-heading-actions .button { min-height: 38px; padding: 8px 12px; font-size: 12px; }
 .association-management .association-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .association-management .association-summary > a { color: inherit; border-radius: var(--radius-md); min-width: 0; }
 .association-management .association-summary .stat-card { height: 100%; transition: background-color 150ms, border-color 150ms; }
 .association-management .association-summary .stat-top { font-size: 12px; }
 .association-management .association-summary strong { color: var(--primary); }
 .association-management .association-summary a:hover .stat-card { border-color: #7a9fca; background: #f3f7fd; }
-.association-management .association-summary a[aria-current="page"] .stat-card { background: #0b427b; border-color: #0b427b; box-shadow: 0 4px 14px rgb(11 66 123 / 15%); }
+.association-management .association-summary a[aria-current="page"] { --summary-counter-surface: #1d628e; }
+.association-management .association-summary a:not([aria-current="page"]):hover { --summary-counter-surface: #f3f7fd; }
+.association-management .association-summary a[aria-current="page"] .stat-card { background: #1d628e; border-color: #1d628e; box-shadow: 0 4px 14px rgb(11 66 123 / 15%); }
 .association-management .association-summary a[aria-current="page"] :is(.stat-top, strong, small) { color: #fff; }
 .association-management .association-summary a[aria-current="page"] .stat-icon { color: #fff; background: rgb(255 255 255 / 15%); }
 .association-management .association-help { font-size: 12px; line-height: 1.7; margin-top: -6px; }
+.association-management .association-heading-actions .contextual-report { display: flex; }
+.association-management .association-info-row { position: relative; z-index: 4; display: flex; align-items: center; gap: 5px; margin-top: -10px; color: var(--text-secondary); font-size: 12px; }
+.association-management .association-heading-title { display: flex; align-items: center; gap: 5px; }
+.association-management .association-section-heading { position: relative; z-index: 3; }
+.association-management .area-info { position: relative; flex: none; }
+.association-management .area-info button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #386a96; cursor: pointer; }
+.association-management .area-info button:hover, .association-management .area-info button[aria-expanded="true"] { background: #edf4fb; }
+.association-management .area-info svg { width: 18px; height: 18px; }
+.association-management .area-info-popover { display: none; position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; width: min(300px, calc(100vw - 48px)); padding: 12px 14px; border: 1px solid #cfdeeb; border-radius: 8px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 16%); color: #334b63; font-size: 12px; line-height: 1.55; }
+.association-management .area-info button[aria-expanded="true"] + .area-info-popover { display: block; }
+@media (hover: hover) { .association-management .area-info:hover .area-info-popover { display: block; } }
 .association-management .association-register { min-width: 0; overflow: visible; }
 .association-management .association-section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 22px; }
 .association-management .association-section-heading h2 { font-size: 17px; color: #263f58; }
@@ -30,11 +72,14 @@
 .association-management .association-filter-count { font-size: 11px; color: var(--primary); }
 .association-management .association-table { min-width: 800px; }
 .association-management .association-table :is(tbody th, td) { padding: 18px 22px; vertical-align: middle; font-size: 13px; max-width: 340px; overflow-wrap: anywhere; }
+.association-management .association-table thead th { padding: 14px 22px; background: #f8fafc; color: #475569; font-size: 12px; }
+.association-management .association-table tbody th { background: transparent; border-bottom: 1px solid #eef2f6; }
+.association-management .association-table tbody tr:hover { background: #f4f8fc; }
 .association-management .association-table tbody th { text-align: left; font-weight: 600; min-width: 200px; }
 .association-management .association-table small { display: block; font-size: 11px; color: var(--text-secondary); font-weight: 400; margin-top: 5px; }
 .association-management .association-table a:hover { text-decoration: underline; }
 .association-management .association-assigned-officers { display: grid; gap: 10px; margin: 0; }
-.association-management .association-assigned-officers dt { font-size: 11px; color: var(--text-secondary); }
+.association-management .association-assigned-officers dt { font-size: 11px; color: var(--text-secondary); font-weight: 700; }
 .association-management .association-assigned-officers dd { margin: 3px 0 0; }
 .association-management .association-actions summary { display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border: 1px solid var(--border-color); border-radius: 7px; list-style: none; color: #46617c; }
 .association-management .association-actions summary::-webkit-details-marker { display: none; }
@@ -44,7 +89,11 @@
 .association-management .association-actions-panel :is(a, button) { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 10px; border: 0; border-radius: 5px; background: transparent; font: inherit; font-size: 12px; color: #2c4e70; text-align: left; }
 .association-management .association-actions-panel :is(a, button):hover { background: #eef5fc; text-decoration: none; }
 .association-management .association-actions-panel .icon { width: 16px; height: 16px; flex-shrink: 0; }
-.association-management .association-pagination nav { display: flex; gap: 8px; }
+.association-management .association-pagination { margin: 16px 22px 22px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #475569; font-size: 12px; }
+.association-management .association-pagination nav { display: flex; flex-wrap: wrap; gap: 4px; }
+.association-management .association-pagination nav > * { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; padding: 6px 9px; border: 1px solid #dbe4ef; border-radius: 6px; background: #fff; color: #334155; font-size: 12px; font-weight: 600; }
+.association-management .association-pagination nav a:hover { border-color: #9bbad8; background: #edf4fb; color: var(--primary); }
+.association-management .association-pagination nav .association-page-disabled { color: #94a3b8; background: #f8fafc; }
 .association-management .association-info-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 0 22px 22px; margin: 0; }
 .association-management .association-info-grid dt { font-size: 12px; color: var(--text-secondary); margin-bottom: 7px; }
 .association-management .association-info-grid dd { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
@@ -54,6 +103,11 @@
 .association-management .association-related-tabs a[aria-current="page"] { font-weight: 650; border-color: var(--primary); }
 .association-management .association-related-tabs [aria-disabled="true"] { color: #66778c; }
 .association-management .association-breadcrumbs { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; overflow-wrap: anywhere; }
+.association-management .association-officer-path { display: flex; flex: 1 1 240px; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; color: #71869b; font-size: 12px; }
+.association-management .association-officer-path a { padding: 5px 3px; border-radius: 4px; color: #38698f; font-weight: 600; overflow-wrap: anywhere; }
+.association-management .association-officer-path a[aria-current="page"] { color: #173b5e; }
+.association-management .association-officer-path a:hover { color: #0b427b; background: #edf4fb; text-decoration: underline; }
+@media (prefers-reduced-motion: no-preference) { .association-management .association-officer-path a { transition: color 180ms ease, background-color 180ms ease; } }
 .association-management.association-officers .form-section { padding: 22px; }
 .association-management.association-officers .form-section > h2 { margin-bottom: 12px; }
 .association-management.association-officers .form-section > p { margin-bottom: 16px; font-size: 13px; }
@@ -68,11 +122,20 @@
     .association-management .association-heading, .association-management .association-section-heading { padding: 18px; }
     .association-management .association-filter-grid, .association-management .association-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .association-management .association-pagination { flex-direction: column; align-items: flex-start; }
+    .association-management .association-pagination { margin-inline: 18px; }
 }
 @media (max-width: 480px) {
     .association-management .association-filter-grid, .association-management .association-info-grid { grid-template-columns: minmax(0, 1fr); }
     .association-management .association-summary .stat-card { padding: 16px; }
     .association-management .association-summary .stat-top { flex-direction: column; align-items: flex-start; gap: 12px; }
     .association-management .association-heading-actions { width: 100%; }
+    .admin-workspace .association-management .association-heading-actions { justify-content: flex-start; }
 }
 @media (prefers-reduced-motion: reduce) { .association-management .association-summary .stat-card { transition: none; } }
+@media (prefers-reduced-motion: no-preference) {
+    .association-management[data-workspace-title="Association Management"] .association-heading { animation: association-arrive 400ms ease-out both; }
+    .association-management .association-table tbody tr, .association-management .association-pagination nav a, .association-management .area-info button { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; }
+    .association-management .association-summary .stat-card { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+    .association-management .association-summary a:hover .stat-card { box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }
+    @keyframes association-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+}

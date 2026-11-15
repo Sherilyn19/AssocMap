@@ -28,11 +28,49 @@ initAssociationUi();
 initReports();
 initContextualReports();
 mountSummaryCounters();
+const dashboardCharts = document.querySelectorAll('[data-dashboard-chart]');
+if (dashboardCharts.length && 'IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-chart-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15 });
+    dashboardCharts.forEach((chart) => observer.observe(chart));
+}
 initStaffLogin();
 initUserInvitations();
 initProjectClosure();
 initProgramLookups();
 initProgramActivities();
+
+const areaToast = document.querySelector('[data-area-toast]');
+if (areaToast) {
+    areaToast.querySelector('[data-area-toast-close]')?.addEventListener('click', () => areaToast.remove());
+    let toastTimer;
+    const scheduleDismissal = () => { toastTimer = window.setTimeout(() => areaToast.remove(), 8000); };
+    const pauseDismissal = () => window.clearTimeout(toastTimer);
+    areaToast.addEventListener('mouseenter', pauseDismissal);
+    areaToast.addEventListener('mouseleave', scheduleDismissal);
+    areaToast.addEventListener('focusin', pauseDismissal);
+    areaToast.addEventListener('focusout', (event) => { if (!areaToast.contains(event.relatedTarget)) scheduleDismissal(); });
+    scheduleDismissal();
+}
+
+document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-area-info]');
+    document.querySelectorAll('[data-area-info][aria-expanded="true"]').forEach((open) => {
+        if (open !== button) open.setAttribute('aria-expanded', 'false');
+    });
+    if (button) button.setAttribute('aria-expanded', String(button.getAttribute('aria-expanded') !== 'true'));
+});
+document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    const open = document.querySelector('[data-area-info][aria-expanded="true"]');
+    if (open) { open.setAttribute('aria-expanded', 'false'); open.focus(); }
+});
 
 const gisRoot = document.querySelector('[data-gis-workspace], [data-gis-editor]');
 if (gisRoot) {

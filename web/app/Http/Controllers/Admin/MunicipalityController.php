@@ -78,6 +78,6 @@ class MunicipalityController extends Controller
 
         return redirect()
             ->route('admin.areas.index')
-            ->with('success', 'Municipality added successfully.');
+            ->with('success', 'Municipality added successfully.')->with('area_created', true);
     }
 }

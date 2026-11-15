@@ -36,11 +36,6 @@
         <input type="hidden" name="area_record_id" value="{{ $editingArea['id'] ?? '' }}" @disabled(!$editingArea)>
         <input type="hidden" name="area_type" value="{{ $areaType }}" data-area-edit-type @disabled(!$editingArea)>
 
-        <p>
-            Maintain geographic reference records.
-            Fields marked * are required.
-        </p>
-
         @if ($hasAreaErrors)
             <div class="notice notice-error" role="alert" data-area-validation>
                 <x-icon name="info" />
@@ -108,20 +103,11 @@
                 />
             </div>
 
-            <div class="form-grid field-wide" data-area-reference-fields @if($areaType === 'Specific Area') hidden @endif>
-            <div>
-                <label>Province</label>
-                <div class="form-static-value" data-area-editor-detail="province">
-                    {{ $editingArea['province'] ?? 'Cebu' }}
-                </div>
-            </div>
-
-            <div>
-                <label>Region</label>
-                <div class="form-static-value" data-area-editor-detail="region">
-                    {{ $editingArea['region'] ?? 'Region VII' }}
-                </div>
-            </div>
+            <div class="form-grid field-wide area-reference-fields" data-area-reference-fields @if($areaType === 'Specific Area') hidden @endif>
+            <div class="area-territory field-wide"><p class="area-territory-label">Parent administrative territory</p><div class="area-territory-grid">
+                <div><span>Province</span><strong data-area-editor-detail="province">{{ $editingArea['province'] ?? 'Cebu' }}</strong></div>
+                <div><span>Region</span><strong data-area-editor-detail="region">{{ $editingArea['region'] ?? 'Region VII' }}</strong></div>
+            </div></div>
 
             <x-field
                 :field="[
@@ -133,18 +119,14 @@
                 :value="$areaOld('psgc_code')"
             />
 
-            <div>
+            <div class="field area-source">
                 <label>Source</label>
-                <div class="form-static-value" data-area-editor-detail="source">
-                    {{ $editingArea['source'] ?? 'Manual' }}
-                </div>
+                <div class="form-static-value"><span data-area-editor-detail="source">{{ $editingArea['source'] ?? 'Manual' }}</span></div>
             </div>
 
-            <div>
-                <label>Status</label>
-                <div class="form-static-value" data-area-editor-detail="status">
-                    {{ $editingArea['status'] ?? 'Active' }}
-                </div>
+            <div class="area-status field-wide">
+                <div><strong>Area operational status</strong><p>Current status of this geographic record.</p></div>
+                <span class="area-status-badge" data-area-editor-detail="status">{{ $editingArea['status'] ?? 'Active' }}</span>
             </div>
             </div>
         </div>

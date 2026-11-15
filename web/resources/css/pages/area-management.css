@@ -1,12 +1,58 @@
 /* Geographic register and dedicated detail pages. */
+#area-editor { width: min(510px, calc(100% - 30px)); padding: 26px; border-radius: 14px; background: #fff; }
+#area-editor .modal-heading { gap: 12px; margin-bottom: 22px; }
+#area-editor .modal-heading h2 { flex: 1; }
+#area-editor .area-modal-icon { display: grid; place-items: center; width: 38px; height: 38px; flex: none; border-radius: 9px; background: #e8f2fb; color: #135c91; }
+#area-editor .area-modal-icon .icon { width: 19px; height: 19px; }
+#area-editor .form-grid { gap: 16px; }
+#area-editor label { color: #193650; font-size: 13px; font-weight: 600; }
+#area-editor :is(input:not([type="hidden"]), select, textarea), #area-editor .area-source .form-static-value { min-height: 44px; border: 1px solid #dce7f1; border-radius: 8px; background-color: #f2f7fc; color: #263f58; }
+#area-editor .area-source .form-static-value { display: flex; align-items: center; padding: 9px 11px; font-size: 13px; }
+#area-editor .area-territory { padding: 12px; border-radius: 9px; background: #edf4fb; }
+#area-editor .area-territory-label { margin: 0 0 8px; color: #4b6279; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+#area-editor .area-territory-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+#area-editor .area-territory-grid > div { min-width: 0; padding: 9px 10px; border: 1px solid #dce7f1; border-radius: 6px; background: #fff; }
+#area-editor .area-territory-grid span { display: block; color: #64788d; font-size: 10px; text-transform: uppercase; }
+#area-editor .area-territory-grid strong { display: block; margin-top: 3px; color: #193650; font-size: 13px; overflow-wrap: anywhere; }
+#area-editor .area-status { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 12px; border-radius: 9px; background: #edf4fb; }
+#area-editor .area-status strong { color: #193650; font-size: 13px; }
+#area-editor .area-status p { margin: 3px 0 0; color: #5b7187; font-size: 12px; }
+#area-editor .area-status-badge { padding: 5px 10px; border-radius: 999px; background: #dce9f5; color: #285b85; font-size: 12px; font-weight: 600; }
+#area-editor .modal-actions { margin-top: 24px; }
+#area-editor [hidden] { display: none !important; }
+.area-toast { position: fixed; z-index: 1000; right: 24px; bottom: 24px; display: flex; align-items: flex-start; gap: 12px; width: min(370px, calc(100vw - 32px)); padding: 14px; border: 1px solid #c7dfd5; border-radius: 10px; background: #fff; box-shadow: 0 8px 28px rgb(16 47 80 / 16%); color: #173b5e; }
+.area-toast-icon { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: 50%; background: #e4f1eb; color: #286954; }
+.area-toast-icon .icon { width: 17px; height: 17px; }
+.area-toast > div { flex: 1; min-width: 0; }
+.area-toast strong { font-size: 13px; }
+.area-toast p { margin: 3px 0 0; color: #526679; font-size: 12px; line-height: 1.5; }
+@media (max-width: 480px) { #area-editor { padding: 20px; } .area-toast { right: 16px; bottom: 16px; } }
+@media (prefers-reduced-motion: no-preference) { #area-editor[open], .area-toast { animation: area-arrive 250ms ease-out both; } }
 .area-management { display: grid; gap: 22px; min-width: 0; }
 .area-management .area-page-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px; padding: 24px; border-top: 3px solid var(--primary); }
 .area-management .area-page-heading p:not(.eyebrow) { font-size: 13px; margin-top: 8px; max-width: 760px; }
 .area-management .area-page-heading > div { flex: 1 1 260px; min-width: 0; overflow-wrap: anywhere; }
+.area-management .area-page-heading h1, .area-management .area-section-heading h2, .area-management .area-record-table thead th { text-transform: uppercase; }
+.area-management .area-heading-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; margin-top: -10px; }
+.area-management .area-heading-actions .button { min-height: 38px; padding: 8px 12px; font-size: 12px; }
 .area-management .area-help, .area-management .area-table-note { color: var(--text-secondary); font-size: 12px; line-height: 1.7; }
 .area-management .area-help { margin-top: -6px; }
+.area-management .area-info-row { position: relative; z-index: 4; display: flex; align-items: center; gap: 5px; margin-top: -10px; color: var(--text-secondary); font-size: 12px; }
+.area-management .area-heading-title { display: flex; align-items: center; gap: 5px; }
+.area-management .area-section-heading { position: relative; z-index: 3; }
+.area-management .area-info { position: relative; flex: none; }
+.area-management .area-info button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #386a96; cursor: pointer; }
+.area-management .area-info button:hover, .area-management .area-info button[aria-expanded="true"] { background: #edf4fb; }
+.area-management .area-info button:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+.area-management .area-info svg { width: 18px; height: 18px; }
+.area-management .area-info-popover { display: none; position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; width: min(300px, calc(100vw - 48px)); padding: 12px 14px; border: 1px solid #cfdeeb; border-radius: 8px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 16%); color: #334b63; font-size: 12px; line-height: 1.55; }
+.area-management .area-info button[aria-expanded="true"] + .area-info-popover { display: block; }
+@media (hover: hover) { .area-management .area-info:hover .area-info-popover { display: block; } }
 .area-management .area-table-note { padding: 0 22px 18px; }
 .area-management .area-directory { min-width: 0; }
+.area-management .area-summary-card[aria-current="page"] { --summary-counter-surface: #1d628e; }
+.area-management .area-summary-card[aria-current="page"] .stat-card { background: #1d628e; border-color: #1d628e; }
+.area-management .area-summary-card:not([aria-current="page"]):hover { --summary-counter-surface: #f3f7fd; }
 .area-management .area-section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding: 22px; }
 .area-management .area-section-heading p { font-size: 12px; margin-top: 5px; }
 .area-management h2 { font-size: 17px; color: #263f58; }
@@ -19,13 +65,20 @@
 .area-management .area-filter-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 .area-management .area-record-table { min-width: 720px; }
 .area-management .area-record-table :is(td, tbody th) { padding: 18px 22px; vertical-align: middle; font-size: 13px; overflow-wrap: anywhere; }
+.area-management .area-record-table thead th { padding: 14px 22px; background: #f8fafc; color: #475569; font-size: 12px; }
+.area-management .area-record-table tbody th { background: transparent; border-bottom: 1px solid #eef2f6; }
+.area-management .area-record-table tbody tr:hover { background: #f4f8fc; }
 .area-management .area-record-table tbody th { text-align: left; font-weight: 600; min-width: 210px; max-width: 370px; }
 .area-management .area-record-table small { display: block; font-size: 11px; color: var(--text-secondary); font-weight: 400; margin-top: 5px; }
 .area-management .area-record-table a:hover, .area-management .area-breadcrumbs a:hover { text-decoration: underline; }
 .area-management .area-record-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
 .area-management .area-record-actions .text-button { min-height: 40px; white-space: nowrap; }
 .area-management .area-record-actions .icon { width: 15px; height: 15px; }
-.area-management .area-pagination nav { display: flex; gap: 8px; }
+.area-management .area-pagination { margin: 16px 22px 22px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #475569; font-size: 12px; }
+.area-management .area-pagination nav { display: flex; flex-wrap: wrap; gap: 4px; }
+.area-management .area-pagination nav > * { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; padding: 6px 9px; border: 1px solid #dbe4ef; border-radius: 6px; background: #fff; color: #334155; font-size: 12px; font-weight: 600; }
+.area-management .area-pagination nav a:hover { border-color: #9bbad8; background: #edf4fb; color: var(--primary); }
+.area-management .area-pagination nav .area-page-disabled { color: #94a3b8; background: #f8fafc; }
 .area-management .area-breadcrumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 12px; overflow-wrap: anywhere; }
 .area-management .area-information { padding-bottom: 22px; }
 .area-management .area-information-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 0 22px; margin: 0 0 24px; }
@@ -37,9 +90,17 @@
     .area-management .area-page-heading, .area-management .area-section-heading, .area-management .area-filter-form { padding: 18px; }
     .area-management .area-filter-grid, .area-management .area-information-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .area-management .area-pagination { align-items: flex-start; flex-direction: column; }
+    .area-management .area-pagination { margin-inline: 18px; }
 }
 @media (max-width: 480px) {
     .area-management .area-filter-grid, .area-management .area-information-grid { grid-template-columns: minmax(0, 1fr); }
-    .area-management .area-page-heading > .button { width: 100%; }
+    .area-management .area-heading-actions { justify-content: flex-start; }
 }
 @media (prefers-reduced-motion: reduce) { .area-management .area-summary-card .stat-card { transition: none; } }
+@media (prefers-reduced-motion: no-preference) {
+    .area-management .area-page-heading { animation: area-arrive 400ms ease-out both; }
+    .area-management .area-record-table tbody tr, .area-management .area-pagination nav a, .area-management .area-info button { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; }
+    .area-management .area-summary-card .stat-card { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+    .area-management .area-summary-card:hover .stat-card { box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }
+    @keyframes area-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+}

@@ -35,7 +35,7 @@ class GlobalFeedback extends Component
                 $notification = ['type' => $accepted ? 'success' : 'error',
                     'title' => $accepted ? 'Invitation Request Accepted' : 'Invitation Not Completed',
                     'message' => $invitation['message']];
-            } elseif (is_string($success) && $success !== '') {
+            } elseif (is_string($success) && $success !== '' && !$session?->get('area_created')) {
                 $notification = ['type' => 'success', 'title' => 'Operation Successful', 'message' => $success];
             }
         }

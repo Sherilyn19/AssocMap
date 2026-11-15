@@ -63,6 +63,6 @@ class BarangayController extends Controller
 
         return redirect()
             ->route('admin.areas.index')
-            ->with('success', 'Barangay added successfully.');
+            ->with('success', 'Barangay added successfully.')->with('area_created', true);
     }
 }

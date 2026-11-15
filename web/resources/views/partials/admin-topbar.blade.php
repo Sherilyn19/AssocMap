@@ -4,7 +4,8 @@
     context-id="current-context"
     :display-name="$currentUser->display_name"
     :account-label="$currentUser->role->name"
-    :compact="request()->routeIs('admin.dashboard')"
+    :compact="true"
+    :scroll-context="true"
     avatar="SA"
 >
     <x-slot:navigationToggle>

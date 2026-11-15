@@ -1,4 +1,6 @@
 .app-footer { display: flex; justify-content: space-between; gap: 15px; font-size: 9px; color: var(--text-secondary); padding: 0 32px 22px; }.noscript-notice { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px; background: #fff3d4; text-align: center; z-index: 99; }
+.app-footer-dashboard { margin: 0 32px; padding: 14px 0 22px; border-top: 1px solid #dbe6ee; font-size: 12px; }
+@media (max-width: 768px) { .app-footer-dashboard { margin: 0 18px; padding: 14px 0 20px; font-size: 12px; } }
 @media not all and (max-width: 1020px) {
     body.sidebar-collapsed { --sidebar-width: 78px; }
     .sidebar-collapsed [data-workspace-sidebar] .brand { padding: 26px 18px; }

@@ -1,2 +1,2 @@
 @props(['id', 'title'])
-<dialog id="{{ $id }}" class="modal" aria-labelledby="{{ $id }}-title"><div class="modal-heading"><h2 id="{{ $id }}-title">{{ $title }}</h2><button type="button" class="icon-button" data-close-dialog aria-label="Close dialog"><x-icon name="close" /></button></div>{{ $slot }}</dialog>
+<dialog id="{{ $id }}" class="modal" aria-labelledby="{{ $id }}-title"><div class="modal-heading">@if(in_array($id, ['area-editor', 'association-editor'], true))<span class="area-modal-icon" aria-hidden="true"><x-icon :name="$id === 'area-editor' ? 'pin' : 'building'" /></span>@endif<h2 id="{{ $id }}-title">{{ $title }}</h2><button type="button" class="icon-button" data-close-dialog aria-label="Close dialog"><x-icon name="close" /></button></div>{{ $slot }}</dialog>
