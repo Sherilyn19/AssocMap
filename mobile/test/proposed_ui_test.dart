@@ -28,6 +28,7 @@ import 'association_dashboard_test.dart' show dashboard;
 import 'analytics_report_test.dart' show report;
 import 'support/test_tile_provider.dart';
 import 'support/member_application_fixtures.dart';
+import 'support/association_record_fixtures.dart';
 
 final _activeSession = AuthSession(
   userId: '11111111-1111-4111-8111-111111111111',
@@ -74,6 +75,12 @@ Map<String, dynamic> _dashboard() {
       'label': 'Official members',
       'value': 4,
       'note': 'All retained official records, including archived members.',
+    },
+    {
+      'key': 'members_active',
+      'label': 'Official members',
+      'value': 1,
+      'note': 'Active unarchived official members.',
     },
     {
       'key': 'projects_total',
@@ -282,6 +289,7 @@ void main() {
           dashboard: repository ?? _Dashboard(),
           analytics: reports,
           memberApplications: TestMemberApplicationsRepository(),
+          associationRecords: TestAssociationRecordsRepository(),
         ),
         scale: scale,
       ),
@@ -331,7 +339,7 @@ void main() {
   });
 
   testWidgets(
-    'ten reference screens retain hierarchy and honest unavailable states',
+    'workspace screens retain hierarchy and authorized member and training lists',
     (tester) async {
       tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1;
@@ -387,15 +395,29 @@ void main() {
       await tester.pumpAndSettle();
       await _snapshot(tester, '02-login');
       final reports = await workspace(tester);
+      expect(
+        find.descendant(
+          of: find.byType(MetricStrip).first,
+          matching: find.text('1'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(MetricStrip).first,
+          matching: find.text('4'),
+        ),
+        findsNothing,
+      );
       await _snapshot(tester, '03-dashboard');
       await quick(tester, 'Association');
       expect(find.byType(PhotoPlaceholder), findsNothing);
       await _snapshot(tester, '04-association');
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
-      expect(find.text('Maayong adlaw!'), findsOneWidget);
+      expect(find.text('Maayong Adlaw!'), findsOneWidget);
       await tab(tester, 1);
-      expect(find.text('Member roster unavailable'), findsOneWidget);
+      expect(find.text('Alpha, Ana'), findsOneWidget);
       await _snapshot(tester, '05-members');
       await tester.tap(find.text('Registrations').last);
       await tester.pumpAndSettle();
@@ -416,7 +438,7 @@ void main() {
       expect(find.text('Bangus livelihood project'), findsOneWidget);
       await tester.tap(find.text('Trainings').first);
       await tester.pumpAndSettle();
-      expect(find.text('Training calendar unavailable'), findsOneWidget);
+      expect(find.text('Coastal skills training'), findsOneWidget);
       await _snapshot(tester, '07-trainings');
       await tester.ensureVisible(find.text('Production monitoring').last);
       await tester.tap(find.text('Production monitoring').last);
@@ -482,7 +504,7 @@ void main() {
       await tester.ensureVisible(find.text('Trainings').first);
       await tester.tap(find.text('Trainings').first);
       await tester.pumpAndSettle();
-      expect(find.text('Training calendar unavailable'), findsOneWidget);
+      expect(find.text('Coastal skills training'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.ensureVisible(find.text('Production monitoring').last);
       await tester.tap(find.text('Production monitoring').last);

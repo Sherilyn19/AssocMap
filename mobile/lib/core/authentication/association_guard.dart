@@ -5,6 +5,7 @@ import '../../features/account/association_access_screen.dart';
 import '../../features/account/association_home_screen.dart';
 import '../../data/repositories/analytics_repository.dart';
 import '../../data/repositories/dashboard_repository.dart';
+import '../../data/repositories/association_records_repository.dart';
 import '../../data/repositories/member_applications_repository.dart';
 import '../../data/models/auth_session.dart';
 import 'auth_controller.dart';
@@ -16,12 +17,14 @@ class AssociationGuard extends StatefulWidget {
     required this.controller,
     this.analytics = const UnavailableAnalyticsRepository(),
     this.dashboard = const UnavailableDashboardRepository(),
+    this.associationRecords = const UnavailableAssociationRecordsRepository(),
     this.memberApplications = const UnavailableMemberApplicationsRepository(),
   });
   final AppConfig config;
   final AuthController controller;
   final AnalyticsRepository analytics;
   final DashboardRepository dashboard;
+  final AssociationRecordsRepository associationRecords;
   final MemberApplicationsRepository memberApplications;
 
   @override
@@ -71,6 +74,7 @@ class _AssociationGuardState extends State<AssociationGuard> {
                   session: session,
                   analytics: widget.analytics,
                   dashboard: widget.dashboard,
+                  associationRecords: widget.associationRecords,
                   memberApplications: widget.memberApplications,
                 ),
               ),

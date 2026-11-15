@@ -7,6 +7,7 @@ import '../../core/widgets/assocmap_widgets.dart';
 import '../../data/models/auth_session.dart';
 import '../../data/repositories/analytics_repository.dart';
 import '../../data/repositories/dashboard_repository.dart';
+import '../../data/repositories/association_records_repository.dart';
 import '../../data/repositories/member_applications_repository.dart';
 import '../reports/association_analytics_screen.dart';
 import 'association_dashboard_screen.dart';
@@ -22,6 +23,7 @@ class AssociationHomeScreen extends StatefulWidget {
     required this.session,
     this.analytics = const UnavailableAnalyticsRepository(),
     this.dashboard = const UnavailableDashboardRepository(),
+    this.associationRecords = const UnavailableAssociationRecordsRepository(),
     this.memberApplications = const UnavailableMemberApplicationsRepository(),
   });
   final AppConfig config;
@@ -29,6 +31,7 @@ class AssociationHomeScreen extends StatefulWidget {
   final AuthSession session;
   final AnalyticsRepository analytics;
   final DashboardRepository dashboard;
+  final AssociationRecordsRepository associationRecords;
   final MemberApplicationsRepository memberApplications;
   @override
   State<AssociationHomeScreen> createState() => _AssociationHomeScreenState();
@@ -181,6 +184,7 @@ class _AssociationHomeScreenState extends State<AssociationHomeScreen> {
         key: ValueKey(_section),
         section: _section,
         repository: widget.dashboard,
+        recordsRepository: widget.associationRecords,
         session: widget.session,
         onSessionExpired: widget.controller.expireSession,
         onOpenSection: _open,

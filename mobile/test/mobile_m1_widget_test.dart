@@ -17,6 +17,7 @@ import 'package:mobile/features/account/association_home_screen.dart';
 import 'mobile_m1_auth_test.dart' show config, me, json, providerSession;
 import 'association_dashboard_test.dart' show dashboard;
 import 'support/member_application_fixtures.dart';
+import 'support/association_record_fixtures.dart';
 
 class _EmptyPublicRepository implements PublicProjectsRepository {
   @override
@@ -157,6 +158,44 @@ void main() {
   }
 
   testWidgets(
+    'Live app wires authorized members and trainings through the session coordinator',
+    (tester) async {
+      final paths = <String>[];
+      apiReply = (request) {
+        paths.add(request.url.path);
+        final key = request.url.path.split('/').last;
+        return json({
+          'data': {'members', 'trainings'}.contains(key)
+              ? recordPage(key: key)
+              : dashboard(),
+        });
+      };
+      await open(tester);
+      await signIn(tester);
+      await tester.tap(find.byKey(const ValueKey('workspace-tab-1')));
+      await tester.pumpAndSettle();
+      expect(find.text('Alpha, Ana'), findsOneWidget);
+      await tester.tap(find.text('Registrations').last);
+      await tester.pumpAndSettle();
+      expect(find.text('View my applications'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('workspace-tab-2')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Trainings').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Coastal skills training'), findsOneWidget);
+      expect(
+        paths,
+        containsAll([
+          '/api/v1/association/members',
+          '/api/v1/association/trainings',
+        ]),
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
     'live app wiring displays authorized zero and empty data, then guards logout',
     (tester) async {
       await open(tester);
@@ -166,7 +205,8 @@ void main() {
       await tester.ensureVisible(find.text('Association summary'));
       await tester.tap(find.text('Association summary'));
       await tester.pumpAndSettle();
-      expect(find.text('Official members'), findsOneWidget);
+      expect(find.text('Retained member records'), findsOneWidget);
+      expect(find.text('Active official members'), findsOneWidget);
       expect(find.text('Synthetic association'), findsWidgets);
       await tester.tap(find.byKey(const ValueKey('workspace-tab-4')));
       await tester.pumpAndSettle();

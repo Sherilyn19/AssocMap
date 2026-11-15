@@ -5,6 +5,19 @@ Live mode uses Supabase Auth for identity and Laravel for account eligibility,
 Association ownership, Dashboard data, and Reports & Analytics. Administrative
 and Field Officer accounts use the web application.
 
+## Association member and training reads
+
+The mobile Members tab loads active, unarchived official member names from
+`GET /api/v1/association/members`. Registrations remain a separate, unchanged workflow.
+The Trainings tab uses `GET /api/v1/association/trainings`, including retained archived
+history shown on the Association Account web register. Both endpoints use the current
+verified account link, 25-record pages, existing authenticated transport and no offline
+record persistence. Deploy the matching Laravel routes/controller before evaluating
+these lists against Railway; no migration or new environment setting is required.
+
+See [member/training implementation and verification](MEMBER_TRAINING_UPDATE_2026_11_15.md)
+for exact files, API fields, evaluation APK and remaining deployed/device checks.
+
 ## Staging build
 
 From this checkout's `mobile` directory:

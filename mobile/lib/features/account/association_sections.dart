@@ -4,6 +4,8 @@ import '../../core/widgets/assocmap_widgets.dart';
 import '../../data/models/association_dashboard.dart';
 import '../../data/models/auth_session.dart';
 import '../../data/repositories/dashboard_repository.dart';
+import '../../data/repositories/association_records_repository.dart';
+import 'association_record_list.dart';
 import 'association_data_view.dart';
 import 'association_dashboard_screen.dart';
 
@@ -12,12 +14,14 @@ class AssociationSections extends StatefulWidget {
     super.key,
     required this.section,
     required this.repository,
+    this.recordsRepository = const UnavailableAssociationRecordsRepository(),
     required this.session,
     required this.onSessionExpired,
     required this.onOpenSection,
   });
   final String section;
   final DashboardRepository repository;
+  final AssociationRecordsRepository recordsRepository;
   final AuthSession session;
   final VoidCallback onSessionExpired;
   final ValueChanged<String> onOpenSection;
@@ -73,9 +77,9 @@ class _AssociationSectionsState extends State<AssociationSections> {
           Text(data.name, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 16),
           if (widget.section == 'members')
-            ..._members(data)
+            ..._members(data, refresh)
           else
-            ..._programs(data),
+            ..._programs(data, refresh),
         ],
       ],
     ),
@@ -102,7 +106,7 @@ class _AssociationSectionsState extends State<AssociationSections> {
     const SizedBox(height: 20),
     MetricStrip(
       values: {
-        'Members': dashboardCount(data, 'members_total'),
+        'Members': dashboardCount(data, 'members_active'),
         'Projects': dashboardCount(data, 'projects_total'),
         'Trainings': data.training?.records,
       },
@@ -124,7 +128,10 @@ class _AssociationSectionsState extends State<AssociationSections> {
     ),
   ];
 
-  List<Widget> _members(AssociationDashboard data) => [
+  List<Widget> _members(
+    AssociationDashboard data,
+    Future<void> Function() refresh,
+  ) => [
     _tabs(
       ['Members', 'Registrations'],
       _registrations ? 'Registrations' : 'Members',
@@ -151,15 +158,11 @@ class _AssociationSectionsState extends State<AssociationSections> {
         'Open applications submitted by this account to check their review status.',
       ),
     ] else ...[
-      InformationCard(
-        child: MetricStrip(
-          values: {'Official members': dashboardCount(data, 'members_total')},
-        ),
-      ),
-      const SizedBox(height: 16),
-      _unavailable(
-        'Member roster unavailable',
-        'Official member records are unavailable to Association Accounts. Contact your assigned Field Officer for roster assistance.',
+      AssociationRecordList(
+        repository: widget.recordsRepository,
+        onRefresh: refresh,
+        session: widget.session,
+        onSessionExpired: widget.onSessionExpired,
       ),
     ],
     const SizedBox(height: 16),
@@ -169,7 +172,10 @@ class _AssociationSectionsState extends State<AssociationSections> {
     ),
   ];
 
-  List<Widget> _programs(AssociationDashboard data) {
+  List<Widget> _programs(
+    AssociationDashboard data,
+    Future<void> Function() refresh,
+  ) {
     final training = widget.section == 'trainings';
     final projects = data.projects
         ?.where(
@@ -201,10 +207,13 @@ class _AssociationSectionsState extends State<AssociationSections> {
             },
           ),
         ),
-        const SectionHeading('Activity calendar'),
-        _unavailable(
-          'Training calendar unavailable',
-          'Dated training activities and attendance details are currently unavailable on mobile. These totals include retained training history.',
+        const SizedBox(height: 16),
+        AssociationRecordList(
+          repository: widget.recordsRepository,
+          onRefresh: refresh,
+          session: widget.session,
+          onSessionExpired: widget.onSessionExpired,
+          trainings: true,
         ),
       ] else ...[
         TextField(

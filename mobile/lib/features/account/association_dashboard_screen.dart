@@ -46,7 +46,7 @@ class AssociationDashboardScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Maayong adlaw!',
+                  'Maayong Adlaw!',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -91,7 +91,7 @@ class AssociationDashboardScreen extends StatelessWidget {
                       MetricStrip(
                         inverse: true,
                         values: {
-                          'Members': dashboardCount(data, 'members_total'),
+                          'Members': dashboardCount(data, 'members_active'),
                           'Pending': data.applications?['pending'],
                           'Projects': dashboardCount(data, 'projects_total'),
                           'Trainings': data.training?.records,
@@ -204,7 +204,9 @@ class AssociationDashboardScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                metric.label,
+                                metric.key == 'members_total'
+                                    ? 'Retained member records'
+                                    : metric.label,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                 ),
