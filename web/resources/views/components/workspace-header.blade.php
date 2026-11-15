@@ -5,13 +5,13 @@
     'accountLabel',
     'contextId' => null,
     'avatar' => null,
+    'compact' => false,
 ])
 
-<header class="topbar workspace-header">
+<header @class(['topbar', 'workspace-header', 'workspace-header--compact' => $compact])>
     <div class="topbar-context">
         {{ $navigationToggle }}
-        <div class="context-product">{{ $workspace }}</div>
-        <x-icon name="chevron" />
+        @unless($compact)<div class="context-product">{{ $workspace }}</div><x-icon name="chevron" />@endunless
         <span class="workspace-header-context" @if($contextId) id="{{ $contextId }}" @endif>{{ $context }}</span>
     </div>
     <div class="topbar-account">
@@ -21,7 +21,7 @@
         @endif
         <div class="account-copy">
             <strong>{{ $displayName }}</strong>
-            <small>{{ $accountLabel }}</small>
+            @unless($compact)<small>{{ $accountLabel }}</small>@endunless
         </div>
         <form method="POST" action="{{ route('logout') }}">
             @csrf

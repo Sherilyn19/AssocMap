@@ -81,6 +81,7 @@ export async function initGis(root) {
         const history = root.querySelector('[data-gis-history]');
         if (history) { history.hidden = true; history.open = false; root.querySelector('[data-gis-history-details]').replaceChildren(); }
         root.querySelector('[data-gis-selection-note]').textContent = 'Choose a marker or a list result to explore its details and photos.';
+        root.querySelector('[data-gis-selection-note]').classList.remove('gis-published');
     }
 
     function selectFeature(feature, reveal = true) {
@@ -105,6 +106,7 @@ export async function initGis(root) {
         root.querySelector('[data-gis-selection-note]').textContent = feature.geometry
             ? (publicView ? 'Published location' : 'Project site information')
             : 'Geometry is unavailable or exceeds the supported limit.';
+        root.querySelector('[data-gis-selection-note]').classList.toggle('gis-published', publicView && Boolean(feature.geometry));
 
         const section = (title, className = '') => {
             const container = document.createElement('section'); container.className = `gis-detail-section ${className}`.trim();
@@ -116,7 +118,7 @@ export async function initGis(root) {
             const paragraph = document.createElement('p'); paragraph.className = 'gis-detail-note'; paragraph.textContent = text;
             list.parentElement.append(paragraph);
         };
-        const location = section('About this location');
+        const location = section('About this location', 'gis-about-section');
         addDetail(location, publicView ? 'Public address' : 'Project site address', p.address || 'Address not supplied');
         addDetail(location, 'Description', p.description || 'No description has been provided.');
         if (!publicView) {
@@ -139,7 +141,14 @@ export async function initGis(root) {
             [...position.querySelectorAll('dd')].forEach((value, index) => {
                 value.title = String(point.coordinates[index === 0 ? 1 : 0]);
             });
-            note(position, representative ? 'Calculated representative position within the boundary, not a surveyed site coordinate.' : 'WGS 84 · decimal degrees');
+            if (publicView) {
+                position.parentElement.classList.add('gis-position-coordinates');
+                const system = document.createElement('p'); system.className = 'gis-coordinate-system';
+                const label = document.createElement('span'); label.textContent = 'Coordinate system';
+                const value = document.createElement('span'); value.textContent = 'WGS 84 · decimal degrees';
+                system.append(label, value); position.parentElement.append(system);
+                if (representative) note(position, 'Calculated representative position within the boundary, not a surveyed site coordinate.');
+            } else note(position, representative ? 'Calculated representative position within the boundary, not a surveyed site coordinate.' : 'WGS 84 · decimal degrees');
         } else {
             addDetail(position, 'Geometry', feature.geometry?.type || 'Unavailable');
         }
@@ -308,7 +317,7 @@ export async function initGis(root) {
                 fresh ? selectFeature(fresh, false) : clearSelection();
             }
             const message = data.features.length ? `${data.features.length} locations loaded.` : emptyMessage(data.meta.empty_reason);
-            showStatus(status, message + (data.meta.truncated ? ' The map limit was reached. Zoom, filter, or use the register for additional records.' : ''));
+            showStatus(status, message + (data.meta.truncated ? ` The map limit was reached. Zoom, filter, or use the ${publicView ? 'location list' : 'register'} for additional records.` : ''));
             return true;
         } catch (error) {
             if (error.name === 'AbortError' || !isCurrent()) return false;

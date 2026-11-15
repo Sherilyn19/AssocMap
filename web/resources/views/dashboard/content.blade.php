@@ -1,6 +1,6 @@
 @php
     $introduction = match ($role) {
-        'system_admin' => 'Current organizational records and administrative attention across all associations.',
+        'system_admin' => 'Your overview of associations, members, and project implementation.',
         'field_officer' => 'Operational records for your currently assigned active, unarchived associations.',
         default => 'Your association records, applications, projects and monitoring overview.',
     };
@@ -26,14 +26,14 @@
 @endphp
 <header class="dashboard-intro">
     <div>
-        <p class="eyebrow">{{ $roleLabel }}</p>
-        <h1 tabindex="-1">{{ match ($role) { 'field_officer' => 'Field Officer Dashboard', 'association_account' => 'Association Dashboard', default => 'Dashboard' } }}</h1>
+        <p class="eyebrow">{{ $role === 'system_admin' ? 'BFAR SAAD Phase II' : $roleLabel }}</p>
+        <h1 tabindex="-1">{{ match ($role) { 'field_officer' => 'Field Officer Dashboard', 'association_account' => 'Association Dashboard', default => 'Welcome, '.($currentUser->display_name ?: 'Administrator').'.' } }}</h1>
         <p class="dashboard-introduction">{{ $introduction }}</p>
     </div>
     @if($state === 'ready')
         <div class="dashboard-context">
-            <a class="button" href="{{ route($prefix.'.dashboard') }}">Refresh dashboard</a>
-            <p>Updated <time datetime="{{ $dashboard['generated_at'] }}">{{ \Carbon\CarbonImmutable::parse($dashboard['generated_at'])->format('M j, Y, g:i a') }}</time><span>{{ $dashboard['timezone'] }}</span></p>
+            <a class="button" href="{{ route($prefix.'.dashboard') }}">{{ $role === 'system_admin' ? 'Refresh overview' : 'Refresh dashboard' }}</a>
+            @if($role !== 'system_admin')<p>Updated <time datetime="{{ $dashboard['generated_at'] }}">{{ \Carbon\CarbonImmutable::parse($dashboard['generated_at'])->format('M j, Y, g:i a') }}</time><span>{{ $dashboard['timezone'] }}</span></p>@endif
         </div>
     @endif
 </header>
@@ -200,4 +200,5 @@
         </section>
     </div>
     <p class="dashboard-help">Dashboard totals use the scopes stated above. Detailed reports can use different periods and retain additional archived project history. Income and production quantities are available in Reports &amp; Analytics.</p>
+    @if($role === 'system_admin')<p class="dashboard-loaded">Loaded <time datetime="{{ $dashboard['generated_at'] }}">{{ \Carbon\CarbonImmutable::parse($dashboard['generated_at'])->format('M j, Y, g:i a') }}</time> · {{ $dashboard['timezone'] }}</p>@endif
 @endif

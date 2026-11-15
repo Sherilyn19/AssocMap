@@ -34,6 +34,19 @@
 .audit-preview { display: flex; gap: 12px; align-items: center; padding: 4px 23px 24px; }.audit-preview strong { font-size: 11px; }.audit-preview p { font-size: 10px; margin-top: 2px; }.audit-preview > .badge { margin-left: 12px; }.audit-preview time { margin-left: auto; color: var(--text-secondary); font-size: 10px; }
 
 /* Operational dashboards share cards while retaining role-specific content. */
+.role-dashboard.admin-dashboard { gap: 20px; }
+.role-dashboard.admin-dashboard .dashboard-intro { align-items: center; gap: 16px; padding: 18px 20px; border: 1px solid #dce7f0; border-radius: 12px; background: #f8fbfd; }
+.role-dashboard.admin-dashboard h1 { font-size: clamp(23px, 2vw, 28px); line-height: 1.25; }
+.role-dashboard.admin-dashboard .dashboard-introduction { margin-top: 6px; }
+.role-dashboard.admin-dashboard .dashboard-context .button { border-color: #bfd1e1; background: #fff; color: var(--primary); font-weight: 600; }
+.role-dashboard.admin-dashboard .dashboard-metrics { gap: 14px; }
+.role-dashboard.admin-dashboard .stat-card { padding: 18px; border-top-color: #a9c8df; }
+.role-dashboard.admin-dashboard .stat-card > strong { font-size: clamp(24px, 2vw, 30px); margin: 14px 0 8px; }
+.role-dashboard.admin-dashboard .dashboard-panel { border: 1px solid #dbe6ee; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+.role-dashboard.admin-dashboard .dashboard-shortcut { background: #fbfdff; }
+.role-dashboard.admin-dashboard .dashboard-loaded { margin: 0; padding: 12px 2px; color: #526679; font-size: 12px; line-height: 1.6; border-top: 1px solid #dbe6ee; }
+@media (prefers-reduced-motion: no-preference) { .role-dashboard.admin-dashboard .stat-card, .role-dashboard.admin-dashboard .dashboard-context .button { transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease; } }
+@media (max-width: 540px) { .role-dashboard.admin-dashboard .dashboard-intro { padding: 16px; } .role-dashboard.admin-dashboard .dashboard-context { justify-items: start; } }
 .role-dashboard { container-type: inline-size; display: grid; gap: 24px; min-width: 0; color: #0f172a; }
 .role-dashboard .dashboard-intro { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 20px; padding-block: 4px; }
 .role-dashboard .dashboard-intro > div:first-child { flex: 1 1 350px; min-width: 0; }

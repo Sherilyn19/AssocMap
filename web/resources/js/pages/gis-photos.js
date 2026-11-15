@@ -10,7 +10,7 @@ export function createGisPhotos(root, { base, manager, csrf }) {
     const display = find('[data-photo-display]');
     const confirmation = find('[data-photo-confirm]');
     const grid = find('[data-photo-grid]');
-    let current, opener, removalId, previewUrl, requestId, busy = false, canManage = false, slots = 0, photos = [];
+    let current, opener, removalId, previewUrl, requestId, busy = false, canManage = false, slots = 0, photos = [], photoIndex = 0;
     const message = text => { status.textContent = text; };
     const resetFile = (clearInput = true) => {
         if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -51,12 +51,23 @@ export function createGisPhotos(root, { base, manager, csrf }) {
         });
         return body;
     };
-    const openPhoto = (photo, source) => {
-        opener = source;
+    const showPhoto = index => {
+        if (index < 0 || index >= photos.length) return;
+        photoIndex = index;
+        const photo = photos[index];
+        find('[data-photo-prev]').disabled = index === 0;
+        find('[data-photo-next]').disabled = index === photos.length - 1;
+        find('[data-photo-viewer-count]').textContent = `${index + 1} / ${photos.length}`;
+        display.alt = `Location photo ${index + 1} of ${photos.length}`;
         find('[data-photo-image-status]').textContent = 'Loading photo...';
         display.onload = () => { find('[data-photo-image-status]').textContent = ''; };
         display.onerror = () => { display.removeAttribute('src'); find('[data-photo-image-status]').textContent = 'Photo unavailable. Close and refresh the gallery.'; };
-        display.src = photo.display_url; viewer.showModal();
+        display.src = photo.display_url;
+    };
+    const openPhoto = (photo, source) => {
+        const index = photos.findIndex(item => item.id === photo.id);
+        if (index < 0) return;
+        opener = source; showPhoto(index); viewer.showModal(); find('[data-photo-close]').focus();
     };
     const remove = (id, source) => { removalId = id; opener = source; confirmation.showModal(); find('[data-photo-cancel]').focus(); };
     const render = gallery => {
@@ -145,6 +156,12 @@ export function createGisPhotos(root, { base, manager, csrf }) {
     });
     find('[data-photo-refresh]').addEventListener('click', refresh);
     find('[data-photo-close]').addEventListener('click', () => viewer.close());
+    find('[data-photo-prev]').addEventListener('click', () => showPhoto(photoIndex - 1));
+    find('[data-photo-next]').addEventListener('click', () => showPhoto(photoIndex + 1));
+    viewer.addEventListener('keydown', event => {
+        if (event.key === 'ArrowLeft') { event.preventDefault(); showPhoto(photoIndex - 1); }
+        if (event.key === 'ArrowRight') { event.preventDefault(); showPhoto(photoIndex + 1); }
+    });
     viewer.addEventListener('close', () => { display.removeAttribute('src'); opener?.isConnected && opener.focus(); });
     if (confirmation) {
         find('[data-photo-cancel]').addEventListener('click', () => confirmation.close());
