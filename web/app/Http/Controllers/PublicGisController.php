@@ -13,7 +13,7 @@ class PublicGisController extends Controller
     public function index(GisQueryService $gis): View
     {
         return view('public.gis', ['gisSiteTypes' => $gis->siteTypes(), 'gisPublic' => true, 'gisManager' => false, 'gisBaseUrl' => route('public.gis'),
-            'gisTitle' => 'Public GIS Map', 'gisDescription' => 'Explore approved project locations and boundaries.']);
+            'gisTitle' => 'Public GIS Map', 'gisDescription' => 'Explore published project locations and their approved public details.']);
     }
 
     public function data(GisQueryRequest $request, GisQueryService $gis): JsonResponse

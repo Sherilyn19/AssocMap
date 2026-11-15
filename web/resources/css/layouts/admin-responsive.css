@@ -27,5 +27,16 @@
     .bar-chart { padding: 20px 17px; }.bar-axis { grid-template-columns: 107px 1fr 10px; }.chart-scale { margin-left: 114px; }.table-footer { padding: 15px; }.filter-panel .panel-heading > span { display: none; }
     .report-document { padding: 18px; }.report-document-header { flex-wrap: wrap; }.report-document-header .badge { margin-left: 0; }.report-stats span { font-size: 9px; }.map-preview-label { left: 12px; font-size: 9px; }.location-panel dl { grid-template-columns: 1fr; }.modal { padding: 20px; }.modal .detail-grid { grid-template-columns: 1fr; }
 }
+@media (max-width: 600px) {
+    .admin-workspace .workspace-header--scroll-context { gap: 6px; padding-inline: 12px; }
+    .admin-workspace .workspace-header--scroll-context .topbar-context { gap: 4px; min-width: 0; }
+    .admin-workspace .workspace-header--scroll-context .admin-header-trail { flex: 1; min-width: 0; }
+    .admin-workspace .workspace-header--scroll-context .admin-header-workspace, .admin-workspace .workspace-header--scroll-context .admin-header-page > .icon { display: none; }
+    .admin-workspace .workspace-header--scroll-context .admin-header-page { flex: 1; min-width: 0; }
+    .admin-workspace .workspace-header--scroll-context .workspace-header-context { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
+    .admin-workspace .workspace-header--scroll-context .topbar-account { gap: 4px; }
+    .admin-workspace .workspace-header--scroll-context .account-copy { max-width: 90px; }
+}
+@media (max-width: 420px) { .admin-workspace .workspace-header--scroll-context .account-copy { display: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 

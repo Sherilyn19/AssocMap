@@ -35,8 +35,8 @@
                     <fieldset class="gis-public-fields"><legend>Approved public details</legend>
                         <p class="gis-help">Public details are explicitly supplied here. Publishing never copies the internal name or address automatically. Publishing includes the complete saved geometry, even when a boundary is shown as a representative marker.</p>
                         <div class="field"><label for="gis-public-title">Public title</label><input id="gis-public-title" name="public_title" maxlength="255" value="{{ $record['public_title'] ?? '' }}" @if($record['is_published'] ?? false) required @endif></div>
-                        <div class="field"><label for="gis-public-description">Public description</label><textarea id="gis-public-description" name="public_description" maxlength="4000" rows="3">{{ $record['public_description'] ?? '' }}</textarea></div>
-                        <div class="field"><label for="gis-public-address">Public address</label><textarea id="gis-public-address" name="public_address" maxlength="2000" rows="2">{{ $record['public_address'] ?? '' }}</textarea></div>
+                        <div class="field"><label for="gis-public-description">Public description</label><textarea id="gis-public-description" name="public_description" maxlength="4000" rows="3" aria-describedby="gis-public-description-help">{{ $record['public_description'] ?? '' }}</textarea><small id="gis-public-description-help">Include the association name here only if it is approved for public display.</small></div>
+                        <div class="field"><label for="gis-public-address">Public address</label><textarea id="gis-public-address" name="public_address" maxlength="2000" rows="2" aria-describedby="gis-public-address-help">{{ $record['public_address'] ?? '' }}</textarea><small id="gis-public-address-help">Include the municipality if it is approved for public display. This address describes the project location.</small></div>
                     </fieldset>
                     @if($correcting)</fieldset>@endif
                 </div>

@@ -34,6 +34,24 @@
 .audit-preview { display: flex; gap: 12px; align-items: center; padding: 4px 23px 24px; }.audit-preview strong { font-size: 11px; }.audit-preview p { font-size: 10px; margin-top: 2px; }.audit-preview > .badge { margin-left: 12px; }.audit-preview time { margin-left: auto; color: var(--text-secondary); font-size: 10px; }
 
 /* Operational dashboards share cards while retaining role-specific content. */
+.role-dashboard.admin-dashboard { gap: 20px; }
+.role-dashboard.admin-dashboard .dashboard-intro { align-items: center; gap: 18px; padding: 24px; border: 1px solid var(--border-color); border-top: 3px solid var(--primary); border-radius: var(--radius-md); background: #fff; box-shadow: var(--shadow-sm); }
+.role-dashboard.admin-dashboard h1 { font-size: clamp(23px, 2vw, 28px); line-height: 1.25; }
+.role-dashboard.admin-dashboard .dashboard-introduction { margin-top: 6px; }
+.role-dashboard.admin-dashboard .dashboard-context .button { border-color: #bfd1e1; background: #fff; color: var(--primary); font-weight: 600; }
+.role-dashboard.admin-dashboard .dashboard-metrics { gap: 14px; }
+.role-dashboard.admin-dashboard .stat-card { padding: 18px; border-top-color: #a9c8df; }
+.role-dashboard.admin-dashboard .stat-card > strong { font-size: clamp(24px, 2vw, 30px); margin: 14px 0 8px; }
+.role-dashboard.admin-dashboard .dashboard-panel { border: 1px solid #dbe6ee; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+.role-dashboard.admin-dashboard .dashboard-shortcut { background: #fbfdff; }
+.role-dashboard.admin-dashboard .dashboard-loaded { margin: 0; padding: 12px 2px; color: #526679; font-size: 12px; line-height: 1.6; border-top: 1px solid #dbe6ee; }
+@media (prefers-reduced-motion: no-preference) { .role-dashboard.admin-dashboard .stat-card, .role-dashboard.admin-dashboard .dashboard-context .button { transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease; } }
+@media (prefers-reduced-motion: no-preference) {
+    .role-dashboard.admin-dashboard .dashboard-context .button:hover { background: #edf4fa; border-color: #8bafd3; box-shadow: 0 4px 12px rgb(16 47 80 / 10%); }
+    .workspace-header--compact .text-button { transition: color 200ms ease, background-color 200ms ease; }
+    .workspace-header--compact .text-button:hover { color: var(--primary); background-color: #edf4fa; }
+}
+@media (max-width: 540px) { .role-dashboard.admin-dashboard .dashboard-intro { padding: 18px; } .role-dashboard.admin-dashboard .dashboard-context { justify-items: start; } }
 .role-dashboard { container-type: inline-size; display: grid; gap: 24px; min-width: 0; color: #0f172a; }
 .role-dashboard .dashboard-intro { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 20px; padding-block: 4px; }
 .role-dashboard .dashboard-intro > div:first-child { flex: 1 1 350px; min-width: 0; }
@@ -85,6 +103,13 @@
 .role-dashboard .dashboard-summary > div { min-width: 0; padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 9px; }
 .role-dashboard .dashboard-summary dt { color: #475569; font-size: 12px; overflow-wrap: anywhere; }
 .role-dashboard .dashboard-summary dd { margin: 10px 0 0; color: #0f172a; font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.role-dashboard.admin-dashboard .dashboard-summary { margin-bottom: 0; }
+.role-dashboard.admin-dashboard .dashboard-summary > div { border-color: #e0eaf3; background: #f8fafc; }
+.role-dashboard.admin-dashboard .dashboard-summary dt { line-height: 1.5; }
+@media (prefers-reduced-motion: no-preference) {
+    .role-dashboard.admin-dashboard .dashboard-summary > div { transition: border-color 180ms ease, box-shadow 180ms ease; }
+    .role-dashboard.admin-dashboard .dashboard-summary > div:hover { border-color: #a9c6df; box-shadow: 0 3px 10px rgb(11 76 140 / 6%); }
+}
 .role-dashboard .dashboard-empty { margin-top: 18px; padding: 18px; color: #475569; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 9px; font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
 .role-dashboard .dashboard-insights { display: grid; gap: 16px; min-width: 0; }
 .role-dashboard .dashboard-section-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
@@ -96,6 +121,20 @@
 .role-dashboard .dashboard-bars dd > span:last-child { max-width: 12ch; overflow-wrap: anywhere; }
 .role-dashboard .dashboard-bar-track { height: 8px; border-radius: 999px; background: #edf2f7; }
 .role-dashboard .dashboard-bar-track > span { display: block; height: 100%; border-radius: inherit; background: var(--primary); }
+.role-dashboard .dashboard-association-chart .dashboard-panel-heading { align-items: flex-start; }
+.role-dashboard .dashboard-association-chart .dashboard-bars { margin-top: 20px; }
+.role-dashboard .dashboard-association-chart .dashboard-bars dd > span:last-child { min-width: 2ch; color: #173b5e; font-weight: 600; text-align: right; }
+.role-dashboard .dashboard-chart-association_status .dashboard-bars > div:nth-child(1) .dashboard-bar-track > span { background: #287c69; }
+.role-dashboard .dashboard-chart-association_status .dashboard-bars > div:nth-child(2) .dashboard-bar-track > span { background: #bd8740; }
+.role-dashboard .dashboard-chart-association_status .dashboard-bars > div:nth-child(3) .dashboard-bar-track > span { background: #77879a; }
+.role-dashboard .dashboard-chart-municipalities .dashboard-bar-track > span { background: #3975a7; }
+.role-dashboard :is(.dashboard-chart-project_status, .dashboard-chart-components) .dashboard-bars > div:nth-child(3n + 1) .dashboard-bar-track > span { background: #0b427b; }
+.role-dashboard :is(.dashboard-chart-project_status, .dashboard-chart-components) .dashboard-bars > div:nth-child(3n + 2) .dashboard-bar-track > span { background: #2996d2; }
+.role-dashboard :is(.dashboard-chart-project_status, .dashboard-chart-components) .dashboard-bars > div:nth-child(3n) .dashboard-bar-track > span { background: #547ca2; }
+@media (prefers-reduced-motion: no-preference) {
+    .role-dashboard .dashboard-association-chart.is-chart-visible .dashboard-bar-track > span { transform-origin: left center; animation: dashboard-bar-grow 700ms ease-out both; }
+    @keyframes dashboard-bar-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+}
 .role-dashboard .dashboard-table-scroll { max-width: 100%; overflow: auto; margin-top: 20px; border: 1px solid #e2e8f0; border-radius: 9px; }
 .role-dashboard table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .role-dashboard th, .role-dashboard td { min-width: 120px; max-width: 320px; padding: 14px 16px; border-bottom: 1px solid #edf1f5; text-align: left; vertical-align: top; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
@@ -105,11 +144,40 @@
 .role-dashboard tbody tr:hover { background: #f8fafc; }
 .role-dashboard .dashboard-table-scroll a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
 .role-dashboard .dashboard-table-scroll a:hover { text-decoration: underline; }
+.role-dashboard .dashboard-associations-link { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 7px; color: var(--primary); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.role-dashboard .dashboard-associations-link svg { width: 16px; height: 16px; flex: none; }
+.role-dashboard .dashboard-associations-link:hover { background: #edf4fb; }
+.role-dashboard .dashboard-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
+.role-dashboard .dashboard-pagination p { margin: 0; color: #475569; font-size: 12px; }
+.role-dashboard .dashboard-pagination nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.role-dashboard .dashboard-pagination nav > * { display: inline-flex; min-width: 34px; min-height: 34px; align-items: center; justify-content: center; padding: 6px 9px; border: 1px solid #dbe4ef; border-radius: 6px; background: #fff; color: #334155; font-size: 12px; font-weight: 600; }
+.role-dashboard .dashboard-pagination nav a:hover { border-color: #9bbad8; background: #edf4fb; color: var(--primary); }
+.role-dashboard .dashboard-pagination nav .dashboard-page-current { border-color: var(--primary); background: var(--primary); color: #fff; }
+.role-dashboard .dashboard-pagination nav .dashboard-page-disabled { color: #94a3b8; background: #f8fafc; }
+.role-dashboard .dashboard-pagination nav .dashboard-page-ellipsis { min-width: 20px; padding-inline: 2px; border-color: transparent; background: transparent; }
+@media (prefers-reduced-motion: no-preference) {
+    .role-dashboard .dashboard-associations-link, .role-dashboard .dashboard-pagination nav a { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; }
+    .role-dashboard .dashboard-associations-link svg { transition: transform 180ms ease; }
+    .role-dashboard .dashboard-associations-link:hover svg { transform: translateX(3px); }
+}
 .role-dashboard .dashboard-records { margin: 20px 0 0; padding: 0; list-style: none; }
 .role-dashboard .dashboard-records li { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; justify-content: space-between; padding: 16px 0; border-top: 1px solid #edf1f5; font-size: 13px; }
 .role-dashboard .dashboard-records li > div { flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere; }
 .role-dashboard .dashboard-records p { margin-top: 6px; font-size: 12px; }
 .role-dashboard .dashboard-records small { display: block; margin-top: 6px; color: #475569; font-size: 12px; }
+.role-dashboard.admin-dashboard .dashboard-recent-panel .dashboard-records { margin-top: 16px; }
+.role-dashboard.admin-dashboard .dashboard-recent-panel .dashboard-records li { padding: 15px 12px; border-radius: 8px; }
+.role-dashboard.admin-dashboard .dashboard-recent-panel .dashboard-records a { color: #164d7e; }
+.role-dashboard.admin-dashboard .dashboard-recent-panel .dashboard-records a:hover { text-decoration: underline; }
+.role-dashboard.admin-dashboard .dashboard-recent-panel .dashboard-records p { color: #64748b; }
+@media (prefers-reduced-motion: no-preference) {
+    .role-dashboard.admin-dashboard .dashboard-intro { animation: dashboard-arrive 400ms ease-out both; }
+    .role-dashboard.admin-dashboard .dashboard-panel { transition: border-color 180ms ease, box-shadow 180ms ease; }
+    .role-dashboard.admin-dashboard .dashboard-panel:hover { border-color: #bfd3e5; box-shadow: 0 6px 20px rgb(16 47 80 / 9%); }
+    .role-dashboard.admin-dashboard .dashboard-recent-panel .dashboard-records li { transition: background-color 180ms ease; }
+    .role-dashboard.admin-dashboard .dashboard-recent-panel .dashboard-records li:hover { background: #f4f8fc; }
+    @keyframes dashboard-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+}
 .role-dashboard .badge { max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: center; }
 .role-dashboard :is(a, [tabindex]):focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
 .role-dashboard #assigned-associations { scroll-margin-top: 24px; }
@@ -129,6 +197,7 @@
     .role-dashboard .dashboard-context p { text-align: left; }
     .role-dashboard .dashboard-bars > div { grid-template-columns: minmax(0, 1fr); gap: 8px; }
     .role-dashboard .dashboard-panel > .button { display: flex; margin-right: 0; width: 100%; padding-inline: 10px; }
+    .role-dashboard .dashboard-association-chart .dashboard-panel-heading { flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) {
     .role-dashboard .dashboard-shortcut { transition: none; }

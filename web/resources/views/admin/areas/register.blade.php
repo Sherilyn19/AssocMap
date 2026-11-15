@@ -2,7 +2,8 @@
 
 @section('content')
 <section class="area-management" data-workspace-module="areas" data-workspace-title="Area Management">
-    <header class="card area-page-heading"><div><p class="eyebrow">Geographic records</p><h1 tabindex="-1">Area Management</h1><p>Manage cities, municipalities, and barangays using their existing geographic references.</p></div><button class="button button-primary" type="button" data-area-add><x-icon name="plus" />Add Area</button></header>
+    <header class="card area-page-heading"><div><p class="eyebrow">Geographic records</p><h1 tabindex="-1">Area Management</h1><p>Manage cities, municipalities, and barangays using their existing geographic references.</p></div></header>
+    <div class="area-heading-actions"><button class="button button-primary" type="button" data-area-add><x-icon name="plus" />Add Area</button></div>
     @php
         $cards = [
             ['key' => 'municipalities', 'label' => 'Total Cities / Municipalities', 'icon' => 'pin', 'tab' => 'municipalities', 'status' => ''],
@@ -21,16 +22,16 @@
                     : route('admin.areas.index', ['tab' => $card['tab'], 'status' => $card['status'], 'q' => $filters['q'], 'sort' => $filters['sort']]);
             @endphp
             <a class="area-summary-card" href="{{ $href }}" data-area-summary="{{ $card['key'] }}" @if($selected) aria-current="page" @endif>
-                <x-stat-card :label="$card['label']" :value="number_format($summary[$card['key']])" :icon="$card['icon']" :animate="false" :note="$navigation ? 'Open Association Management' : 'View matching records'" />
+                <x-stat-card :label="$card['label']" :value="number_format($summary[$card['key']])" :icon="$card['icon']" />
             </a>
         @endforeach
     </nav>
-    <p class="area-help">Totals include all cities and municipalities. Current barangays are active; inactive records remain readable. Current associations include active and inactive associations that have not been archived.</p>
+    <div class="area-info-row"><span>About these totals</span><x-area-info label="About geographic totals">City and municipality totals include all records. Current barangays are active; current associations include all unarchived statuses.</x-area-info></div>
     <section class="card area-directory" aria-labelledby="area-directory-title">
-        <div class="area-section-heading"><div><h2 id="area-directory-title">Geographic directory</h2><p>{{ number_format($records->total()) }} matching record(s)</p></div><p>Record specific addresses from a barangay's detail page.</p></div>
+        <div class="area-section-heading"><div><div class="area-heading-title"><h2 id="area-directory-title">Geographic directory</h2><x-area-info label="About connected records">Counts include inactive areas and all association statuses, including archived records. Deactivation keeps existing links.</x-area-info></div><p>{{ number_format($records->total()) }} matching record(s)</p></div><p>Record specific addresses from a barangay's detail page.</p></div>
         <nav class="area-tabs" aria-label="Geographic record type">
             @foreach(['municipalities' => 'Cities / Municipalities', 'barangays' => 'Barangays'] as $tab => $label)
-                <a href="{{ route('admin.areas.index', ['tab' => $tab, 'q' => $filters['q'], 'sort' => $filters['sort']]) }}" @if($filters['tab'] === $tab) aria-current="page" @endif>{{ $label }}</a>
+                <a href="{{ route('admin.areas.index', ['tab' => $tab, 'status' => $tab === 'barangays' ? 'active' : '', 'q' => $filters['q'], 'sort' => $filters['sort']]) }}" @if($filters['tab'] === $tab) aria-current="page" @endif>{{ $label }}</a>
             @endforeach
         </nav>
         <form class="area-filter-form" method="GET" action="{{ route('admin.areas.index') }}" data-feedback-error-bag="default">
@@ -63,7 +64,6 @@
             </table>
         </div>
         @include('admin.areas.partials.pagination', ['paginator' => $records, 'label' => 'Geographic record pages'])
-        <p class="area-table-note">Connected counts include inactive geographic records and active, inactive, and archived associations. Deactivation preserves existing relationships.</p>
     </section>
 </section>
 @endsection

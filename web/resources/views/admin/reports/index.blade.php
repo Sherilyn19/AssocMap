@@ -21,20 +21,20 @@
     }
 @endphp
 <div class="reports-layout" data-report-workspace data-data-url="{{ route($prefix.'.data') }}" data-options-url="{{ route($prefix.'.options') }}">
-    @component('partials.page-header', ['headingCard' => true, 'headingClass' => 'report-page-header', 'title' => 'Reports & Analytics', 'description' => 'A clear view of your associations, recorded activity, and program performance.', 'eyebrow' => 'Program insights'])
+    @component('partials.page-header', ['headingCard' => true, 'headingClass' => 'report-page-header', 'title' => 'Reports & Analytics', 'description' => 'Explore associations, activities, and program progress.', 'eyebrow' => 'Program insights'])
         @slot('headerContext')
-            <span class="report-access-label"><x-icon name="shield" />{{ match ($role) { 'system_admin' => 'Organizational reporting', 'field_officer' => 'Current assigned associations', default => 'Your association · View only' } }}</span>
+            @if($role !== 'system_admin')<span class="report-access-label"><x-icon name="shield" />{{ $role === 'field_officer' ? 'Current assigned associations' : 'Your association · View only' }}</span>@endif
         @endslot
         @slot('actions')
         <div class="report-toolbar" role="group" aria-label="Report actions">
-            <button class="button" type="button" data-report-filter-toggle aria-controls="report-filter-panel" aria-expanded="true" hidden><x-icon name="filter" />Filters<span class="report-filter-count" data-report-filter-count @if(!$activeFilterCount) hidden @endif>{{ $activeFilterCount }}</span><x-icon name="chevron-down" /></button>
+            <button class="button" type="button" data-report-filter-toggle aria-controls="report-filter-panel" aria-expanded="true" hidden><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.446.248 8.057.722.73.132.943 1.059.417 1.585L15 10.78v5.72a.75.75 0 0 1-.332.624l-4.5 3A.75.75 0 0 1 9 19.5v-8.72L3.526 5.307c-.526-.526-.313-1.453.417-1.585A45.12 45.12 0 0 1 12 3Z" /></svg>Filters<span class="report-filter-count" data-report-filter-count @if(!$activeFilterCount) hidden @endif>{{ $activeFilterCount }}</span><x-icon name="chevron-down" /></button>
             @if($canExport)
                 <details class="report-export-menu" data-report-export-menu>
                     <summary class="button button-primary"><x-icon name="download" />Export<x-icon name="chevron-down" /></summary>
                     <form method="POST" data-report-export class="report-export-panel">
                         @csrf
                         <div data-export-filters>@foreach($filters as $key => $value)<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endforeach</div>
-                        <p class="field-help">Exports use the applied filters and current authorized records. PDF/XLSX contain tables, summaries and notes; chart images are shown on this page.</p>
+                        <p class="field-help">Export the applied report as tables and summaries. Charts remain on this page.</p>
                         <button type="submit" class="button" formaction="{{ route($prefix.'.export', ['format' => 'pdf']) }}" @disabled(!$result)>Export PDF</button>
                         <button type="submit" class="button" formaction="{{ route($prefix.'.export', ['format' => 'xlsx']) }}" @disabled(!$result)>Export XLSX</button>
                     </form>
@@ -43,8 +43,9 @@
         </div>
         @endslot
     @endcomponent
+    @if($role === 'system_admin')<nav class="report-breadcrumbs" aria-label="Report navigation"><a href="{{ route($filters['report_type'] === 'associations' ? 'admin.associations.index' : 'admin.dashboard') }}">{{ $filters['report_type'] === 'associations' ? 'Association Management' : 'Dashboard' }}</a><span aria-hidden="true">/</span><a href="{{ route('admin.reports.index', ['report_type' => $filters['report_type']]) }}" aria-current="page">Reports &amp; Analytics</a></nav>@endif
     <section id="report-filter-panel" class="card report-configuration" aria-labelledby="report-filter-title">
-        <div class="section-heading"><div><h2 id="report-filter-title">Build your report</h2><p>Choose a report, narrow the scope, and apply your selection.</p></div><span class="report-filter-indicator" data-report-filter-status role="status">{{ $activeFilterCount ? $activeFilterCount.' active filter(s)' : 'Default filters' }}</span></div>
+        <div class="section-heading"><div><h2 id="report-filter-title">Build your report</h2><p>Select a report and filters to get started.</p></div><div class="report-heading-meta"><x-area-info label="About reporting periods">Periods apply to recorded events. Association and member counts are current snapshots; month filters use recorded details.</x-area-info></div></div>
         <form data-report-form method="GET" action="{{ route($prefix.'.index') }}">
             <noscript><p>Choose a report type below before setting its filters:</p><ul>@foreach($types as $value => $label)<li><a href="{{ route($prefix.'.index', ['report_type' => $value]) }}">{{ $label }}</a></li>@endforeach</ul></noscript>
             <div class="field"><label for="report-type">Report type</label><select id="report-type" name="report_type" required>
@@ -81,7 +82,6 @@
                     </select>
                 </div>
             @endforeach
-            <p class="field-help">Reporting periods apply to recorded events. Association/member counts remain current snapshots. Month filters use recorded details only.</p>
             <div class="report-filter-actions">
                 <a class="button button-quiet" href="{{ route($prefix.'.index') }}">Reset filters</a>
                 <button class="button button-primary" type="submit" data-report-submit><x-icon name="chart" />Apply filters</button>
@@ -91,7 +91,6 @@
     <div class="report-preview">
         <section class="card report-document">
             <p data-report-status role="{{ isset($sizeLimitMessage) ? 'alert' : 'status' }}" aria-live="polite"
-                @if($unavailable || isset($sizeLimitMessage)) data-feedback-fallback @endif
                 @class(['notice-error' => $unavailable || isset($sizeLimitMessage)])>{{ $sizeLimitMessage ?? ($unavailable ? 'Reporting is temporarily unavailable. Please try again later.' : 'Report loaded from authorized records.') }}</p>
             <div data-report-result>
                 @if($result)

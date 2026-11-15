@@ -1,4 +1,4 @@
-@props(['prefix', 'type', 'filters' => [], 'scope', 'related' => false, 'association' => null])
+@props(['prefix', 'type', 'filters' => [], 'scope', 'related' => false, 'association' => null, 'showScope' => true])
 
 @php
     $reportActor = request()->attributes->get('current_user');
@@ -33,6 +33,6 @@
                 </details>
             @endunless
         </div>
-        <p class="contextual-report-scope"><strong>{{ $reportTitles[$type] }}.</strong> {{ $scope }}</p>
+        @if($showScope)<p class="contextual-report-scope"><strong>{{ $reportTitles[$type] }}.</strong> {{ $scope }}</p>@endif
     </div>
 @endif

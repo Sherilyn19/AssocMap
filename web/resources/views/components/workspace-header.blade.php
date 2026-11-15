@@ -5,14 +5,19 @@
     'accountLabel',
     'contextId' => null,
     'avatar' => null,
+    'compact' => false,
+    'scrollContext' => false,
 ])
 
-<header class="topbar workspace-header">
+<header @class(['topbar', 'workspace-header', 'workspace-header--compact' => $compact, 'workspace-header--scroll-context' => $scrollContext])>
     <div class="topbar-context">
         {{ $navigationToggle }}
-        <div class="context-product">{{ $workspace }}</div>
-        <x-icon name="chevron" />
-        <span class="workspace-header-context" @if($contextId) id="{{ $contextId }}" @endif>{{ $context }}</span>
+        @if($scrollContext)
+            <div class="admin-header-trail"><span class="admin-header-workspace">{{ $workspace }}</span><span class="admin-header-page" data-admin-header-page><x-icon name="chevron" /><span class="workspace-header-context" @if($contextId) id="{{ $contextId }}" @endif>{{ $context }}</span></span></div>
+        @else
+            @unless($compact)<div class="context-product">{{ $workspace }}</div><x-icon name="chevron" />@endunless
+            <span class="workspace-header-context" @if($contextId) id="{{ $contextId }}" @endif>{{ $context }}</span>
+        @endif
     </div>
     <div class="topbar-account">
         <span class="account-divider" aria-hidden="true"></span>
@@ -21,7 +26,7 @@
         @endif
         <div class="account-copy">
             <strong>{{ $displayName }}</strong>
-            <small>{{ $accountLabel }}</small>
+            @unless($compact)<small>{{ $accountLabel }}</small>@endunless
         </div>
         <form method="POST" action="{{ route('logout') }}">
             @csrf

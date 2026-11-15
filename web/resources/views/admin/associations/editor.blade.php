@@ -94,8 +94,7 @@
         @endif
         @unless($editingAssociation)
         <div data-association-registration>
-            <h3>Existing registration or accreditation</h3>
-            <p>Optional: record details from an existing document. This does not approve an association or issue a registration.</p>
+            <div class="association-registration-heading"><h3>Existing registration or accreditation</h3><x-area-info label="About existing registration">Optionally record an existing document. This does not approve the association or issue a registration.</x-area-info></div>
             <label><input type="checkbox" data-registration-toggle @checked($associationOld('registration') !== null)> Record an existing registration</label>
             <fieldset class="form-grid" data-registration-fields @disabled($editingAssociation || $associationOld('registration') === null)>
                 <legend>Registration details</legend>
@@ -103,7 +102,7 @@
                 <div class="field"><label for="association-registration-number">Registration number *</label><input id="association-registration-number" name="registration[registration_number]" maxlength="150" value="{{ $associationOld('registration.registration_number') }}" required></div>
                 <div class="field"><label for="association-registration-date">Registration date *</label><input id="association-registration-date" name="registration[registration_date]" type="date" value="{{ $associationOld('registration.registration_date') }}" required></div>
                 <div class="field"><label for="association-registration-expiration">Expiration date (optional)</label><input id="association-registration-expiration" name="registration[expiration_date]" type="date" value="{{ $associationOld('registration.expiration_date') }}"></div>
-                <div class="field"><label for="association-registration-primary">Primary registration</label><select id="association-registration-primary" name="registration[is_primary]"><option value="0">No</option><option value="1" @selected($associationOld('registration.is_primary') == '1')>Yes</option></select><small>A primary registration must not post-date SAAD Phase II joining.</small></div>
+                <div class="field"><label for="association-registration-primary">Primary registration</label><select id="association-registration-primary" name="registration[is_primary]"><option value="0">No</option><option value="1" @selected($associationOld('registration.is_primary') == '1')>Yes</option></select><small>The primary registration date must be on or before the SAAD Phase II join date.</small></div>
                 <div class="field"><label for="association-registration-remarks">Remarks (optional)</label><textarea id="association-registration-remarks" name="registration[remarks]" maxlength="4000" rows="2">{{ $associationOld('registration.remarks') }}</textarea></div>
             </fieldset>
             @if(empty($catalog['options']['registration_agencies']))<p class="notice">No active registration agencies are available. The association may be added without registration details.</p>@endif

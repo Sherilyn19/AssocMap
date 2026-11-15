@@ -2,6 +2,27 @@ import { $, $$ } from '../core/helpers.js';
 
 export function initAdminNavigation(sidebarController) {
     if (!$('#admin-sidebar')) return;
+    const dashboardHeader = $('.workspace-header--scroll-context');
+    let syncHeader = () => {};
+    if (dashboardHeader) {
+        const trail = $('[data-admin-header-page]', dashboardHeader);
+        let frame = null;
+        const updateHeader = () => {
+            frame = null;
+            dashboardHeader.classList.toggle('is-scrolled', window.scrollY > 16);
+            const heading = $$('#main-content h1').find(element => element.getClientRects().length > 0);
+            const hidden = Boolean(heading && heading.getBoundingClientRect().bottom > dashboardHeader.getBoundingClientRect().bottom);
+            trail.classList.toggle('is-concealed', hidden);
+            trail.setAttribute('aria-hidden', String(hidden));
+        };
+        syncHeader = updateHeader;
+        dashboardHeader.classList.add('has-scroll-context');
+        window.addEventListener('scroll', () => {
+            if (frame === null) frame = requestAnimationFrame(updateHeader);
+        }, { passive: true });
+        window.addEventListener('resize', updateHeader);
+        updateHeader();
+    }
     const pages = new Map($$('[data-page]').map(page => [page.dataset.page, page]));
 
     function navigate(focus = true) {
@@ -41,6 +62,7 @@ export function initAdminNavigation(sidebarController) {
         $$('details[open]').forEach(menu => { menu.open = false; });
         sidebarController?.closeDrawer();
         if (focus) { $('h1', current)?.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: 'instant' }); }
+        syncHeader();
     }
 
 

@@ -25,7 +25,11 @@ function initReportControls(root, form, readFilters, defaultYear) {
 
     toggle.hidden = false;
     setOpen(true);
-    toggle.addEventListener('click', () => setOpen(panel.hidden));
+    toggle.addEventListener('click', () => {
+        const opening = panel.hidden;
+        setOpen(opening);
+        if (opening) panel.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    });
     panel.addEventListener('keydown', event => {
         if (event.key === 'Escape') { event.preventDefault(); setOpen(false, true); }
     });
@@ -44,7 +48,7 @@ function initReportControls(root, form, readFilters, defaultYear) {
         count.textContent = String(active);
         count.hidden = active === 0;
         toggle.setAttribute('aria-label', active ? `Filters, ${active} active` : 'Filters');
-        indicator.textContent = active ? `${active} active filter(s)` : 'Default filters';
+        if (indicator) indicator.textContent = active ? `${active} active filter(s)` : '';
     };
 }
 
@@ -193,7 +197,7 @@ export function initReports() {
             fill('year', options.years.map(year => ({ id: year, name: year })));
             relevance();
             syncControls();
-            showStatus('Filters changed. Apply filters to load current results.');
+            showStatus('Apply filters to update the report.');
         } catch (error) {
             if (current === optionsRequest && error.name !== 'AbortError') showStatus(error.message, true);
         } finally {
@@ -370,7 +374,7 @@ export function initReports() {
         ++revision;
         exportsEnabled(false);
         preview.replaceChildren();
-        showStatus(request ? 'Filters changed. Wait for the current request to finish, then apply filters.' : 'Filters changed. Apply filters to load results.');
+        showStatus(request ? 'Wait for the current request, then apply filters.' : 'Apply filters to update the report.');
         relevance();
         const name = event.target.name;
         if (name === 'municipality_id' && field('association_id')) {
@@ -420,7 +424,7 @@ export function initReports() {
             if (current === request) {
                 request = undefined;
                 syncBusy();
-                if (started !== revision && !optionsRequest && status.getAttribute('role') !== 'alert') showStatus('Filters changed. Apply filters to load results.');
+                if (started !== revision && !optionsRequest && status.getAttribute('role') !== 'alert') showStatus('Apply filters to update the report.');
             }
         }
     });
@@ -435,7 +439,7 @@ export function initReports() {
         else {
             preview.replaceChildren();
             exportsEnabled(false);
-            showStatus('Filters changed. Apply filters to load matching results.');
+            showStatus('Apply filters to update the report.');
         }
     }
 }
