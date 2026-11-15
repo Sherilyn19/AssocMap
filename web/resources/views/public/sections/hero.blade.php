@@ -14,7 +14,6 @@
     @endif
     <div class="public-hero-overlay" aria-hidden="true"></div>
     <div class="public-container public-hero-content">
-        <div class="public-hero-topline public-hero-enter"><span class="public-status-dot" aria-hidden="true"></span> Community livelihood. A connected perspective.</div>
         <div class="public-hero-copy">
             <p class="public-eyebrow public-hero-enter">Welcome to AssocMap</p>
             <h1 id="public-hero-title" class="public-hero-enter">Mapping communities.<br>Monitoring <em>progress.</em></h1>
@@ -27,15 +26,26 @@
         <div class="public-hero-bottom">
             <a href="#about" class="public-scroll-link"><span class="public-scroll-icon"><x-icon name="chevron-down" /></span> Explore the bigger picture</a>
             <div class="public-hero-meta">
-                <p>Community livelihood information <span>&middot; SAAD Phase II program context</span></p>
+                <span class="public-hero-region">SAAD PHASE 2 REGION 7</span>
             </div>
         </div>
     </div>
 </section>
-<div class="public-intro-band">
+
+<section class="public-intro-band" aria-labelledby="public-philosophy-title">
     <div class="public-container public-intro-content">
-        <span>People at the center.<br><strong>Information that connects.</strong></span>
-        <p>From association records to geographic context, bring the pieces of community livelihood monitoring together.</p>
-        <a href="#features" class="public-text-link">Explore the system <x-icon name="arrow" /></a>
+        <div class="public-intro-message">
+            <p class="public-intro-eyebrow">Platform Philosophy</p>
+
+            <h4 id="public-philosophy-title" class="public-intro-title">
+                People at the center.
+                <span>Information that connects.</span>
+            </h4>
+        </div>
+
+        <p class="public-intro-summary">
+            From association records to geographic context, bring the pieces of community livelihood monitoring together.
+        </p>
     </div>
-</div>
+</section>
+

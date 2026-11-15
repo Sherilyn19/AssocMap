@@ -1,15 +1,28 @@
-<section id="public-gis" class="public-section public-gis-section" aria-labelledby="public-gis-title">
+<section id="public-gis" class="public-map-feature-section" aria-labelledby="public-map-feature-title">
     <div class="public-container">
         <div class="public-section-label" data-public-reveal><span>03 / The geographic view</span><span>Put the work in perspective</span></div>
-        <div class="public-gis-grid">
-            <div class="public-section-heading" data-public-reveal>
-                <p class="public-eyebrow">A place. A project. A bigger picture.</p>
-                <h2 id="public-gis-title">Every location<br>adds <span>context.</span></h2>
-                <p>See where livelihood projects take place. Explore eligible published project locations and boundaries on the public Street Map, with no account required.</p>
-                <a href="{{ route('public.gis') }}" class="public-button public-button-primary">Open the public map <x-icon name="arrow" /></a>
-                <p class="public-gis-privacy"><x-icon name="shield" /> Only eligible published information is visible. Internal records stay within authorized workspaces.</p>
-            </div>
-            <figure class="public-map-preview" aria-labelledby="public-map-caption" data-public-reveal>
+        <div class="public-map-feature-grid">
+        <div class="public-map-feature-copy">
+            <p class="public-map-feature-eyebrow">A PLACE. A PROJECT. A BIGGER PICTURE.</p>
+
+            <h2 id="public-map-feature-title" class="public-map-feature-title">
+                Every location<br>
+                adds <span>context.</span>
+            </h2>
+
+            <p class="public-map-feature-description">
+                See where livelihood projects take place. Explore eligible published project locations and boundaries on the public Street Map, with no account required.
+            </p>
+
+            <a href="{{ route('public.gis') }}" class="public-button public-button-primary public-map-feature-button">
+                <span>Open the public map</span>
+                <x-icon name="arrow" />
+            </a>
+
+        </div>
+
+        <div class="public-map-feature-visual">
+            <figure class="public-map-preview public-map-feature-card" aria-label="Illustration of a geographic view" data-public-reveal>
                 <div class="public-map-heading"><span><x-icon name="map" /> AssocMap / Geographic view</span><span class="public-preview-label">Illustration</span></div>
                 <div class="public-map-canvas" aria-hidden="true">
                     <svg class="public-map-art" viewBox="0 0 640 440" fill="none" preserveAspectRatio="xMidYMid slice">
@@ -26,8 +39,8 @@
                     <span class="public-map-watermark">Illustrative geography<br>No actual project data</span>
                     <div class="public-map-caption-panel"><x-icon name="layers" /><div><strong>From records to geographic context.</strong><span>Discover the public view of program locations.</span></div></div>
                 </div>
-                <figcaption id="public-map-caption">Illustration only. Open the public map for published locations and boundaries.</figcaption>
             </figure>
+        </div>
         </div>
     </div>
 </section>
