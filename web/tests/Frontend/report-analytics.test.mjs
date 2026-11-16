@@ -89,11 +89,27 @@ test('formatting preserves canonical decimal digits, units, zero and unobserved 
 class Element {
     constructor(tag) { this.tagName = tag; this.children = []; this.attributes = new Map(); this.style = {}; this.dataset = {}; }
     append(...children) { this.children.push(...children); }
+    prepend(...children) { this.children.unshift(...children); }
     replaceChildren(...children) { this.children = children; }
     setAttribute(key, value) { this.attributes.set(key, value); }
     removeAttribute(key) { this.attributes.delete(key); }
     all(tag) { return this.children.flatMap(child => [...(child.tagName === tag ? [child] : []), ...child.all(tag)]); }
 }
+
+test('association charts are grouped by topic while retaining their detail tables', () => {
+    const previous = globalThis.document;
+    const create = tag => Object.assign(new Element(tag), { clientWidth: 608 });
+    globalThis.document = { createElement: create, createElementNS: (_namespace, tag) => create(tag) };
+    try {
+        const container = new Element('section');
+        container.closest = selector => selector === '.association-workspace' ? {} : null;
+        renderReportAnalytics(result([distribution('project_status'), section('production', [production({ target: '2.00', actual: '1.00' })])]), container);
+        const groups = container.children.filter(child => child.className === 'report-chart-group');
+        assert.deepEqual(groups.map(group => group.id), ['report-chart-group-status', 'report-chart-group-production']);
+        assert.equal(container.all('figure').length, 2);
+        assert.equal(container.all('table').length, 2);
+    } finally { globalThis.document = previous; }
+});
 
 function render(input, width = 608) {
     const previous = globalThis.document;

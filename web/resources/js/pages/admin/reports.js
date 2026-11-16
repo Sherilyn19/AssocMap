@@ -54,6 +54,29 @@ export function initReports() {
     const form = root.querySelector('[data-report-form]');
     const preview = root.querySelector('[data-report-result]');
     const status = root.querySelector('[data-report-status]');
+    const associationReport = Boolean(root.closest?.('.association-workspace'));
+    let guideFrame = null;
+    function updateReportGuide() {
+        guideFrame = null;
+        const links = [...preview.querySelectorAll('.report-section-nav a[href^="#report-"]')];
+        let active = null;
+        for (const link of links) {
+            const target = preview.querySelector(link.hash);
+            if (target && target.getBoundingClientRect().top <= 150) active = link;
+        }
+        if (!active) active = links[0];
+        links.forEach(link => {
+            if (link === active) link.setAttribute('aria-current', 'location');
+            else link.removeAttribute('aria-current');
+        });
+    }
+    function scheduleReportGuide() {
+        if (associationReport && guideFrame === null) guideFrame = window.requestAnimationFrame(updateReportGuide);
+    }
+    if (associationReport) {
+        window.addEventListener('scroll', scheduleReportGuide, { passive: true });
+        window.addEventListener('resize', scheduleReportGuide, { passive: true });
+    }
     const exportForm = root.querySelector('[data-report-export]');
     initReportDownloads(exportForm);
     const initial = JSON.parse(root.querySelector('[data-report-initial]').textContent);
@@ -254,10 +277,12 @@ export function initReports() {
     function render(result) {
         const navigation = element('nav', undefined, 'report-section-nav');
         navigation.setAttribute('aria-label', 'Report sections');
-        for (const [label, target] of [['Overview', 'report-summary'], ['Charts', 'report-analytics'], ['Detailed records →', 'report-details']]) {
+        for (const [label, target] of [['Scope', 'report-scope'], ['Overview', 'report-summary'], ['Charts', 'report-analytics'], ['Interpretation', 'report-quality'], ['Detailed records →', 'report-details']]) {
             const link = element('a', label); link.href = `#${target}`; navigation.append(link);
         }
-        preview.replaceChildren(navigation, element('h2', result.title));
+        const content = element('div', undefined, 'report-result-content');
+        content.append(element('h2', result.title));
+        preview.replaceChildren(navigation, content);
         const scope = element('section', undefined, 'report-context-card');
         scope.id = 'report-scope';
         const applied = result.meta.filters;
@@ -277,8 +302,8 @@ export function initReports() {
             return `${key.replaceAll('_', ' ')}: ${label || value}`;
         }).join(' · ');
         scopeDetails.append(element('p', context, 'field-help')); scope.append(scopeDetails);
-        preview.append(scope);
-        if (result.empty) preview.append(element('p', 'No recorded results match the selected report and filters.', 'notice'));
+        content.append(scope);
+        if (result.empty) content.append(element('p', 'No recorded results match the selected report and filters.', 'notice'));
         const summary = element('section', undefined, 'report-summary');
         summary.id = 'report-summary'; summary.tabIndex = -1;
         summary.setAttribute('aria-labelledby', 'report-summary-title');
@@ -292,7 +317,16 @@ export function initReports() {
             const measure = result.sections.find(section => section.key === key)?.measures.find(measure => measure.label === label);
             if (!measure) continue;
             const card = element('div'), definition = element('dd'), value = element('span', measureValue(measure.value));
-            definition.append(value); card.append(element('dt', measure.label), definition); primary.append(card);
+            const labelNode = element('dt', measure.label);
+            if (root.closest?.('.association-workspace')) {
+                const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                icon.setAttribute('viewBox', '0 0 24 24'); icon.setAttribute('fill', 'none'); icon.setAttribute('stroke', 'currentColor'); icon.setAttribute('stroke-width', '1.5'); icon.setAttribute('aria-hidden', 'true'); icon.classList.add('icon');
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('stroke-linecap', 'round'); path.setAttribute('stroke-linejoin', 'round');
+                path.setAttribute('d', key === 'members' ? 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8-7a4 4 0 0 1 0 8m4 9v-2a4 4 0 0 0-3-3.87' : key === 'projects' ? 'M4 7h16v13H4zM9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2' : key === 'trainings' ? 'M3 9l9-5 9 5-9 5-9-5Zm3 2v5c3 3 9 3 12 0v-5' : 'M4 20h16M6 17v-6m6 6V5m6 12V9');
+                icon.append(path); labelNode.append(icon);
+            }
+            definition.append(value); card.append(labelNode, definition); primary.append(card);
         }
         summary.append(primary);
         const allMeasures = element('details', undefined, 'report-all-measures');
@@ -309,19 +343,20 @@ export function initReports() {
             allMeasures.append(measures);
         }
         summary.append(allMeasures);
-        preview.append(summary);
+        content.append(summary);
         const analytics = element('section', undefined, 'report-analytics');
         analytics.id = 'report-analytics'; analytics.tabIndex = -1;
         analytics.setAttribute('aria-labelledby', 'report-analytics-title');
         analytics.setAttribute('aria-busy', 'true');
         const analyticsTitle = element('h3', 'Visual analytics'); analyticsTitle.id = 'report-analytics-title';
         analytics.append(analyticsTitle, element('p', 'Loading charts. Summary indicators and detailed data remain available.', 'field-help'));
-        preview.append(analytics);
+        content.append(analytics);
         // Load presentation code only on report pages; never request a dataset per chart.
         import('../../components/report-analytics.js').then(({ renderReportAnalytics }) => {
             if (!preview.contains(analytics)) return;
             currentAnalytics = { result, node: analytics, render: renderReportAnalytics };
             renderReportAnalytics(result, analytics);
+            scheduleReportGuide();
         }).catch(() => {
             if (!preview.contains(analytics)) return;
             analytics.removeAttribute('aria-busy');
@@ -329,6 +364,7 @@ export function initReports() {
             analytics.replaceChildren(title, element('p', 'Charts are unavailable. Summary indicators and detailed data tables remain available.', 'report-empty'));
         });
         const quality = element('details', undefined, 'report-quality');
+        quality.id = 'report-quality'; quality.tabIndex = -1;
         quality.append(element('summary', 'Data interpretation and quality'));
         const notes = element('ul');
         for (const note of result.notes) notes.append(element('li', note));
@@ -339,7 +375,7 @@ export function initReports() {
             for (const note of section.notes) sectionNotes.append(element('li', note));
             quality.append(sectionNotes);
         }
-        preview.append(quality);
+        content.append(quality);
         const detailed = element('details', undefined, 'report-detailed-data');
         detailed.id = 'report-details'; detailed.tabIndex = -1;
         const detailedHeading = element('summary', 'Detailed records ');
@@ -353,7 +389,8 @@ export function initReports() {
             table(section, container);
             detailed.append(container);
         });
-        preview.append(detailed);
+        content.append(detailed);
+        scheduleReportGuide();
         const hidden = exportForm?.querySelector('[data-export-filters]');
         if (hidden) {
             hidden.replaceChildren();
@@ -403,7 +440,7 @@ export function initReports() {
             const result = await json(`${root.dataset.dataUrl}?${query}`, current.signal);
             if (current !== request || started !== revision || current.signal.aborted) return;
             render(result);
-            showStatus(result.empty ? 'Report loaded. No matching observations.' : 'Report loaded from authorized records.');
+            showStatus(result.empty ? 'Report loaded. No matching observations.' : (root.closest?.('.association-workspace') ? '' : 'Report loaded from authorized records.'));
             void showFeedback({ type: 'success', title: 'Report Loaded', message: result.empty
                 ? 'The report was loaded. No recorded observations match these filters.' : 'The report was loaded from your authorized records.',
                 returnFocus: form.querySelector('[data-report-submit]') });

@@ -21,9 +21,9 @@
     }
 @endphp
 <div class="reports-layout" data-report-workspace data-data-url="{{ route($prefix.'.data') }}" data-options-url="{{ route($prefix.'.options') }}">
-    @component('partials.page-header', ['headingCard' => true, 'headingClass' => 'report-page-header', 'title' => 'Reports & Analytics', 'description' => 'Explore associations, activities, and program progress.', 'eyebrow' => 'Program insights'])
+    @component('partials.page-header', ['headingCard' => true, 'headingClass' => 'report-page-header', 'title' => 'Reports & Analytics', 'description' => $role === 'association_account' ? 'Explore your association’s records, activities, and program progress.' : 'Explore associations, activities, and program progress.', 'eyebrow' => 'Program insights'])
         @slot('headerContext')
-            @if($role !== 'system_admin')<span class="report-access-label"><x-icon name="shield" />{{ $role === 'field_officer' ? 'Current assigned associations' : 'Your association · View only' }}</span>@endif
+            @if($role === 'field_officer')<span class="report-access-label"><x-icon name="shield" />Current assigned associations</span>@endif
         @endslot
         @slot('actions')
         <div class="report-toolbar" role="group" aria-label="Report actions">
@@ -89,10 +89,11 @@
     <div class="report-preview">
         <section class="card report-document">
             <p data-report-status role="{{ isset($sizeLimitMessage) ? 'alert' : 'status' }}" aria-live="polite"
-                @class(['notice-error' => $unavailable || isset($sizeLimitMessage)])>{{ $sizeLimitMessage ?? ($unavailable ? 'Reporting is temporarily unavailable. Please try again later.' : 'Report loaded from authorized records.') }}</p>
+                @class(['notice-error' => $unavailable || isset($sizeLimitMessage)])>{{ $sizeLimitMessage ?? ($unavailable ? 'Reporting is temporarily unavailable. Please try again later.' : ($role === 'association_account' ? '' : 'Report loaded from authorized records.')) }}</p>
             <div data-report-result>
                 @if($result)
-                    <nav class="report-section-nav" aria-label="Report sections"><a href="#report-summary">Overview</a><a href="#report-analytics">Charts</a><a href="#report-details">Detailed records <x-icon name="arrow" /></a></nav>
+                    <nav class="report-section-nav" aria-label="Report sections"><a href="#report-scope">Scope</a><a href="#report-summary">Overview</a><a href="#report-analytics">Charts</a><a href="#report-quality">Interpretation</a><a href="#report-details">Detailed records <x-icon name="arrow" /></a></nav>
+                    <div class="report-result-content">
                     <h2>{{ $result['title'] }}</h2>
                     <section class="report-context-card" id="report-scope" aria-labelledby="report-scope-title">
                         <h3 id="report-scope-title">Reporting scope and period</h3>
@@ -108,7 +109,7 @@
                     @if($result['empty'])<p class="notice">No recorded results match the selected report and filters.</p>@endif
                     <section class="report-summary" id="report-summary" tabindex="-1" aria-labelledby="report-summary-title">
                         <div class="report-section-heading"><div><h3 id="report-summary-title">At a glance</h3><p>Recorded indicators within the applied scope. Unobserved values are not zero.</p></div></div>
-                        <dl class="report-measures report-primary-measures" data-report-kpis>@foreach($primaryMeasures as $measure)<div><dt>{{ $measure['label'] }}</dt><dd>{{ $measureValue($measure['value']) }}</dd></div>@endforeach</dl>
+                        <dl class="report-measures report-primary-measures" data-report-kpis>@foreach($primaryMeasures as $measure)<div><dt>{{ $measure['label'] }}@if($role === 'association_account')<x-icon :name="match (true) { str_contains(strtolower($measure['label']), 'member') => 'users', str_contains(strtolower($measure['label']), 'project') => 'briefcase', str_contains(strtolower($measure['label']), 'training') => 'graduation', default => 'chart' }" />@endif</dt><dd>{{ $measureValue($measure['value']) }}</dd></div>@endforeach</dl>
                         <details class="report-all-measures"><summary>All report measures</summary>
                         <p class="field-help">Recorded values within the applied scope. Unobserved values are not zero.</p>
                         @foreach($result['sections'] as $section)
@@ -124,7 +125,7 @@
                         <p class="field-help">Enable JavaScript for charts. All measures and detailed tables remain available. Chart images are HTML-only.</p>
                         @include('admin.reports.partials.geography', ['geography' => collect($result['sections'])->firstWhere('key', 'association_geography')])
                     </section>
-                    <details class="report-quality"><summary>Data interpretation and quality</summary>
+                    <details class="report-quality" id="report-quality" tabindex="-1"><summary>Data interpretation and quality</summary>
                         <ul>@foreach($result['notes'] as $note)<li>{{ $note }}</li>@endforeach</ul>
                         @foreach($result['sections'] as $section)
                             @if($section['notes'])<h4>{{ $section['title'] }}</h4><ul>@foreach($section['notes'] as $note)<li>{{ $note }}</li>@endforeach</ul>@endif
@@ -142,6 +143,7 @@
                         </section>
                     @endforeach
                     </details>
+                    </div>
                 @endif
             </div>
         </section>

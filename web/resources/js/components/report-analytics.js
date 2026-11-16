@@ -187,7 +187,7 @@ function horizontalBars(chart, container, width, ticks) {
                 plot.append(svg('path', { d: `M ${x} ${y} v 12`, stroke: '#dfe7ee', fill: 'none' }));
             }
             if (numeric(value)) {
-                const bar = svg('rect', { x: left, y, width: Number(value) / top * (right - left), height: 12, fill: palette[series], rx: 3 });
+                const bar = svg('rect', { class: 'report-chart-bar', x: left, y, width: Number(value) / top * (right - left), height: 12, fill: palette[series], rx: 3 });
                 const tooltip = svg('title', {}); tooltip.textContent = `${label} · ${chart.series[series]}: ${formatReportValue(value, chart.unit)}`;
                 bar.append(tooltip); plot.append(bar);
                 if (Number(value) === 0) plot.append(svg('circle', { cx: left + 2, cy: y + 6, r: 3, fill: palette[series] }));
@@ -229,7 +229,7 @@ function barPlot(chart, container) {
             const size = numeric(value) ? Number(value) / top : 0;
             const y = bottom - size * (bottom - 32);
             if (value !== null) {
-                const rect = svg('rect', { x, y, width: Math.max(1, barWidth - 3), height: size * (bottom - 32), fill: palette[series], rx: 4 });
+                const rect = svg('rect', { class: 'report-chart-bar', x, y, width: Math.max(1, barWidth - 3), height: size * (bottom - 32), fill: palette[series], rx: 4 });
                 const tooltip = svg('title', {}); tooltip.textContent = `${label} · ${chart.series[series]}: ${formatReportValue(value, chart.unit)}`; rect.append(tooltip); plot.append(rect);
                 if (Number(value) === 0) plot.append(svg('circle', { cx: x + barWidth / 2, cy: bottom, r: 3, fill: palette[series] }));
             }
@@ -374,16 +374,42 @@ export function renderReportAnalytics(result, container) {
     heading.append(copy); container.replaceChildren(heading);
     const charts = buildReportCharts(result);
     if (!charts.length) container.append(node('p', 'No suitable recorded chart data for this selection. Review the summary indicators and detailed tables below.', 'report-empty'));
+    const associationView = Boolean(container.closest?.('.association-workspace'));
     const grid = node('div', undefined, 'report-chart-grid');
     const priority = result.meta.filters.report_type === 'comprehensive' ? ['association_geography', 'project_status', 'income_periods', 'production'] : ['monthly_production'];
     charts.sort((a, b) => (priority.includes(a.key) ? priority.indexOf(a.key) : 100) - (priority.includes(b.key) ? priority.indexOf(b.key) : 100));
+    const groups = [
+        ['geography', 'Geographic distribution', ['association_geography', 'association_municipality', 'association_barangay']],
+        ['status', 'Statuses and demographics', ['association_status', 'members', 'classifications', 'project_status', 'project_component']],
+        ['production', 'Production performance', ['production', 'monthly_production', 'production_coverage']],
+        ['income', 'Financial overview', ['income_periods']],
+        ['training', 'Training and attendance', ['training_component', 'trainings']],
+        ['activities', 'Program activities', ['activity_component']],
+        ['monitoring', 'Monitoring records', ['monitoring_status']],
+        ['other', 'Other recorded indicators', []],
+    ];
+    const nav = associationView ? container.closest?.('[data-report-result]')?.querySelector('.report-section-nav') : null;
+    nav?.querySelectorAll('.report-group-link').forEach(link => link.remove());
+    const groupGrids = new Map();
+    if (associationView) {
+        for (const [key, label, keys] of groups) {
+            const contains = charts.some(chart => keys.includes(chart.key) || (key === 'other' && !groups.some(group => group[2].includes(chart.key))));
+            if (!contains) continue;
+            const section = node('section', undefined, 'report-chart-group'); section.id = `report-chart-group-${key}`; section.tabIndex = -1;
+            const heading = node('h4', label); const icon = svg('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5, 'aria-hidden': 'true', class: 'report-group-icon' });
+            icon.append(svg('path', { d: key === 'geography' ? 'M12 21s7-5 7-12a7 7 0 1 0-14 0c0 7 7 12 7 12Zm0-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z' : key === 'training' ? 'M3 9l9-5 9 5-9 5-9-5Zm3 2v5c3 3 9 3 12 0v-5' : 'M4 20h16M6 17v-6m6 6V5m6 12V9', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+            heading.prepend(icon); const sectionGrid = node('div', undefined, 'report-chart-grid'); section.append(heading, sectionGrid); container.append(section); groupGrids.set(key, sectionGrid);
+            if (nav) { const link = node('a', label, 'report-group-link'); link.href = `#${section.id}`; nav.insertBefore(link, nav.querySelector('[href="#report-quality"]')); }
+        }
+    }
     const figures = charts.map(chart => {
         const figure = node('figure', undefined, 'report-chart-card');
         figure.dataset.chartKind = chart.kind;
-        grid.append(figure);
+        const group = groups.find(item => item[2].includes(chart.key))?.[0] || 'other';
+        (associationView ? groupGrids.get(group) : grid).append(figure);
         return figure;
     });
-    container.append(grid);
+    if (!associationView) container.append(grid);
     charts.forEach((chart, index) => {
         const figure = figures[index];
         const title = node('figcaption', chart.title);
@@ -405,6 +431,18 @@ export function renderReportAnalytics(result, container) {
         figure.dataset.ranking = String(Boolean(chart.ranking));
         if (chart.orientation) figure.dataset.orientation = chart.orientation;
     });
+    if (associationView && typeof IntersectionObserver === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        container._reportAnimationObserver?.disconnect();
+        const seen = container._reportAnimatedCharts ||= new Set();
+        const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const key = entry.target.dataset.animationKey;
+            if (!seen.has(key)) { seen.add(key); entry.target.classList.add('report-chart-animate'); }
+            observer.unobserve(entry.target);
+        }), { threshold: 0.15 });
+        container._reportAnimationObserver = observer;
+        figures.forEach((figure, index) => { figure.dataset.animationKey = `${charts[index].key}:${charts[index].title}`; observer.observe(figure); });
+    }
     renderReportGeography(result, container);
     if (result.sections.some(section => section.key === 'monthly_production') && !charts.some(chart => chart.kind === 'line')) {
         container.append(node('p', 'Monthly trend unavailable for this selection. Choose Production Performance and select one project and product, one consistent unit and at least two recorded months. Missing or ambiguous series remain in detailed tables.', 'report-chart-guidance'));
