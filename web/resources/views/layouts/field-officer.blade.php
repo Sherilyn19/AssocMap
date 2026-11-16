@@ -40,7 +40,7 @@
     <button type="button" class="sidebar-backdrop" data-fo-close hidden aria-label="Close navigation"></button>
     <div class="main-shell">
         <x-workspace-header
-            workspace=""
+            workspace="Field Officer workspace"
             :context="request()->routeIs('field-officer.association-officers.*') ? 'Association Officers' : $workspaceHeading"
             :display-name="$currentUser->display_name ?? 'Field Officer'"
             account-label=""
