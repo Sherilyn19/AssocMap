@@ -14,7 +14,7 @@
     <title>{{ $workspaceHeading }} · AssocMap</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body>
+<body class="association-workspace">
     <a class="skip-link" href="#main-content">Skip to content</a>
     <x-workspace-sidebar :dashboard-url="route('association.dashboard')" workspace="ASSOCIATION WORKSPACE" id="association-sidebar" aria-label="Association Account navigation">
         <x-workspace-nav-section id="association-overview" label="OVERVIEW">
@@ -37,10 +37,11 @@
     <button type="button" class="sidebar-backdrop" data-aa-close hidden aria-label="Close navigation"></button>
     <div class="main-shell">
         <x-workspace-header
-            workspace="Association Account workspace"
+            workspace="Association workspace"
             :context="$workspaceHeading"
             :display-name="$currentUser->display_name ?? 'Association Account'"
-            account-label="Association Account workspace"
+            account-label=""
+            :scroll-context="true"
         >
             <x-slot:navigationToggle>
                 <button type="button" class="icon-button mobile-menu" data-aa-open aria-label="Open navigation" aria-controls="association-sidebar" aria-expanded="false"><x-icon name="menu" /></button>
@@ -49,7 +50,7 @@
         <main id="main-content" tabindex="-1">
             @yield('content')
         </main>
-        <footer class="app-footer"><span>AssocMap · GIS-Based Program Monitoring Information System</span></footer>
+        <footer class="app-footer app-footer-dashboard"><span>AssocMap · Association workspace</span></footer>
     </div>
     @stack('dialogs')
     <x-global-feedback :notification="$globalFeedbackNotification ?? null" />

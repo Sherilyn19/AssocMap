@@ -105,7 +105,7 @@ final class WorkflowNavigation
             if ($members) {
                 unset($rules['year']);
             }
-            if (! $own || $projects) {
+            if (! $own || $projects || str_contains($name, '.trainings.')) {
                 $rules['status'] = ['nullable', Rule::in($statuses)];
             }
             if (! $own) {

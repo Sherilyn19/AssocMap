@@ -422,3 +422,9 @@ html.gis-details-drawer-open { overflow: hidden; }
 @media (prefers-reduced-motion: no-preference) {
     .field-officer-polish [data-gis-manager="true"] .button:not(:disabled):hover { box-shadow: 0 8px 18px -12px #17304d26; }
 }
+.association-workspace .gis-module :is(.gis-heading, .gis-search-panel, .gis-map-panel, .gis-register-panel, .gis-location-panel) { border-color: #dbe6ee; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+.association-workspace .gis-module .gis-heading { border-top: 3px solid var(--primary); }
+@media (prefers-reduced-motion: no-preference) {
+    .association-workspace .gis-module :is(.gis-heading, .gis-search-panel) { animation: gis-public-enter 340ms ease-out both; }
+    .association-workspace .gis-module :is(.button, .gis-filters summary, .gis-map-legend > summary, .gis-map-guide summary) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease; }
+}

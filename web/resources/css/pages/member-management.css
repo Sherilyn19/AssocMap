@@ -56,6 +56,11 @@
 .admin-workspace .member-management[data-workspace-title="Member Management"] .member-register-pagination nav .member-page-disabled { color: #94a3b8; background: #f8fafc; }
 .member-management .member-association-context { padding: 20px 22px; }
 .member-management .member-association-context summary { display: flex; justify-content: space-between; gap: 15px; cursor: pointer; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.member-management .member-association-context .member-association-summary { display: flex; align-items: center; gap: 10px; min-width: 0; line-height: 1.5; }
+.member-management .member-association-context .member-association-summary > .icon { width: 18px; height: 18px; flex: none; color: #6986a1; }
+.member-management .member-association-context .member-association-label { color: var(--text-secondary); font-weight: 500; }
+.member-management .member-association-context .member-association-summary strong { color: #193650; font-weight: 650; }
+.member-management .member-association-context summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: 3px; }
 .member-management .member-association-context[open] summary { margin-bottom: 22px; }
 .member-management :is(a, button, input, select, summary, [tabindex]):focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
 .modal:has(.member-record-dialog) { width: min(800px, calc(100% - 30px)); }
@@ -91,10 +96,46 @@
 .member-record-dialog .form-section h3 { font-size: 13px; margin-bottom: 10px; }
 .member-record-dialog .form-section textarea { min-height: 220px; }
 .member-record-dialog .form-section img { border-radius: 9px; border: 1px solid var(--border-color); }
+.modal:has(.application-details-dialog) { width: min(650px, calc(100% - 30px)); border-radius: 14px; }
+.modal:has(.application-details-dialog) .modal-heading h2 { text-transform: uppercase; font-weight: 700; }
+.application-details-dialog .member-detail-banner { margin-bottom: 18px; background: #f8fbfe; border-color: #dce7f1; }
+.application-details-dialog .application-details-section { padding: 18px; border: 1px solid #dce7f1; border-radius: 9px; background: #fff; }
+.application-details-dialog .application-details-section > h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid #edf1f5; color: #526679; }
+.application-details-dialog .application-details-section > h3 .icon { width: 17px; height: 17px; color: #6986a1; }
+.application-details-dialog .detail-grid dt { font-weight: 700; text-transform: uppercase; }
+.application-details-dialog .detail-grid dd { color: #263f58; }
+.application-details-dialog .form-section { margin-top: 18px; padding: 18px; border: 1px solid #dce7f1; border-radius: 9px; background: #f8fbfe; }
+@media (prefers-reduced-motion: no-preference) { .modal:has(.application-details-dialog)[open] { animation: association-arrive 250ms ease-out both; } }
 .member-record-dialog .member-application-fields { border: 0; padding: 0; margin: 22px 0 0; min-width: 0; }
 .member-record-dialog .member-application-fields > legend { font-size: 15px; font-weight: 650; margin-bottom: 12px; }
 .member-record-dialog .member-form-help { color: var(--text-secondary); }
 .member-record-dialog .member-form-subheading { font-size: 15px; padding-top: 20px; margin: 0 0 18px; border-top: 1px solid var(--border-color); }
+#submit-member-application { width: min(650px, calc(100% - 30px)); border-radius: 14px; }
+#submit-member-application .modal-heading { gap: 12px; margin-bottom: 22px; }
+#submit-member-application .modal-heading h2 { flex: 1; }
+#submit-member-application .area-modal-icon { display: grid; place-items: center; width: 38px; height: 38px; flex: none; border-radius: 9px; background: #e8f2fb; color: #135c91; }
+#submit-member-application .area-modal-icon .icon { width: 19px; height: 19px; }
+#submit-member-application .member-application-context { display: flex; align-items: flex-start; gap: 10px; padding: 14px; border: 1px solid #dce7f1; border-radius: 9px; background: #f8fbfe; }
+#submit-member-application .member-application-context .icon { width: 18px; height: 18px; flex: none; color: #386a96; }
+#submit-member-application .form-grid { gap: 16px; }
+#submit-member-application :is(input:not([type="checkbox"]):not([type="file"]), select, textarea) { min-height: 44px; border: 1px solid #dce7f1; border-radius: 8px; background-color: #f2f7fc; color: #263f58; }
+#submit-member-application :is(.member-form-subheading, legend) .icon { width: 16px; height: 16px; color: #6986a1; vertical-align: middle; margin-right: 6px; }
+#submit-member-application .member-photo-field input[type="file"] { display: block; width: 100%; padding: 12px; border: 1px dashed #bfd1e1; border-radius: 9px; background: #f8fbfe; color: #334b63; }
+#submit-member-application .member-photo-field input[type="file"]::file-selector-button { margin-right: 12px; padding: 9px 14px; border: 1px solid #bfd1e1; border-radius: 7px; background: #fff; color: var(--primary); font: inherit; font-weight: 600; cursor: pointer; }
+#submit-member-application .member-photo-field input[type="file"]:hover { border-color: var(--primary); }
+#submit-member-application .member-photo-field .field-help { display: block; margin-top: 8px; line-height: 1.5; }
+#submit-member-application .member-classification-field { padding-top: 6px; }
+#submit-member-application .member-classification-field .checkbox-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 8px; margin-top: 12px; }
+#submit-member-application .member-classification-field .checkbox-options label { min-height: 44px; padding: 10px 12px; border: 1px solid #dce7f1; border-radius: 8px; background: #f8fbfe; cursor: pointer; }
+#submit-member-application .member-classification-field .checkbox-options label:hover, #submit-member-application .member-classification-field .checkbox-options label:focus-within { border-color: #8bafd3; background: #edf4fb; }
+#submit-member-application .member-classification-field .checkbox-options label:has(input:checked) { border-color: var(--primary); background: #edf4fb; }
+#submit-member-application .member-classification-field input[type="checkbox"] { accent-color: var(--primary); flex: none; }
+#submit-member-application :is(button, input, select, textarea):focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+    #submit-member-application[open] { animation: association-arrive 250ms ease-out both; }
+    #submit-member-application :is(button, input, select, textarea) { transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
+    #submit-member-application .member-classification-field .checkbox-options label { transition: background-color 180ms ease, border-color 180ms ease; }
+}
 .member-record-dialog .field-help { line-height: 1.7; }
 .member-record-dialog .modal-actions { flex-wrap: wrap; }
 @media (max-width: 760px) {
@@ -118,28 +159,28 @@
 
 /* Field officer presentation */
 
-.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) :is(.member-heading h1, .member-section-heading h2, .member-register-table thead th) { text-transform: uppercase; }
-.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-summary a[aria-current="page"] { --summary-counter-surface: #1d628e; }
-.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-summary a[aria-current="page"] .stat-card { background: #1d628e; border-color: #1d628e; }
-.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-summary a:not([aria-current="page"]):hover { --summary-counter-surface: #f3f7fd; }
-.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register { overflow: visible; }
-.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-table thead th { padding: 14px 22px; background: #f8fafc; color: #475569; font-weight: 700; }
-.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-table tbody th { background: transparent; border-bottom: 1px solid #eef2f6; }
-.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-table tbody tr:hover { background: #f4f8fc; }
-.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination { justify-content: space-between; margin: 16px 22px 22px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #475569; }
-.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination nav { gap: 4px; }
-.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination nav > * { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; padding: 6px 9px; border: 1px solid #dbe4ef; border-radius: 6px; background: #fff; color: #334155; font-weight: 600; }
-.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination nav a:hover { border-color: #9bbad8; background: #edf4fb; color: var(--primary); }
-.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination nav .member-page-disabled { color: #94a3b8; background: #f8fafc; }
+:is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) :is(.member-heading h1, .member-section-heading h2, .member-register-table thead th) { text-transform: uppercase; }
+:is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-summary a[aria-current="page"] { --summary-counter-surface: #1d628e; }
+:is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-summary a[aria-current="page"] .stat-card { background: #1d628e; border-color: #1d628e; }
+:is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-summary a:not([aria-current="page"]):hover { --summary-counter-surface: #f3f7fd; }
+:is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register { overflow: visible; }
+:is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-table thead th { padding: 14px 22px; background: #f8fafc; color: #475569; font-weight: 700; }
+:is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-table tbody th { background: transparent; border-bottom: 1px solid #eef2f6; }
+:is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-table tbody tr:hover { background: #f4f8fc; }
+:is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination { justify-content: space-between; margin: 16px 22px 22px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #475569; }
+:is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination nav { gap: 4px; }
+:is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination nav > * { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; padding: 6px 9px; border: 1px solid #dbe4ef; border-radius: 6px; background: #fff; color: #334155; font-weight: 600; }
+:is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination nav a:hover { border-color: #9bbad8; background: #edf4fb; color: var(--primary); }
+:is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination nav .member-page-disabled { color: #94a3b8; background: #f8fafc; }
 @media (max-width: 760px) {
-    .field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination { margin-inline: 18px; }
+    :is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination { margin-inline: 18px; }
 }
 @media (prefers-reduced-motion: no-preference) {
-    .field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-heading { animation: member-arrive 400ms ease-out both; }
+    :is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-heading { animation: member-arrive 400ms ease-out both; }
 }
 @media (prefers-reduced-motion: no-preference) {
-    .field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) :is(.member-summary .stat-card, .member-register-table tbody tr, .member-register-pagination nav a, .area-info button) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease; }
+    :is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) :is(.member-summary .stat-card, .member-register-table tbody tr, .member-register-pagination nav a, .area-info button) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease; }
 }
 @media (prefers-reduced-motion: no-preference) {
-    .field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-summary a:hover .stat-card { box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }
+    :is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-summary a:hover .stat-card { box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }
 }

@@ -78,19 +78,26 @@ class ProgramController extends Controller
             $association = $this->association($request);
             $filters = $request->filters();
             $query = $this->records($training ? Training::class : ProgramActivityRecord::class, $association->id);
+            $years = (clone $query)->whereNotNull('program_year')->distinct()->orderByDesc('program_year')->pluck('program_year');
             if ($filters['search'] !== '') {
                 $pattern = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower($filters['search'])).'%';
                 $query->whereRaw("LOWER(title) LIKE ? ESCAPE '!'", [$pattern]);
             }
             if ($filters['year'] !== '') $query->where('program_year', $filters['year']);
+            if ($training && $filters['status'] === 'archived') $query->whereNotNull('archived_at');
+            elseif ($training && $filters['status'] !== '') $query->where('status', $filters['status'])->whereNull('archived_at');
             $dates = $training ? ['start_date', 'end_date'] : ['activity_date'];
-            $records = $query->select(array_merge(['id', 'association_id', 'related_project_id', 'title',
-                'program_year', 'venue', 'status', 'archived_at'], $dates))
-                ->orderByDesc('program_year')->orderByDesc($dates[0])->orderBy('title')->orderBy('id')
-                ->paginate(25)->appends($filters);
+            $query->select(array_merge(['id', 'association_id', 'related_project_id', 'title',
+                'program_year', 'venue', 'status', 'archived_at'], $dates));
+            if ($training) {
+                $query->orderByRaw('CASE WHEN start_date IS NULL THEN 1 ELSE 0 END')->orderByDesc('start_date');
+            } else {
+                $query->orderByDesc('program_year')->orderByDesc($dates[0]);
+            }
+            $records = $query->orderBy('title')->orderBy('id')->paginate(25)->appends($filters);
             $this->scope->recheck($request, [], [$association->id]);
 
-            return ApiRequestGuard::secure(response()->view('association.'.$module.'.index', compact('association', 'filters', 'records')));
+            return ApiRequestGuard::secure(response()->view('association.'.$module.'.index', compact('association', 'filters', 'records', 'years')));
         } catch (QueryException $exception) {
             return $this->unavailable($module);
         }

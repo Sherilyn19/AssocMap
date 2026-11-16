@@ -28,12 +28,20 @@ class AssociationProgramRequest extends FormRequest
             $rules['search'] = ['nullable', 'string', 'max:120'];
             $rules['year'] = ['nullable', 'integer', 'between:2000,2100'];
         }
+        if ($this->routeIs('association.trainings.index')) {
+            $rules['status'] = ['nullable', 'in:scheduled,completed,cancelled,archived'];
+        }
 
         return $rules;
     }
 
     public function filters(): array
     {
-        return ['search' => $this->validated('search') ?? '', 'year' => $this->validated('year') ?? ''];
+        $filters = ['search' => $this->validated('search') ?? '', 'year' => $this->validated('year') ?? ''];
+        if ($this->routeIs('association.trainings.index')) {
+            $filters['status'] = $this->validated('status') ?? '';
+        }
+
+        return $filters;
     }
 }

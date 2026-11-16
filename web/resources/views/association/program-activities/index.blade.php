@@ -3,7 +3,7 @@
 
 @section('content')
 <section class="program-management" data-workspace-module="association-program-activities" data-workspace-title="Program Activities" data-association-program-activities>
-    <header class="card program-heading"><div><p class="eyebrow">Association Account</p><h1 tabindex="-1">Program Activities</h1><p>View saved Program Activities belonging to your association.</p></div></header>
+    <header class="card program-heading"><div><h1 tabindex="-1">Program Activities</h1><p>View saved Program Activities belonging to your association.</p></div></header>
     @if($unavailable ?? false)
         <section class="card program-information" role="alert"><h2>Program Activity information is temporarily unavailable</h2><p>Please try again later.</p><a class="button button-primary" href="{{ route('association.program-activities.index') }}">Retry Program Activities</a></section>
     @else
@@ -13,7 +13,7 @@
             <form method="GET" action="{{ route('association.program-activities.index') }}" class="program-filter-panel" aria-label="Filter association Program Activities">
                 <div class="program-filter-grid">
                     <div class="field"><label for="activity-search">Activity title</label><input id="activity-search" name="search" type="search" value="{{ $filters['search'] }}" maxlength="120" placeholder="Search activity titles"></div>
-                    <div class="field"><label for="activity-year">Program year</label><input id="activity-year" name="year" type="number" value="{{ $filters['year'] }}" min="2000" max="2100" step="1" placeholder="All years"></div>
+                    <div class="field"><label for="activity-year">Program year</label><select id="activity-year" name="year"><option value="">All years</option>@foreach($years as $year)<option value="{{ $year }}" @selected((string) $filters['year'] === (string) $year)>{{ $year }}</option>@endforeach</select></div>
                 </div>
                 <div class="program-filter-actions"><button type="submit" class="button button-primary">Apply filters</button><a class="button" href="{{ route('association.program-activities.index') }}">Reset filters</a></div>
             </form>
