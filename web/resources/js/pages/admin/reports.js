@@ -25,11 +25,7 @@ function initReportControls(root, form, readFilters, defaultYear) {
 
     toggle.hidden = false;
     setOpen(true);
-    toggle.addEventListener('click', () => {
-        const opening = panel.hidden;
-        setOpen(opening);
-        if (opening) panel.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
-    });
+    toggle.addEventListener('click', () => setOpen(panel.hidden));
     panel.addEventListener('keydown', event => {
         if (event.key === 'Escape') { event.preventDefault(); setOpen(false, true); }
     });
@@ -47,7 +43,7 @@ function initReportControls(root, form, readFilters, defaultYear) {
             && !(key === 'year' && Number(value) === defaultYear)).length;
         count.textContent = String(active);
         count.hidden = active === 0;
-        toggle.setAttribute('aria-label', active ? `Filters, ${active} active` : 'Filters');
+        toggle.setAttribute('aria-label', active ? `Build your report, ${active} active filters` : 'Build your report');
         if (indicator) indicator.textContent = active ? `${active} active filter(s)` : '';
     };
 }

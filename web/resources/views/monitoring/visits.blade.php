@@ -1,6 +1,6 @@
 @extends($monitoringLayout)
 @section('content')
-<div class="monitoring-management" data-workspace-module="monitoring" data-workspace-title="Monitoring">
+<div @class(['monitoring-management', 'monitoring-record-view' => $monitoringPrefix === 'admin.monitoring']) data-workspace-module="monitoring" data-workspace-title="Monitoring">
     @include('monitoring.partials.context')
     <section class="card monitoring-register" aria-labelledby="visit-history-title">
         <div class="monitoring-section-heading"><div><h2 id="visit-history-title">Visit Reports</h2><p>Visit history for Q{{ $record->quarter?->quarter_number }} {{ $record->year }}, including retained historical reports.</p></div>

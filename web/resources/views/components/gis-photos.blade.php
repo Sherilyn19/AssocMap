@@ -1,8 +1,8 @@
 <section class="gis-photos" data-gis-photos hidden aria-label="Location photos">
-    <div class="gis-photos-heading"><div><h3>Photo gallery</h3><span data-photo-count @if($gisPublic ?? false) hidden @endif></span></div><button type="button" class="button" data-photo-refresh aria-label="Refresh location photos">Refresh</button></div>
+    <div class="gis-photos-heading"><div><div class="gis-photo-title"><h3>Photo gallery</h3>@if($gisAdministrator ?? false)<x-area-info label="About photo visibility">Photos are private until approved for an eligible published location. Evidence for finalized projects is read-only.</x-area-info>@endif</div><span data-photo-count @if($gisPublic ?? false) hidden @endif></span></div><button type="button" class="button" data-photo-refresh aria-label="Refresh location photos">Refresh</button></div>
     <p class="gis-photo-status" data-photo-status role="status" aria-live="polite"></p>
     @if($gisManager)
-        <p class="gis-photo-policy">Private by default. Approve each photo explicitly for a published, eligible location. Finalized project evidence is read-only.</p>
+        @unless($gisAdministrator ?? false)<p class="gis-photo-policy">Private by default. Approve each photo explicitly for a published, eligible location. Finalized project evidence is read-only.</p>@endunless
         <form data-photo-upload>
             <label for="gis-photo-file">JPEG or PNG, at most 5 MiB</label>
             <input id="gis-photo-file" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" required>

@@ -10,6 +10,7 @@ export async function initGis(root) {
     root.querySelectorAll('[data-gis-site-symbol]').forEach(symbol => { symbol.innerHTML = siteSymbol(symbol.dataset.gisSiteSymbol); });
     const base = root.dataset.gisBase.replace(/\/$/, '');
     const publicView = root.dataset.gisPublic === 'true';
+    const administratorView = root.dataset.gisAdministrator === 'true';
     const manager = root.dataset.gisManager === 'true';
     const gallery = root.dataset.gisPhotos === 'true' ? createGisPhotos(root.querySelector('[data-gis-photos]'), {
         base: manager ? base : '/map', manager, csrf: root.querySelector('[data-gis-csrf]')?.value || '',
@@ -110,13 +111,44 @@ export async function initGis(root) {
 
         const section = (title, className = '') => {
             const container = document.createElement('section'); container.className = `gis-detail-section ${className}`.trim();
-            const heading = document.createElement('h4'); heading.textContent = title;
+            const heading = document.createElement('h4');
+            if (administratorView) {
+                const paths = {
+                    'About this location': 'M11.25 11.25h.008v.008h-.008v-.008ZM12 10.5v5.25m9-3.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
+                    'Project & association': 'M3.75 21h16.5M4.5 21V7.5l7.5-4.5 7.5 4.5V21M9 21v-6h6v6',
+                    'Registered geography': 'M9 18.75 4.5 21V5.25L9 3m0 15.75L15 21m-6-2.25V3m6 18 4.5-2.25V3L15 5.25M15 21V5.25M9 3l6 2.25',
+                    'Map position': 'M12 21s6.75-5.192 6.75-11.25a6.75 6.75 0 1 0-13.5 0C5.25 15.808 12 21 12 21Zm0-8.25a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
+                    'Record status': 'M9 12.75 11.25 15 15 9.75M12 3 3.75 6v5.25c0 5.25 3.5 8.5 8.25 9.75 4.75-1.25 8.25-4.5 8.25-9.75V6L12 3Z',
+                };
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor');
+                svg.setAttribute('stroke-width', '1.5'); svg.setAttribute('aria-hidden', 'true'); svg.classList.add('gis-detail-icon');
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('stroke-linecap', 'round'); path.setAttribute('stroke-linejoin', 'round'); path.setAttribute('d', paths[title] || paths['About this location']);
+                svg.append(path); heading.append(svg);
+            }
+            heading.append(document.createTextNode(title));
             const list = document.createElement('dl'); container.append(heading, list); details.append(container);
             return list;
         };
         const note = (list, text) => {
             const paragraph = document.createElement('p'); paragraph.className = 'gis-detail-note'; paragraph.textContent = text;
             list.parentElement.append(paragraph);
+        };
+        const infoNote = (list, label, text) => {
+            const wrapper = document.createElement('span'); wrapper.className = 'area-info gis-detail-info';
+            const button = document.createElement('button'); button.type = 'button'; button.dataset.areaInfo = '';
+            button.setAttribute('aria-label', label); button.setAttribute('aria-expanded', 'false');
+            button.setAttribute('aria-controls', 'gis-geography-info');
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor');
+            svg.setAttribute('stroke-width', '1.5'); svg.setAttribute('aria-hidden', 'true');
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('stroke-linecap', 'round'); path.setAttribute('stroke-linejoin', 'round');
+            path.setAttribute('d', 'm11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.852l.041-.02M12 8.25h.008v.008H12V8.25ZM21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z');
+            svg.append(path); button.append(svg);
+            const bubble = document.createElement('span'); bubble.id = 'gis-geography-info'; bubble.className = 'area-info-popover'; bubble.textContent = text;
+            wrapper.append(button, bubble); list.parentElement.querySelector('h4').append(wrapper);
         };
         const location = section('About this location', 'gis-about-section');
         addDetail(location, publicView ? 'Public address' : 'Project site address', p.address || 'Address not supplied');
@@ -128,7 +160,8 @@ export async function initGis(root) {
             const geography = section('Registered geography');
             [['Municipality', p.municipality], ['Barangay', p.barangay], ['Specific area', p.area]]
                 .forEach(([label, value]) => addDetail(geography, label, value));
-            note(geography, "Association registration geography does not verify site containment. Site-address verification is not recorded; legacy area fallbacks may require review.");
+            if (administratorView) infoNote(geography, 'About registered geography', "Registered geography does not confirm the site's boundary. Site address verification is not recorded; older area records may need review.");
+            else note(geography, "Association registration geography does not verify site containment. Site-address verification is not recorded; legacy area fallbacks may require review.");
         }
         const position = section('Map position', 'gis-position-section');
         const representative = publicView && p.location_type === 'project_boundary';
@@ -141,7 +174,7 @@ export async function initGis(root) {
             [...position.querySelectorAll('dd')].forEach((value, index) => {
                 value.title = String(point.coordinates[index === 0 ? 1 : 0]);
             });
-            if (publicView) {
+            if (publicView || administratorView) {
                 position.parentElement.classList.add('gis-position-coordinates');
                 const system = document.createElement('p'); system.className = 'gis-coordinate-system';
                 const label = document.createElement('span'); label.textContent = 'Coordinate system';
