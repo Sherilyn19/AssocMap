@@ -3,16 +3,15 @@
     $workflow = app(\App\View\WorkflowNavigation::class);
     $parents = $activity->relatedProject ? [['name' => 'association.projects.show', 'parameters' => ['project' => $activity->relatedProject->id], 'label' => $activity->relatedProject->title]] : [];
     $workflowBack = $workflow->back(request(), 'association.program-activities.index', [], $parents);
-    $breadcrumbs = [['label' => $association->name]];
-    foreach ($parents as $parent) $breadcrumbs[] = ['label' => $parent['label'], 'url' => $workflow->parent(request(), $parent['name'], $parent['parameters'])];
+    $breadcrumbs = [['label' => $workflowBack['label'], 'url' => $workflowBack['url']]];
 @endphp
 
 @section('content')
-<section class="program-management" data-workspace-module="association-program-activities" data-workspace-title="Program Activity Details" data-association-program-activities>
+<section class="program-management association-record-detail" data-workspace-module="association-program-activities" data-workspace-title="Program Activity Details" data-association-program-activities>
+    <header class="card program-heading"><div><p class="eyebrow">{{ $association->name }}</p><h1 tabindex="-1">Program Activity Details</h1><p class="training-detail-title"><x-icon name="calendar" /> <span>{{ $activity->title }}</span></p></div></header>
     <x-workflow-navigation :back="$workflowBack" :parents="$breadcrumbs" :current="$activity->title" />
-    <header class="card program-heading"><div><p class="eyebrow">{{ $association->name }}</p><h1 tabindex="-1">Program Activity Details</h1><p>{{ $activity->title }}</p></div></header>
     <section class="card program-information" aria-labelledby="activity-information-title">
-        <h2 id="activity-information-title">Program Activity information</h2>
+        <h2 id="activity-information-title"><x-icon name="calendar" /> Program Activity information</h2>
         <p>Read-only information for your association.</p>
         @if($activity->archived_at)<p class="notice">This Program Activity is archived.</p>@endif
         <dl class="detail-grid">

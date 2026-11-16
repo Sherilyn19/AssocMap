@@ -2,17 +2,17 @@
 @section('content')
 <div class="monitoring-management" data-workspace-module="monitoring" data-workspace-title="Monitoring">
     <header class="card monitoring-heading">
-        <div><p class="eyebrow">Program Operations</p><h1 tabindex="-1">Monitoring Management</h1><p>Review quarterly progress and visit reports for your projects.</p></div>
+        <div><p class="eyebrow">Program Operations</p><h1 tabindex="-1">Monitoring Management</h1><p>{{ $monitoringPrefix === 'association.monitoring' ? 'Explore your projects’ quarterly monitoring records and visit reports.' : 'Review quarterly progress and visit reports for your projects.' }}</p></div>
         @if($canManage)<a class="button button-primary" href="{{ route($monitoringPrefix.'.create') }}"><x-icon name="plus" />Add Monitoring Record</a>@endif
     </header>
     @if($errors->any())<div class="notice notice-error" role="alert">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
     <div class="monitoring-summary" aria-label="Monitoring register summary">
-        <section class="stat-card monitoring-summary-selected"><div class="stat-top"><span>Matching projects</span><span class="stat-icon"><x-icon name="clipboard-check" /></span></div><strong><x-summary-counter :value="number_format($projects->total())" /></strong><small>With a record matching the selected filters</small></section>
-        <section class="stat-card"><div class="stat-top"><span>Reporting year</span><span class="stat-icon"><x-icon name="calendar" /></span></div><strong>{{ $selectedYear ?? '—' }}</strong><small>{{ $years->count() }} available reporting year(s)</small></section>
-        <section class="stat-card"><div class="stat-top"><span>Projects on this page</span><span class="stat-icon"><x-icon name="layers" /></span></div><strong><x-summary-counter :value="$projects->count()" /></strong><small>Up to 25 projects per page</small></section>
+        <section class="stat-card monitoring-summary-selected"><div class="stat-top"><span>Matching projects</span><span class="stat-icon"><x-icon name="clipboard-check" /></span></div><strong><x-summary-counter :value="number_format($projects->total())" /></strong><small>{{ $monitoringPrefix === 'association.monitoring' ? 'Matching your filters' : 'With a record matching the selected filters' }}</small></section>
+        <section class="stat-card"><div class="stat-top"><span>Reporting year</span><span class="stat-icon"><x-icon name="calendar" /></span></div><strong>{{ $selectedYear ?? '—' }}</strong><small>{{ $years->count() }} {{ $monitoringPrefix === 'association.monitoring' ? 'available years' : 'available reporting year(s)' }}</small></section>
+        <section class="stat-card"><div class="stat-top"><span>Projects on this page</span><span class="stat-icon"><x-icon name="layers" /></span></div><strong><x-summary-counter :value="$projects->count()" /></strong><small>{{ $monitoringPrefix === 'association.monitoring' ? '25 per page' : 'Up to 25 projects per page' }}</small></section>
     </div>
     <section class="card monitoring-register" aria-labelledby="monitoring-register-title">
-        <div class="monitoring-section-heading"><div><div class="monitoring-heading-title"><h2 id="monitoring-register-title">Projects by reporting quarter</h2><x-area-info label="About monitoring records">Projects match the selected filters. Cards show all recorded quarters for the selected year, including accessible historical records.</x-area-info></div><p>Quarterly records for the selected year.</p></div></div>
+        <div class="monitoring-section-heading"><div><div class="monitoring-heading-title"><h2 id="monitoring-register-title">Projects by reporting quarter</h2><x-area-info label="About monitoring records">Projects match the selected filters. Cards show all recorded quarters for the selected year, including accessible historical records.</x-area-info></div>@if($monitoringPrefix !== 'association.monitoring')<p>Quarterly records for the selected year.</p>@endif</div></div>
         @include('monitoring.partials.filters', ['filterAction' => route($monitoringPrefix.'.index'), 'searchPlaceholder' => 'Project, association, quarter, date or monitor'])
         <div class="monitoring-project-list">
             @forelse($projects as $project)

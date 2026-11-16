@@ -1,9 +1,9 @@
 @extends($monitoringLayout)
 @section('content')
-<div @class(['monitoring-management', 'monitoring-record-view' => in_array($monitoringPrefix, ['admin.monitoring', 'field-officer.monitoring'], true)]) data-workspace-module="monitoring" data-workspace-title="Monitoring">
+<div @class(['monitoring-management', 'monitoring-record-view' => in_array($monitoringPrefix, ['admin.monitoring', 'field-officer.monitoring', 'association.monitoring'], true)]) data-workspace-module="monitoring" data-workspace-title="Monitoring">
     @include('monitoring.partials.context')
     <section class="card monitoring-register" aria-labelledby="visit-history-title">
-        <div class="monitoring-section-heading"><div><h2 id="visit-history-title">Visit Reports</h2><p>Visit history for Q{{ $record->quarter?->quarter_number }} {{ $record->year }}, including retained historical reports.</p></div>
+        <div class="monitoring-section-heading"><div><h2 id="visit-history-title">@if($monitoringPrefix === 'association.monitoring')<x-icon name="calendar" /> @endif Visit Reports</h2><p>Visit history for Q{{ $record->quarter?->quarter_number }} {{ $record->year }}, including retained historical reports.</p></div>
             @if($canManage)<a class="button button-primary" href="{{ route($monitoringPrefix.'.visit.create', $record) }}"><x-icon name="plus" />Add Visit Report</a>@endif
         </div>
         @include('monitoring.partials.filters', ['filterAction' => route($monitoringPrefix.'.visits', $record), 'searchPlaceholder' => 'Conductor, visit date, issues, actions or remarks'])
@@ -18,7 +18,7 @@
                         @foreach(['issues_encountered' => 'Issues Encountered', 'actions_taken' => 'Actions Taken', 'overall_remarks' => 'Overall Remarks'] as $field => $label)<div><dt>{{ $label }}</dt><dd>{{ filled($report->$field) ? $report->$field : 'Not recorded' }}</dd></div>@endforeach
                     </dl>
                     @include('monitoring.partials.photos', ['photoKind' => 'visits', 'photoParent' => $report])
-                    @if($report->is_legacy_import)<p class="field-hint">Retained historical visit report.</p>@endif
+                    @if($report->is_legacy_import && $monitoringPrefix !== 'association.monitoring')<p class="field-hint">Retained historical visit report.</p>@endif
                 </article>
             @empty<p class="monitoring-empty">{{ $filters['search'] !== '' || $filters['validated'] !== '' ? 'No Visit Reports match these filters.' : 'No Visit Reports recorded.' }}</p>@endforelse
         </div>

@@ -30,6 +30,8 @@ class AssociationProgramRequest extends FormRequest
         }
         if ($this->routeIs('association.trainings.index')) {
             $rules['status'] = ['nullable', 'in:scheduled,completed,cancelled,archived'];
+        } elseif ($this->routeIs('association.program-activities.index')) {
+            $rules['status'] = ['nullable', 'in:planned,ongoing,completed,cancelled,archived'];
         }
 
         return $rules;
@@ -38,7 +40,7 @@ class AssociationProgramRequest extends FormRequest
     public function filters(): array
     {
         $filters = ['search' => $this->validated('search') ?? '', 'year' => $this->validated('year') ?? ''];
-        if ($this->routeIs('association.trainings.index')) {
+        if ($this->routeIs('association.trainings.index', 'association.program-activities.index')) {
             $filters['status'] = $this->validated('status') ?? '';
         }
 

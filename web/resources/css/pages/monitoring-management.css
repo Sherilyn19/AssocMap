@@ -1,5 +1,21 @@
 /* Monitoring pages share the established management tokens. */
 .monitoring-management { display: grid; gap: 22px; min-width: 0; }
+.association-workspace .monitoring-record-view :is(.monitoring-heading h1, .monitoring-section-heading h2, .monitoring-detail-grid dt, .monitoring-visit-notes dt) { text-transform: uppercase; font-weight: 700; }
+.association-workspace .monitoring-record-view :is(.monitoring-heading, .monitoring-overview, .monitoring-section, .monitoring-register) { min-width: 0; border-color: #dbe6ee; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); overflow-wrap: anywhere; }
+.association-workspace .monitoring-record-view .monitoring-heading { border-top: 3px solid var(--primary); }
+.association-workspace .monitoring-record-view .monitoring-header-identity { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: #263f58; overflow-wrap: anywhere; }
+.association-workspace .monitoring-record-view .monitoring-header-identity > .icon, .association-workspace .monitoring-record-view .monitoring-header-location .icon { width: 16px; height: 16px; flex: none; color: var(--primary); }
+.association-workspace .monitoring-record-view .monitoring-header-location { display: inline-flex; align-items: center; gap: 5px; color: var(--text-secondary); min-width: 0; overflow-wrap: anywhere; }
+.association-workspace .monitoring-record-view .monitoring-section-heading h2 .icon { width: 18px; height: 18px; vertical-align: -3px; color: var(--primary); margin-right: 6px; }
+.association-workspace .monitoring-record-view :is(.monitoring-detail-grid dd, .monitoring-visit-notes dd) { overflow-wrap: anywhere; }
+.association-workspace .monitoring-record-view .workflow-navigation .back-link { text-decoration: none; }
+.association-workspace .monitoring-record-view .workflow-navigation nav a { font-weight: 600; text-decoration: none; }
+.association-workspace .monitoring-record-view .workflow-navigation nav a:hover { text-decoration: underline; }
+.association-workspace .monitoring-record-view .monitoring-card { min-width: 0; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: no-preference) {
+    .association-workspace .monitoring-record-view :is(.monitoring-nav a, .monitoring-card, .workflow-navigation a) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease; }
+    .association-workspace .monitoring-record-view .monitoring-card:hover { border-color: #bfd3e5; box-shadow: 0 5px 16px rgb(16 47 80 / 7%); }
+}
 .monitoring-management .monitoring-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding: 24px; border-top: 3px solid var(--primary); }
 .monitoring-management .monitoring-heading > div { flex: 1 1 280px; min-width: 0; overflow-wrap: anywhere; }
 .monitoring-management .monitoring-heading p:not(.eyebrow) { font-size: 13px; margin-top: 7px; }
@@ -32,7 +48,6 @@
 @media (max-width: 640px) { .admin-workspace .monitoring-record-view :is(.monitoring-overview, .monitoring-section) .monitoring-section-heading { margin-inline: 18px; } .admin-workspace .monitoring-record-view .monitoring-heading .monitoring-record-badges { flex-basis: 100%; } }
 .admin-workspace .monitoring-management .monitoring-heading h1, .admin-workspace .monitoring-management .monitoring-section-heading h2 { text-transform: uppercase; }
 .admin-workspace .monitoring-management .workflow-navigation { margin: -8px 0 0; }
-.admin-workspace .monitoring-management .workflow-navigation nav { order: -1; }
 .admin-workspace .monitoring-management .workflow-navigation .back-link { padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; text-decoration: none; }
 .admin-workspace .monitoring-management .workflow-navigation a:hover { color: #0b427b; }
 .monitoring-management .monitoring-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
@@ -93,6 +108,23 @@
 .monitoring-management .monitoring-quarter-empty .icon { color: #66809a; }
 .monitoring-management .monitoring-quarter-empty p { font-size: 13px; font-weight: 600; }
 .monitoring-management .monitoring-quarter-empty small { font-size: 11px; color: var(--text-secondary); overflow-wrap: anywhere; }
+/* Association quarterly overview */
+.association-workspace .monitoring-management .monitoring-summary .stat-card small { font-size: 16px; line-height: 1.4; }
+.association-workspace .monitoring-management .monitoring-filter-help { margin: 12px 0 0; color: var(--text-secondary); line-height: 1.5; }
+.association-workspace .monitoring-management .monitoring-project-list .monitoring-project-row { padding: 0; border: 0; box-shadow: none; background: transparent; }
+.association-workspace .monitoring-management .monitoring-project-list .monitoring-project-row:hover { box-shadow: none; }
+.association-workspace .monitoring-management .monitoring-project-heading { padding: 20px; border: 1px solid #dbe6ee; border-radius: 10px; background: #fff; }
+.association-workspace .monitoring-management .monitoring-project-heading h3 { font-size: 20px; overflow-wrap: anywhere; }
+.association-workspace .monitoring-management .monitoring-project-heading p { font-size: 14px; overflow-wrap: anywhere; }
+.association-workspace .monitoring-management .monitoring-quarter-grid { margin-top: 16px; }
+.association-workspace .monitoring-management .monitoring-quarter-slot { border-top: 3px solid #cbd5e1; border-radius: 9px; background: #fff; box-shadow: 0 3px 12px rgb(16 47 80 / 5%); overflow-wrap: anywhere; }
+.association-workspace .monitoring-management .monitoring-quarter-slot.has-record { border-top-color: #4da99a; }
+.association-workspace .monitoring-management .monitoring-quarter-slot > h4 { color: #173b5e; font-size: 21px; }
+.association-workspace .monitoring-management .monitoring-quarter-validation { font-size: 13px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; }
+.association-workspace .monitoring-management .monitoring-quarter-record dt { font-size: 12px; font-weight: 700; text-transform: uppercase; }
+.association-workspace .monitoring-management .monitoring-quarter-record dd { font-size: 13px; }
+@media (max-width: 540px) { .association-workspace .monitoring-management .monitoring-summary .stat-card small { font-size: 14px; } .association-workspace .monitoring-management .monitoring-quarter-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: no-preference) { .association-workspace .monitoring-management .monitoring-quarter-slot:hover { border-color: #9bbad8; box-shadow: 0 6px 18px rgb(16 47 80 / 9%); } }
 .monitoring-management .monitoring-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 0 22px 22px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
 .monitoring-management .monitoring-pagination > p { font-size: 12px; }
 .monitoring-management .monitoring-pagination nav { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -253,7 +285,6 @@
 @media (max-width: 640px) { :is(.field-officer-polish, .association-workspace) .monitoring-record-view .monitoring-heading .monitoring-record-badges { flex-basis: 100%; } }
 :is(.field-officer-polish, .association-workspace) .monitoring-management .monitoring-heading h1, :is(.field-officer-polish, .association-workspace) .monitoring-management .monitoring-section-heading h2 { text-transform: uppercase; }
 :is(.field-officer-polish, .association-workspace) .monitoring-management .workflow-navigation { margin: -8px 0 0; }
-:is(.field-officer-polish, .association-workspace) .monitoring-management .workflow-navigation nav { order: -1; }
 :is(.field-officer-polish, .association-workspace) .monitoring-management .workflow-navigation .back-link { padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; text-decoration: none; }
 :is(.field-officer-polish, .association-workspace) .monitoring-management .workflow-navigation a:hover { color: #0b427b; }
 :is(.field-officer-polish, .association-workspace) .monitoring-management .monitoring-register { overflow: visible; }
