@@ -1,7 +1,6 @@
 import { $, $$ } from '../core/helpers.js';
 
-export function initAdminNavigation(sidebarController) {
-    if (!$('#admin-sidebar')) return;
+export function initWorkspaceHeaderScroll() {
     const dashboardHeader = $('.workspace-header--scroll-context');
     let syncHeader = () => {};
     if (dashboardHeader) {
@@ -23,6 +22,11 @@ export function initAdminNavigation(sidebarController) {
         window.addEventListener('resize', updateHeader);
         updateHeader();
     }
+    return syncHeader;
+}
+
+export function initAdminNavigation(sidebarController, syncHeader = () => {}) {
+    if (!$('#admin-sidebar')) return;
     const pages = new Map($$('[data-page]').map(page => [page.dataset.page, page]));
 
     function navigate(focus = true) {

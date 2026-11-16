@@ -14,7 +14,7 @@
     <title>{{ request()->routeIs('field-officer.association-officers.*') ? 'Association Officers' : $workspaceHeading }} · AssocMap</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body>
+<body @class(['field-officer-workspace', 'field-officer-polish' => !request()->routeIs('field-officer.reports.*')])>
     <a class="skip-link" href="#main-content">Skip to content</a>
     <x-workspace-sidebar :dashboard-url="route('field-officer.dashboard')" workspace="FIELD OFFICER WORKSPACE" id="field-officer-sidebar" aria-label="Field Officer navigation">
         <x-workspace-nav-section id="field-officer-overview" label="OVERVIEW">
@@ -40,10 +40,11 @@
     <button type="button" class="sidebar-backdrop" data-fo-close hidden aria-label="Close navigation"></button>
     <div class="main-shell">
         <x-workspace-header
-            workspace="Field Officer workspace"
+            workspace=""
             :context="request()->routeIs('field-officer.association-officers.*') ? 'Association Officers' : $workspaceHeading"
             :display-name="$currentUser->display_name ?? 'Field Officer'"
-            account-label="Field Officer workspace"
+            account-label=""
+            :scroll-context="true"
         >
             <x-slot:navigationToggle>
                 <button type="button" class="icon-button mobile-menu" data-fo-open aria-label="Open navigation" aria-controls="field-officer-sidebar" aria-expanded="false"><x-icon name="menu" /></button>
@@ -52,7 +53,7 @@
         <main id="main-content" tabindex="-1">
             @yield('content')
         </main>
-        <footer class="app-footer"><span>AssocMap · GIS-Based Program Monitoring Information System</span></footer>
+        <footer class="app-footer app-footer-dashboard"><span>AssocMap · Field Officer workspace</span></footer>
     </div>
     @stack('dialogs')
     <x-global-feedback :notification="$globalFeedbackNotification ?? null" />

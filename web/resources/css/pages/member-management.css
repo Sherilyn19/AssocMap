@@ -115,3 +115,31 @@
     .admin-workspace .member-management[data-workspace-title="Member Management"] .member-summary a:hover .stat-card { box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }
     @keyframes member-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 }
+
+/* Field officer presentation */
+
+.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) :is(.member-heading h1, .member-section-heading h2, .member-register-table thead th) { text-transform: uppercase; }
+.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-summary a[aria-current="page"] { --summary-counter-surface: #1d628e; }
+.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-summary a[aria-current="page"] .stat-card { background: #1d628e; border-color: #1d628e; }
+.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-summary a:not([aria-current="page"]):hover { --summary-counter-surface: #f3f7fd; }
+.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register { overflow: visible; }
+.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-table thead th { padding: 14px 22px; background: #f8fafc; color: #475569; font-weight: 700; }
+.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-table tbody th { background: transparent; border-bottom: 1px solid #eef2f6; }
+.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-table tbody tr:hover { background: #f4f8fc; }
+.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination { justify-content: space-between; margin: 16px 22px 22px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #475569; }
+.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination nav { gap: 4px; }
+.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination nav > * { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; padding: 6px 9px; border: 1px solid #dbe4ef; border-radius: 6px; background: #fff; color: #334155; font-weight: 600; }
+.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination nav a:hover { border-color: #9bbad8; background: #edf4fb; color: var(--primary); }
+.field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination nav .member-page-disabled { color: #94a3b8; background: #f8fafc; }
+@media (max-width: 760px) {
+    .field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-register-pagination { margin-inline: 18px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-heading { animation: member-arrive 400ms ease-out both; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) :is(.member-summary .stat-card, .member-register-table tbody tr, .member-register-pagination nav a, .area-info button) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-summary a:hover .stat-card { box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }
+}

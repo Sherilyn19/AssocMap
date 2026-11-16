@@ -202,3 +202,76 @@
 @media (prefers-reduced-motion: reduce) {
     .role-dashboard .dashboard-shortcut { transition: none; }
 }
+
+/* Field officer presentation */
+.field-officer-polish .dashboard-info-line { display: flex; align-items: center; gap: 6px; }
+.field-officer-polish .dashboard-info-line .area-info { position: relative; display: inline-flex; }
+.field-officer-polish .dashboard-info-line .area-info button { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 4px; border: 0; border-radius: 50%; background: transparent; color: var(--primary); cursor: pointer; }
+.field-officer-polish .dashboard-info-line .area-info button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.field-officer-polish .dashboard-info-line .area-info svg { width: 18px; height: 18px; }
+.field-officer-polish .dashboard-info-line .area-info-popover { display: none; position: absolute; z-index: 20; left: 0; top: 100%; width: min(300px, 70vw); padding: 12px 14px; border: 1px solid #cfdeeb; border-radius: 8px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 16%); color: #334b63; }
+.field-officer-polish .dashboard-info-line .area-info button[aria-expanded="true"] + .area-info-popover { display: block; }
+@media (hover: hover) { .field-officer-polish .dashboard-info-line .area-info:hover .area-info-popover { display: block; } }
+.field-officer-polish .role-dashboard .dashboard-summary-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 12px; }
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .role-dashboard .dashboard-summary-link > .stat-card,
+    .field-officer-polish .role-dashboard .dashboard-shortcut {
+        transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+    }
+    @media (hover: hover) {
+        .field-officer-polish .role-dashboard .dashboard-summary-link:hover > .stat-card,
+        .field-officer-polish .role-dashboard .dashboard-shortcut:hover {
+            transform: translateY(-3px);
+            border-color: #a9c6df;
+            box-shadow: 0 6px 20px rgb(16 47 80 / 9%);
+        }
+    }
+}
+
+
+.field-officer-polish .role-dashboard { gap: 20px; }
+.field-officer-polish .role-dashboard .dashboard-intro { align-items: center; gap: 18px; padding: 24px; border: 1px solid var(--border-color); border-top: 3px solid var(--primary); border-radius: var(--radius-md); background: #fff; box-shadow: var(--shadow-sm); }
+.field-officer-polish .role-dashboard h1 { line-height: 1.25; }
+.field-officer-polish .role-dashboard .dashboard-introduction { margin-top: 6px; }
+.field-officer-polish .role-dashboard .dashboard-context .button { border-color: #bfd1e1; background: #fff; color: var(--primary); font-weight: 600; }
+.field-officer-polish .role-dashboard .dashboard-metrics { gap: 14px; }
+.field-officer-polish .role-dashboard .stat-card { padding: 18px; border-top-color: #a9c8df; }
+.field-officer-polish .role-dashboard .stat-card > strong { margin: 14px 0 8px; }
+.field-officer-polish .role-dashboard .dashboard-panel { border: 1px solid #dbe6ee; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+.field-officer-polish .role-dashboard .dashboard-shortcut { background: #fbfdff; }
+.field-officer-polish .role-dashboard .dashboard-loaded { margin: 0; padding: 12px 2px; color: #526679; line-height: 1.6; border-top: 1px solid #dbe6ee; }
+@media (prefers-reduced-motion: no-preference) { .field-officer-polish .role-dashboard .stat-card, .field-officer-polish .role-dashboard .dashboard-context .button { transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease; } }
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .role-dashboard .dashboard-context .button:hover { background: #edf4fa; border-color: #8bafd3; box-shadow: 0 4px 12px rgb(16 47 80 / 10%); }
+}
+@media (max-width: 540px) { .field-officer-polish .role-dashboard .dashboard-intro { padding: 18px; } }
+@media (max-width: 540px) { .field-officer-polish .role-dashboard .dashboard-context { justify-items: start; } }
+.field-officer-polish .role-dashboard .dashboard-summary { margin-bottom: 0; }
+.field-officer-polish .role-dashboard .dashboard-summary > div { border-color: #e0eaf3; background: #f8fafc; }
+.field-officer-polish .role-dashboard .dashboard-summary dt { line-height: 1.5; }
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .role-dashboard .dashboard-summary > div { transition: border-color 180ms ease, box-shadow 180ms ease; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .role-dashboard .dashboard-summary > div:hover { border-color: #a9c6df; box-shadow: 0 3px 10px rgb(11 76 140 / 6%); }
+}
+.field-officer-polish .role-dashboard .dashboard-recent-panel .dashboard-records { margin-top: 16px; }
+.field-officer-polish .role-dashboard .dashboard-recent-panel .dashboard-records li { padding: 15px 12px; border-radius: 8px; }
+.field-officer-polish .role-dashboard .dashboard-recent-panel .dashboard-records a { color: #164d7e; }
+.field-officer-polish .role-dashboard .dashboard-recent-panel .dashboard-records a:hover { text-decoration: underline; }
+.field-officer-polish .role-dashboard .dashboard-recent-panel .dashboard-records p { color: #64748b; }
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .role-dashboard .dashboard-intro { animation: dashboard-arrive 400ms ease-out both; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .role-dashboard .dashboard-panel { transition: border-color 180ms ease, box-shadow 180ms ease; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .role-dashboard .dashboard-panel:hover { border-color: #bfd3e5; box-shadow: 0 6px 20px rgb(16 47 80 / 9%); }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .role-dashboard .dashboard-recent-panel .dashboard-records li { transition: background-color 180ms ease; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .role-dashboard .dashboard-recent-panel .dashboard-records li:hover { background: #f4f8fc; }
+}

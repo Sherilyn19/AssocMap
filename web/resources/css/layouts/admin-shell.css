@@ -52,6 +52,8 @@
 .admin-workspace main h1 { font-size: clamp(24px, 2vw, 30px); line-height: 1.25; letter-spacing: -.02em; }
 @media (max-width: 540px) { .admin-header-workspace { font-size: 12px; } .admin-header-trail, .admin-header-page { gap: 6px; } .workspace-header--scroll-context .workspace-header-context { font-size: 14px; } }
 .workspace-header--compact.is-scrolled { box-shadow: 0 5px 18px rgb(16 47 80 / 10%); border-bottom-color: #cddce8; }
+.field-officer-workspace .workspace-header--scroll-context.is-scrolled { box-shadow: 0 5px 18px rgb(16 47 80 / 10%); border-bottom-color: #cddce8; }
+@media (prefers-reduced-motion: no-preference) { .field-officer-workspace .workspace-header--scroll-context { transition: box-shadow 220ms ease, border-color 220ms ease; } }
 @media (prefers-reduced-motion: no-preference) { .workspace-header--compact { transition: box-shadow 220ms ease, border-color 220ms ease; } }
 .topbar-account { flex-shrink: 0; gap: 12px; }
 .account-divider { width: 1px; height: 31px; background: var(--border-color); margin: 0 6px; }

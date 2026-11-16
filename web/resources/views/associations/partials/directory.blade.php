@@ -1,18 +1,14 @@
 <section class="association-management" data-association-ui data-workspace-module="associations" data-workspace-title="{{ $officerDirectory ? 'Association Officers' : ($prefix === 'admin' ? 'Association Management' : 'Assigned Associations') }}">
     <header class="card association-heading">
-        <div>@if($prefix !== 'admin')<p class="eyebrow">Field Officer</p>@endif<h1 tabindex="-1">{{ $officerDirectory ? 'Association Officers' : ($prefix === 'admin' ? 'Association Management' : 'Assigned Associations') }}</h1><p>{{ $officerDirectory ? 'Manage organizational positions held by eligible association members.' : ($prefix === 'admin' ? 'Manage association records, locations, and organizational officers.' : 'Review association records and manage officers within your current assignments.') }}</p></div>
-        @if(!$officerDirectory && $prefix !== 'admin')
-            <x-contextual-report :prefix="$prefix" type="associations" :related="true"
-                :scope="($prefix === 'admin' ? 'All authorized associations, including archived associations.' : 'Your currently assigned active, unarchived associations.').' Current snapshot; no reporting period. Search, status, municipality, barangay, officer, sorting and pagination selections from this register are not applied. Open an association for a single-association report.'" />
-        @endif
+        <div><h1 tabindex="-1">{{ $officerDirectory ? 'Association Officers' : ($prefix === 'admin' ? 'Association Management' : 'Assigned Associations') }}</h1><p>{{ $officerDirectory ? 'Manage organizational positions held by eligible association members.' : ($prefix === 'admin' ? 'Manage association records, locations, and organizational officers.' : 'Review association records and manage officers within your current assignments.') }}</p></div>
     </header>
         <div class="association-heading-actions">
             @if(!$officerDirectory)
                 <a class="button" href="{{ route($prefix.'.association-officers.index') }}">{{ $prefix === 'admin' ? 'Manage Association Officers' : 'Assign Officers' }}</a>
-                @if($prefix === 'admin')<x-contextual-report :prefix="$prefix" type="associations" :related="true" :show-scope="false" scope="All associations, including archived records. Register filters do not apply." />@endif
+                <x-contextual-report :prefix="$prefix" type="associations" :related="true" :show-scope="false" :scope="$prefix === 'admin' ? 'All associations, including archived records. Register filters do not apply.' : 'Assigned active associations; register filters do not apply.'" />
                 @if($prefix === 'admin')<a class="button button-primary" href="{{ route('admin.associations.index', $filters + ['editor' => 'create']) }}"><x-icon name="plus" />Add Association</a>@endif
             @else
-                @if($prefix === 'admin')<nav class="association-officer-path" aria-label="Association officer navigation"><a href="{{ route('admin.associations.index') }}">Association Management</a><span aria-hidden="true">/</span><a href="{{ route('admin.association-officers.index') }}" aria-current="page">Manage Association Officers</a></nav>@endif
+                <nav class="association-officer-path" aria-label="Association officer navigation"><a href="{{ route($prefix.'.associations.index') }}">{{ $prefix === 'admin' ? 'Association Management' : 'Assigned Associations' }}</a><span aria-hidden="true">/</span><a href="{{ route($prefix.'.association-officers.index') }}" aria-current="page">{{ $prefix === 'admin' ? 'Manage Association Officers' : 'Association Officers' }}</a></nav>
                 <a class="button" href="{{ route($prefix.'.associations.index') }}">Back to {{ $prefix === 'admin' ? 'Association Management' : 'Assigned Associations' }}</a>
             @endif
         </div>

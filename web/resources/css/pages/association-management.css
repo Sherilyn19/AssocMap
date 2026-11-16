@@ -139,3 +139,13 @@
     .association-management .association-summary a:hover .stat-card { box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }
     @keyframes association-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 }
+
+/* Field officer presentation */
+
+.field-officer-polish .association-management .association-heading h1, .field-officer-polish .association-management .association-section-heading h2, .field-officer-polish .association-management .association-table thead th { text-transform: uppercase; }
+.field-officer-polish .association-management .association-heading-actions { justify-content: flex-end; margin-top: -10px; gap: 8px; }
+.field-officer-polish .association-management .association-heading-actions .contextual-report { flex: 0 1 auto; }
+.field-officer-polish .association-management .association-heading-actions .button { min-height: 38px; padding: 8px 12px; }
+@media (max-width: 480px) {
+    .field-officer-polish .association-management .association-heading-actions { justify-content: flex-start; }
+}

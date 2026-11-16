@@ -1,6 +1,6 @@
 @extends($monitoringLayout)
 @section('content')
-<div @class(['monitoring-management', 'monitoring-record-view' => $monitoringPrefix === 'admin.monitoring']) data-workspace-module="monitoring" data-workspace-title="Monitoring">
+<div @class(['monitoring-management', 'monitoring-record-view' => in_array($monitoringPrefix, ['admin.monitoring', 'field-officer.monitoring'], true)]) data-workspace-module="monitoring" data-workspace-title="Monitoring">
     @include('monitoring.partials.context')
     <section class="card monitoring-section" aria-labelledby="monitoring-section-title">
         <div class="monitoring-section-heading">
