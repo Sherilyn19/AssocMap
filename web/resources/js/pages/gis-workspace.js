@@ -11,6 +11,7 @@ export async function initGis(root) {
     const base = root.dataset.gisBase.replace(/\/$/, '');
     const publicView = root.dataset.gisPublic === 'true';
     const administratorView = root.dataset.gisAdministrator === 'true';
+    const associationView = Boolean(root.closest('.association-workspace'));
     const manager = root.dataset.gisManager === 'true';
     const gallery = root.dataset.gisPhotos === 'true' ? createGisPhotos(root.querySelector('[data-gis-photos]'), {
         base: manager ? base : '/map', manager, csrf: root.querySelector('[data-gis-csrf]')?.value || '',
@@ -112,7 +113,7 @@ export async function initGis(root) {
         const section = (title, className = '') => {
             const container = document.createElement('section'); container.className = `gis-detail-section ${className}`.trim();
             const heading = document.createElement('h4');
-            if (administratorView) {
+            if (administratorView || associationView) {
                 const paths = {
                     'About this location': 'M11.25 11.25h.008v.008h-.008v-.008ZM12 10.5v5.25m9-3.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
                     'Project & association': 'M3.75 21h16.5M4.5 21V7.5l7.5-4.5 7.5 4.5V21M9 21v-6h6v6',
@@ -161,7 +162,7 @@ export async function initGis(root) {
             [['Municipality', p.municipality], ['Barangay', p.barangay], ['Specific area', p.area]]
                 .forEach(([label, value]) => addDetail(geography, label, value));
             if (administratorView) infoNote(geography, 'About registered geography', "Registered geography does not confirm the site's boundary. Site address verification is not recorded; older area records may need review.");
-            else note(geography, "Association registration geography does not verify site containment. Site-address verification is not recorded; legacy area fallbacks may require review.");
+            else if (!associationView) note(geography, "Association registration geography does not verify site containment. Site-address verification is not recorded; legacy area fallbacks may require review.");
         }
         const position = section('Map position', 'gis-position-section');
         const representative = publicView && p.location_type === 'project_boundary';

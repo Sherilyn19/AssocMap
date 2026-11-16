@@ -84,15 +84,15 @@ class ProgramController extends Controller
                 $query->whereRaw("LOWER(title) LIKE ? ESCAPE '!'", [$pattern]);
             }
             if ($filters['year'] !== '') $query->where('program_year', $filters['year']);
-            if ($training && $filters['status'] === 'archived') $query->whereNotNull('archived_at');
-            elseif ($training && $filters['status'] !== '') $query->where('status', $filters['status'])->whereNull('archived_at');
+            if ($filters['status'] === 'archived') $query->whereNotNull('archived_at');
+            elseif ($filters['status'] !== '') $query->where('status', $filters['status'])->whereNull('archived_at');
             $dates = $training ? ['start_date', 'end_date'] : ['activity_date'];
             $query->select(array_merge(['id', 'association_id', 'related_project_id', 'title',
                 'program_year', 'venue', 'status', 'archived_at'], $dates));
             if ($training) {
                 $query->orderByRaw('CASE WHEN start_date IS NULL THEN 1 ELSE 0 END')->orderByDesc('start_date');
             } else {
-                $query->orderByDesc('program_year')->orderByDesc($dates[0]);
+                $query->orderByRaw('CASE WHEN activity_date IS NULL THEN 1 ELSE 0 END')->orderByDesc('activity_date');
             }
             $records = $query->orderBy('title')->orderBy('id')->paginate(25)->appends($filters);
             $this->scope->recheck($request, [], [$association->id]);

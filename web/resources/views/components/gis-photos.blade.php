@@ -9,7 +9,7 @@
             <img data-photo-preview hidden alt="Selected photo preview" class="gis-photo-preview">
             <button type="submit" class="button button-primary">Upload photo</button>
         </form>
-    @elseif(!($gisPublic ?? false))
+    @elseif(!($gisPublic ?? false) && !request()->routeIs('association.gis.*'))
         <p class="gis-photo-policy">Approved photos of published locations.</p>
     @endif
     <div class="gis-photo-grid" data-photo-grid></div>

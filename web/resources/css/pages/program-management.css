@@ -213,15 +213,15 @@
     .association-workspace .program-management .program-heading { animation: project-arrive 400ms ease-out both; }
     .association-workspace :is(.program-register-table tbody tr, .program-pagination nav a) { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; }
 }
-.program-management:is([data-association-projects], [data-association-trainings]) .member-search-bar { padding-top: 0; }
-.association-workspace [data-association-trainings] .table-scroll { max-width: 100%; overflow-x: auto; }
-.association-workspace [data-association-trainings] .program-register-table :is(th, td) { white-space: normal; overflow-wrap: anywhere; }
-.association-workspace [data-association-trainings] .training-timeline-date { position: relative; min-width: 150px; padding-left: 42px; }
-.association-workspace [data-association-trainings] .training-timeline-date::before { content: ''; position: absolute; left: 25px; top: 0; bottom: 0; border-left: 2px solid #dbe6ee; }
-.association-workspace [data-association-trainings] .training-timeline-marker { position: absolute; left: 20px; top: 23px; width: 12px; height: 12px; border: 3px solid #fff; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 1px #9bbad8; }
+.program-management:is([data-association-projects], :is([data-association-trainings], [data-association-program-activities])) .member-search-bar { padding-top: 0; }
+.association-workspace :is([data-association-trainings], [data-association-program-activities]) .table-scroll { max-width: 100%; overflow-x: auto; }
+.association-workspace :is([data-association-trainings], [data-association-program-activities]) .program-register-table :is(th, td) { white-space: normal; overflow-wrap: anywhere; }
+.association-workspace :is([data-association-trainings], [data-association-program-activities]) .training-timeline-date { position: relative; min-width: 150px; padding-left: 42px; }
+.association-workspace :is([data-association-trainings], [data-association-program-activities]) .training-timeline-date::before { content: ''; position: absolute; left: 25px; top: 0; bottom: 0; border-left: 2px solid #dbe6ee; }
+.association-workspace :is([data-association-trainings], [data-association-program-activities]) .training-timeline-marker { position: absolute; left: 20px; top: 23px; width: 12px; height: 12px; border: 3px solid #fff; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 1px #9bbad8; }
 @media (prefers-reduced-motion: no-preference) {
-    .association-workspace [data-association-trainings] .training-timeline-marker { transition: box-shadow 180ms ease; }
-    .association-workspace [data-association-trainings] tr:hover .training-timeline-marker { box-shadow: 0 0 0 4px #dbe6ee; }
+    .association-workspace :is([data-association-trainings], [data-association-program-activities]) .training-timeline-marker { transition: box-shadow 180ms ease; }
+    .association-workspace :is([data-association-trainings], [data-association-program-activities]) tr:hover .training-timeline-marker { box-shadow: 0 0 0 4px #dbe6ee; }
 }
 /* Project details: retain the existing information and controls in a readable layout. */
 .association-workspace .association-record-detail { min-width: 0; }
@@ -249,6 +249,6 @@
     .association-workspace .association-record-detail .detail-grid > div:hover { border-color: #9bbad8; }
 }
 @media (prefers-reduced-motion: no-preference) {
-    .program-management:is([data-association-projects], [data-association-trainings]) .member-filter-disclosure > summary { transition: background-color 180ms ease, border-color 180ms ease; }
-    .program-management:is([data-association-projects], [data-association-trainings]) .member-filter-disclosure > summary .icon:last-child { transition: transform 180ms ease; }
+    .program-management:is([data-association-projects], :is([data-association-trainings], [data-association-program-activities])) .member-filter-disclosure > summary { transition: background-color 180ms ease, border-color 180ms ease; }
+    .program-management:is([data-association-projects], :is([data-association-trainings], [data-association-program-activities])) .member-filter-disclosure > summary .icon:last-child { transition: transform 180ms ease; }
 }
