@@ -23,6 +23,7 @@ class ProjectController extends Controller
             $association = $this->association($request);
             $filters = $request->filters();
             $query = Project::query()->useWritePdo()->where('association_id', $association->id);
+            $years = (clone $query)->whereNotNull('program_year')->distinct()->orderByDesc('program_year')->pluck('program_year');
             if ($filters['search'] !== '') {
                 $pattern = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower($filters['search'])).'%';
                 $query->whereRaw("LOWER(title) LIKE ? ESCAPE '!'", [$pattern]);
@@ -36,7 +37,7 @@ class ProjectController extends Controller
                 ->orderByDesc('program_year')->orderBy('title')->orderBy('id')->paginate(25)->appends($filters);
             $this->scope->recheck($request, [], [$association->id]);
 
-            return ApiRequestGuard::secure(response()->view('association.projects.index', compact('association', 'filters', 'projects')));
+            return ApiRequestGuard::secure(response()->view('association.projects.index', compact('association', 'filters', 'projects', 'years')));
         } catch (QueryException $exception) {
             return $this->unavailable();
         }

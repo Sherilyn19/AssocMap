@@ -194,3 +194,61 @@
 @media (prefers-reduced-motion: no-preference) {
     .field-officer-polish .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-summary a:hover .stat-card { box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }
 }
+/* Association account: use the same surfaces and feedback as staff registers. */
+.association-workspace .program-management :is(.program-heading, .program-register) { border-color: #dbe6ee; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+.association-workspace .program-management .program-heading { border-top: 3px solid var(--primary); }
+.association-workspace .program-management :is(.program-heading h1, .program-section-heading h2, .program-register-table thead th) { text-transform: uppercase; font-weight: 700; }
+.association-workspace .program-register-table thead th { padding: 14px 20px; background: #f8fafc; color: #475569; font-weight: 700; }
+.association-workspace .program-register-table tbody th { background: transparent; border-bottom: 1px solid #eef2f6; }
+.association-workspace .program-register-table tbody tr:hover { background: #f4f8fc; }
+.association-workspace .program-management .program-pagination { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; margin: 16px 22px 22px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #475569; }
+.association-workspace .program-management .program-pagination nav { display: flex; flex-wrap: wrap; gap: 4px; }
+.association-workspace .program-management .program-pagination nav > * { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; padding: 6px 9px; border: 1px solid #dbe4ef; border-radius: 6px; background: #fff; color: #334155; font-weight: 600; }
+.association-workspace .program-management .program-pagination nav a:hover { border-color: #9bbad8; background: #edf4fb; color: var(--primary); }
+.association-workspace .program-management .program-pagination nav [aria-disabled="true"] { color: #94a3b8; background: #f8fafc; }
+@media (max-width: 760px) {
+    .association-workspace .program-management .program-pagination { margin-inline: 18px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .association-workspace .program-management .program-heading { animation: project-arrive 400ms ease-out both; }
+    .association-workspace :is(.program-register-table tbody tr, .program-pagination nav a) { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; }
+}
+.program-management:is([data-association-projects], [data-association-trainings]) .member-search-bar { padding-top: 0; }
+.association-workspace [data-association-trainings] .table-scroll { max-width: 100%; overflow-x: auto; }
+.association-workspace [data-association-trainings] .program-register-table :is(th, td) { white-space: normal; overflow-wrap: anywhere; }
+.association-workspace [data-association-trainings] .training-timeline-date { position: relative; min-width: 150px; padding-left: 42px; }
+.association-workspace [data-association-trainings] .training-timeline-date::before { content: ''; position: absolute; left: 25px; top: 0; bottom: 0; border-left: 2px solid #dbe6ee; }
+.association-workspace [data-association-trainings] .training-timeline-marker { position: absolute; left: 20px; top: 23px; width: 12px; height: 12px; border: 3px solid #fff; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 1px #9bbad8; }
+@media (prefers-reduced-motion: no-preference) {
+    .association-workspace [data-association-trainings] .training-timeline-marker { transition: box-shadow 180ms ease; }
+    .association-workspace [data-association-trainings] tr:hover .training-timeline-marker { box-shadow: 0 0 0 4px #dbe6ee; }
+}
+/* Project details: retain the existing information and controls in a readable layout. */
+.association-workspace .association-record-detail { min-width: 0; }
+.association-workspace .association-record-detail .workflow-navigation { margin: 0; gap: 10px 20px; }
+.association-workspace .association-record-detail .workflow-navigation .back-link { display: inline-flex; align-items: center; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
+.association-workspace .association-record-detail .workflow-navigation .back-link:hover { border-color: #9bbad8; background: #edf4fb; text-decoration: none; }
+.association-workspace .association-record-detail .workflow-navigation nav a { font-weight: 600; text-decoration: none; }
+.association-workspace .association-record-detail .workflow-navigation nav a:hover { text-decoration: underline; }
+.association-workspace .association-record-detail .workflow-navigation [aria-current="page"] { overflow-wrap: anywhere; }
+.association-workspace .association-record-detail :is(.program-heading > div, .program-information, .program-register, .program-section-heading > div) { min-width: 0; overflow-wrap: anywhere; }
+.association-workspace .association-record-detail .program-information { border: 1px solid #dbe6ee; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+.association-workspace .association-record-detail :is(.program-information h2, .program-information h3, .detail-grid dt) { text-transform: uppercase; font-weight: 700; }
+.association-workspace .association-record-detail .detail-grid { gap: 12px; }
+.association-workspace .association-record-detail .detail-grid > div { min-width: 0; padding: 10px 0; border-bottom: 1px solid #dce7f1; }
+.association-workspace .association-record-detail .program-information h2 .icon { width: 18px; height: 18px; vertical-align: -3px; color: var(--primary); margin-right: 6px; }
+.association-workspace .association-record-detail .training-detail-title { display: flex; align-items: flex-start; gap: 8px; color: #334b63; font-weight: 600; overflow-wrap: anywhere; }
+.association-workspace .association-record-detail .training-detail-title .icon { width: 16px; height: 16px; flex: none; color: var(--primary); }
+.association-workspace .association-record-detail .detail-grid :is(dt, dd), .association-workspace .association-record-detail .program-preserve-text { overflow-wrap: anywhere; }
+.association-workspace .association-record-detail .table-scroll { max-width: 100%; overflow-x: auto; }
+.association-workspace .association-record-detail .program-register-table :is(th, td) { white-space: normal; overflow-wrap: anywhere; }
+.association-workspace .association-record-detail .program-register-table td .button { margin: 3px; }
+@media (prefers-reduced-motion: no-preference) {
+    .association-workspace .association-record-detail .workflow-navigation a { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; }
+    .association-workspace .association-record-detail .detail-grid > div { transition: border-color 180ms ease; }
+    .association-workspace .association-record-detail .detail-grid > div:hover { border-color: #9bbad8; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .program-management:is([data-association-projects], [data-association-trainings]) .member-filter-disclosure > summary { transition: background-color 180ms ease, border-color 180ms ease; }
+    .program-management:is([data-association-projects], [data-association-trainings]) .member-filter-disclosure > summary .icon:last-child { transition: transform 180ms ease; }
+}

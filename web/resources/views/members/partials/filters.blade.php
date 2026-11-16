@@ -13,7 +13,7 @@
         </div>
         <button class="button button-primary" type="submit">Search</button>
         <a class="button" href="{{ route($indexRoute) }}">Reset</a>
-        @if($activeFilters || !request()->routeIs('admin.*'))<span class="member-filter-indicator" role="status">{{ $activeFilters ? $activeFilters.' active filter(s)' : 'Default view' }}</span>@endif
+        @if($activeFilters || (!request()->routeIs('admin.*') && $indexRoute !== 'association.member-applications.index'))<span class="member-filter-indicator" role="status">{{ $activeFilters ? $activeFilters.' active filter(s)' : 'Default view' }}</span>@endif
     </div>
     <details class="member-filter-disclosure" @if($activeFilters) open @endif>
         <summary class="button"><x-icon name="filter" />Filters &amp; sorting<x-icon name="chevron-down" /></summary>
@@ -29,7 +29,7 @@
                     </select></div>
                 @endif
                 <div class="field"><label for="member-register-sort">Sort by</label><select id="member-register-sort" name="sort">
-                    @foreach(['az' => 'Name: A–Z', 'za' => 'Name: Z–A', 'newest' => ($applicationRegister ? 'Submitted: newest first' : 'Registered: newest first'), 'oldest' => ($applicationRegister ? 'Submitted: oldest first' : 'Registered: oldest first')] as $value => $label)<option value="{{ $value }}" @selected($filters['sort'] === $value)>{{ $label }}</option>@endforeach
+                    @foreach(['az' => ($applicationRegister ? 'Applicant' : 'Member').' last name: A–Z', 'za' => ($applicationRegister ? 'Applicant' : 'Member').' last name: Z–A', 'newest' => ($applicationRegister ? 'Submitted: newest first' : 'Registered: newest first'), 'oldest' => ($applicationRegister ? 'Submitted: oldest first' : 'Registered: oldest first')] as $value => $label)<option value="{{ $value }}" @selected($filters['sort'] === $value)>{{ $label }}</option>@endforeach
                 </select></div>
             </div>
             <div class="member-filter-actions"><button class="button button-primary" type="submit">Apply Filters</button><a class="button" href="{{ route($indexRoute) }}">Reset All</a></div>

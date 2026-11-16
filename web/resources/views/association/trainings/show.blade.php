@@ -5,17 +5,16 @@
     $participants->appends($workflow->carry(request()));
     $parents = $training->relatedProject ? [['name' => 'association.projects.show', 'parameters' => ['project' => $training->relatedProject->id], 'label' => $training->relatedProject->title]] : [];
     $workflowBack = $workflow->back(request(), 'association.trainings.index', [], $parents);
-    $breadcrumbs = [['label' => $association->name]];
-    foreach ($parents as $parent) $breadcrumbs[] = ['label' => $parent['label'], 'url' => $workflow->parent(request(), $parent['name'], $parent['parameters'])];
+    $breadcrumbs = [['label' => $workflowBack['label'], 'url' => $workflowBack['url']]];
 @endphp
 
 @section('content')
-<section class="program-management" data-workspace-module="association-trainings" data-workspace-title="Training Details" data-association-trainings>
+<section class="program-management association-record-detail" data-workspace-module="association-trainings" data-workspace-title="Training Details" data-association-trainings>
+    <header class="card program-heading"><div><p class="eyebrow">{{ $association->name }}</p><h1 tabindex="-1">Training Details</h1><p class="training-detail-title"><x-icon name="graduation" /> <span>{{ $training->title }}</span></p></div></header>
     <x-workflow-navigation :back="$workflowBack" :parents="$breadcrumbs" :current="$training->title" />
-    <header class="card program-heading"><div><p class="eyebrow">{{ $association->name }}</p><h1 tabindex="-1">Training Details</h1><p>{{ $training->title }}</p></div></header>
     @if($errors->any())<div class="notice notice-error" role="alert">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
     <section class="card program-information" aria-labelledby="training-information-title">
-        <h2 id="training-information-title">Training information</h2>
+        <h2 id="training-information-title"><x-icon name="graduation" /> Training information</h2>
         <p>Read-only information for your association.</p>
         @if($training->archived_at)<p class="notice">This training is archived. Saved attendance remains available.</p>@endif
         <dl class="detail-grid">
@@ -31,7 +30,7 @@
         <h3>Description</h3><p class="program-preserve-text">{{ filled($training->description) ? $training->description : 'Not recorded' }}</p>
     </section>
     <section class="card program-register" id="training-attendance" aria-labelledby="training-attendance-title">
-        <div class="program-section-heading"><div><h2 id="training-attendance-title">Recorded attendance</h2><p>{{ number_format($participants->total()) }} recorded participant(s) from your association. Present: {{ number_format($counts['present'] ?? 0) }}. Absent: {{ number_format($counts['absent'] ?? 0) }}.</p></div><p>The Association Account represents the association, not an individual attendee. Counts cover all authorized attendance records, across every page.</p></div>
+        <div class="program-section-heading"><div><h2 id="training-attendance-title">Recorded attendance</h2><p>{{ number_format($participants->total()) }} recorded participant(s) from your association. Present: {{ number_format($counts['present'] ?? 0) }}. Absent: {{ number_format($counts['absent'] ?? 0) }}.</p></div></div>
         <div class="table-scroll" role="region" aria-label="Association training attendance" tabindex="0">
             <table class="data-table program-register-table"><caption class="sr-only">Recorded member names and attendance for this association and training</caption><thead><tr><th scope="col">Member</th><th scope="col">Attendance</th></tr></thead><tbody>
                 @forelse($participants as $participant)<tr><th scope="row">{{ $nameOf($participant) }}</th><td><x-status-badge :value="ucfirst($participant->attendance_status)" /></td></tr>

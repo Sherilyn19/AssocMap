@@ -6,12 +6,12 @@
 @endphp
 
 @section('content')
-<section class="program-management" data-workspace-module="association-projects" data-workspace-title="Project Details" data-association-projects>
-    <x-workflow-navigation :back="$workflowBack" :parents="[['label' => $association->name]]" :current="$project->title" />
+<section class="program-management association-record-detail" data-workspace-module="association-projects" data-workspace-title="Project Details" data-association-projects>
     <header class="card program-heading"><div><p class="eyebrow">{{ $association->name }}</p><h1 tabindex="-1">Project Details</h1><p>{{ $project->title }}</p></div></header>
+    <x-workflow-navigation :back="$workflowBack" :parents="[['label' => 'My Projects', 'url' => $workflowBack['url']]]" :current="$project->title" />
     @if($errors->any())<div class="notice notice-error" role="alert">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
     <section class="card program-information" aria-labelledby="project-information-title">
-        <h2 id="project-information-title">Project overview</h2>
+        <h2 id="project-information-title"><x-icon name="briefcase" /> Project overview</h2>
         <p>This page provides read-only access to your association's saved project information.</p>
         @if($project->archived_at)<p class="notice">Project Archived — Read Only.</p>@endif
         @if($project->isFinalized())<p class="notice">Project finalized — Read Only. Saved Monitoring history remains available.</p>@endif

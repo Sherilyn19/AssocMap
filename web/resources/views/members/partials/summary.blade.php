@@ -5,4 +5,4 @@
         </a>
     @endforeach
 </nav>
-@if($indexRoute === 'admin.members.index')<div class="member-info-row"><span>About these totals</span><x-area-info label="About member totals">Current, active, and inactive totals exclude archived members. Counts cover authorized records before filters.</x-area-info></div>@else<p class="member-summary-help">{{ $summaryNote }} Counts cover your authorized records before search and filters.</p>@endif
+@if($indexRoute === 'admin.members.index')<div class="member-info-row"><span>About these totals</span><x-area-info label="About member totals">Current, active, and inactive totals exclude archived members. Counts cover authorized records before filters.</x-area-info></div>@elseif($indexRoute !== 'association.member-applications.index')<p class="member-summary-help">{{ $summaryNote }} Counts cover your authorized records before search and filters.</p>@endif
