@@ -44,12 +44,37 @@
         <a class="button button-primary" href="{{ route($prefix.'.dashboard') }}">Retry dashboard</a>
     </section>
 @else
-    @if($role === 'association_account')<div class="dashboard-association-summary">@endif
     @if($role === 'association_account')
         <section class="card dashboard-panel dashboard-association" aria-labelledby="dashboard-association-title">
             <span class="stat-icon"><x-icon name="building" /></span>
-            <div><p class="dashboard-kicker">Your association</p><h2 id="dashboard-association-title">{{ $dashboard['association']['name'] }}</h2><p>{{ $dashboard['association']['municipality'] }}</p><p class="dashboard-help">SAAD Phase II join date: {{ $dashboard['association']['joined_on'] }}. This dashboard contains only this association's records.</p></div>
-            <span class="badge badge-blue">{{ ucfirst($dashboard['association']['status']) }}</span>
+            <div class="dashboard-association-content"><p class="dashboard-kicker">Your association</p><div class="dashboard-association-title-row"><h2 id="dashboard-association-title">{{ $dashboard['association']['name'] }}</h2><span class="badge badge-blue">{{ ucfirst($dashboard['association']['status']) }}</span></div>
+                @foreach([
+                    'Association details' => [
+                        ['Acronym', $dashboard['association']['acronym'], 'building'],
+                        ['SAAD Phase II join date', $dashboard['association']['joined_on'], 'calendar'],
+                        ['Association ID', $dashboard['association']['id'], 'receipt'],
+                    ],
+                    'Registered location' => [
+                        ['Address', $dashboard['association']['address'], 'map-pinned'],
+                        ['Barangay', $dashboard['association']['barangay'], 'map-pin'],
+                        ['Municipality / city', $dashboard['association']['municipality'], 'map-pin'],
+                        ['Province', $dashboard['association']['province'], 'map'],
+                        ['Region', $dashboard['association']['region'], 'map'],
+                        ['Barangay ID', $dashboard['association']['barangay_id'], 'receipt'],
+                    ],
+                ] as $group => $items)
+                    <section class="dashboard-association-group"><h3>{{ $group }}</h3><dl class="dashboard-association-details">
+                        @foreach($items as [$label, $value, $icon])<div><dt><x-icon :name="$icon" />{{ $label }}</dt><dd>{{ filled($value) ? $value : 'Not recorded' }}</dd></div>@endforeach
+                    </dl></section>
+                @endforeach
+            </div>
+                <section class="dashboard-gis-gallery" data-dashboard-gis-gallery data-gis-base="{{ route('association.gis.index') }}" aria-labelledby="dashboard-gis-gallery-title">
+                    <div class="dashboard-gis-gallery-heading"><h3 id="dashboard-gis-gallery-title"><x-icon name="map-pinned" /> GIS photo gallery</h3><a href="{{ route('association.gis.index') }}">Explore GIS map <x-icon name="arrow" /></a></div>
+                    <p class="dashboard-gis-gallery-status" role="status" data-gallery-status>Loading photos…</p><div class="dashboard-gis-gallery-grid" data-gallery-grid></div>
+                    <div class="dashboard-gis-gallery-pages"><button type="button" class="button" data-gallery-previous disabled>Previous locations</button><span data-gallery-page></span><button type="button" class="button" data-gallery-next disabled>Next locations</button></div>
+                    <dialog class="dashboard-gis-gallery-viewer" data-gallery-viewer aria-label="GIS photo viewer"><button type="button" class="button" data-gallery-close aria-label="Close photo">Close</button><img data-gallery-image alt=""><p data-gallery-caption></p></dialog>
+                    <noscript>Open the GIS map to view location photos.</noscript>
+                </section>
         </section>
     @elseif($role === 'field_officer' && $dashboard['scope_count'] === 0)
         <p class="notice" role="status">No active, unarchived associations are currently assigned to you. Ask the administrator to review assignments.</p>
@@ -73,7 +98,7 @@
         };
         $metricsByKey = array_column($dashboard['metrics'], null, 'key');
     @endphp
-    <section class="dashboard-metrics" aria-label="Dashboard summary">
+    @if($role !== 'association_account')<section class="dashboard-metrics" aria-label="Dashboard summary">
         @foreach($primaryCards as [$metricKey, $label, $routeName, $destination])
             @if(isset($metricsByKey[$metricKey]))
                 @php
@@ -82,12 +107,11 @@
                     $parameters = $metricKey === 'applications_pending' ? ['status' => 'pending'] : [];
                 @endphp
                 <a class="dashboard-summary-link" href="{{ route($routeName, $parameters) }}" aria-label="{{ $label }}: {{ $displayValue }}. Open {{ $destination }}">
-                    <x-stat-card :label="$label" :value="$displayValue" :icon="$metric['icon']" :note="$metric['note']" />
+                    <x-stat-card :label="$label" :value="$displayValue" :icon="$metric['icon']" :note="$role === 'association_account' && $metricKey === 'applications_pending' ? '' : $metric['note']" />
                 </a>
             @endif
         @endforeach
-    </section>
-    @if($role === 'association_account')</div>@endif
+    </section>@endif
     <section class="card dashboard-panel" aria-labelledby="dashboard-actions-title">
         <div class="dashboard-panel-heading"><div><h2 id="dashboard-actions-title">{{ match ($role) { 'field_officer' => 'Field workspace', 'association_account' => 'Your workspace', default => 'Quick access' } }}</h2><p class="dashboard-help">{{ match ($role) { 'field_officer' => 'People, program records and reporting in your assigned scope.', 'association_account' => 'Applications, monitoring and reports for your association.', default => 'Open your workspace' } }}</p></div><span class="stat-icon"><x-icon name="grid" /></span></div>
         <nav @class(['dashboard-actions', 'dashboard-actions-field' => $role === 'field_officer', 'dashboard-actions-association' => $role === 'association_account']) aria-label="Dashboard quick actions">
@@ -114,10 +138,10 @@
             @if($dashboard['applications'] === null)<p class="dashboard-empty">Application counts are temporarily unavailable.</p>
             @else
                 <dl class="dashboard-summary">
-                    @foreach($dashboard['applications'] as $status => $count)<div><dt>{{ ucfirst($status) }}</dt><dd><x-summary-counter :value="number_format($count)" /></dd></div>@endforeach
+                    @foreach($dashboard['applications'] as $status => $count)<div><dt>@if($role === 'association_account')<a class="dashboard-application-status-link" href="{{ route('association.member-applications.index', ['status' => $status]) }}" aria-label="View {{ $status }} applications, {{ number_format($count) }}">{{ ucfirst($status) }}</a>@else{{ ucfirst($status) }}@endif</dt><dd><x-summary-counter :value="number_format($count)" /></dd></div>@endforeach
                 </dl>
             @endif
-            @if($role === 'association_account')<p class="dashboard-help dashboard-info-line">About application totals <x-area-info label="About application totals">Field Officers review applications. Application totals are separate from official member counts.</x-area-info></p>@endif
+            @if($role === 'association_account')<p class="dashboard-help dashboard-info-line">About application totals <x-area-info label="About application totals">Totals cover the association. The application list shows submissions from this account, so its counts may differ. Field Officers review applications; totals are separate from official member counts.</x-area-info></p>@endif
             @if($role === 'field_officer')<a class="button button-primary" href="{{ route($prefix.'.member-applications.index', ['status' => 'pending']) }}">Review pending applications</a>@endif
         </section>
     @endif

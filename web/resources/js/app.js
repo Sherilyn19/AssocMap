@@ -15,6 +15,7 @@ import { initProgramActivities } from './pages/program-activities.js';
 import { initFeedback, showFeedback } from './core/feedback.js';
 import { mountSummaryCounters } from './components/summary-counter.js';
 import { initContextualReports } from './components/contextual-report.js';
+import { initDashboardGisGallery } from './pages/dashboard-gis-gallery.js';
 
 initFeedback();
 initDisclosures();
@@ -27,6 +28,7 @@ initUserMenus();
 initAssociationUi();
 initReports();
 initContextualReports();
+initDashboardGisGallery();
 mountSummaryCounters();
 const dashboardCharts = document.querySelectorAll('[data-dashboard-chart]');
 if (dashboardCharts.length && 'IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {

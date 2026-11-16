@@ -6,6 +6,13 @@
 @php if (request()->routeIs('association.projects.*')) $workspaceHeading = 'My Projects'; @endphp
 @php if (request()->routeIs('association.trainings.*')) $workspaceHeading = 'Trainings'; @endphp
 @php if (request()->routeIs('association.program-activities.*')) $workspaceHeading = 'Program Activities'; @endphp
+@php
+    try {
+        $headerAssociationName = $currentUser->associationAccount()->with('association:id,name')->first()?->association?->name;
+    } catch (\Illuminate\Database\QueryException $exception) {
+        $headerAssociationName = null;
+    }
+@endphp
 <head>
     @include('partials.favicon')
     <meta charset="utf-8">
@@ -39,7 +46,8 @@
         <x-workspace-header
             workspace="Association workspace"
             :context="$workspaceHeading"
-            :display-name="$currentUser->display_name ?? 'Association Account'"
+            :display-name="request()->attributes->get('current_user_email') ?: 'Association Account'"
+            :association-name="$headerAssociationName"
             account-label=""
             :scroll-context="true"
         >

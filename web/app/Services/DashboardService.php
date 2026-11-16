@@ -142,7 +142,11 @@ class DashboardService
             ])->all());
         $association = null;
         if ($role === 'association_account') {
-            $linked = (clone $associations)->first(['a.id', 'a.name', 'a.status', 'mu.name as municipality', 'a.saad_phase2_join_date as joined_on']);
+            $addressColumn = app(\App\Services\Associations\AssociationGeographyService::class)->usesDirectGeography()
+                ? 'a.specific_address as address' : 'ar.address as address';
+            $linked = (clone $associations)->first(['a.id', 'a.name', 'a.acronym', 'a.status', 'b.id as barangay_id',
+                'b.name as barangay', 'mu.name as municipality', 'mu.province', 'mu.region', $addressColumn,
+                'a.saad_phase2_join_date as joined_on']);
             abort_unless($linked, 403);
             $association = (array) $linked;
         }

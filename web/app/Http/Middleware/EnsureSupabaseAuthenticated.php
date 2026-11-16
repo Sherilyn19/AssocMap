@@ -59,6 +59,7 @@ class EnsureSupabaseAuthenticated
         }
 
         $request->attributes->set('current_user', $profile);
+        $request->attributes->set('current_user_email', is_string($supabaseUser['email'] ?? null) ? $supabaseUser['email'] : null);
         view()->share('currentUser', $profile);
         return $next($request);
     }

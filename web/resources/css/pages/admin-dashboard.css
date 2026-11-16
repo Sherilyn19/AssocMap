@@ -93,7 +93,9 @@
 .role-dashboard .dashboard-shortcut > span:nth-child(2) { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .role-dashboard .dashboard-shortcut > .icon { width: 16px; color: var(--primary); }
 .role-dashboard .dashboard-shortcut:hover { color: var(--primary); background: #f6f9fd; border-color: #8bafd3; }
-.role-dashboard .dashboard-association { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; border-left: 3px solid var(--primary); background: #f5f9fe; }
+.role-dashboard .dashboard-association { display: grid; grid-template-columns: auto minmax(0, 1.8fr) minmax(250px, 1fr); gap: 16px; align-items: start; border-left: 3px solid var(--primary); background: #f5f9fe; }
+.role-dashboard .dashboard-association-title-row { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.role-dashboard .dashboard-association-title-row h2 { min-width: 0; overflow-wrap: anywhere; }
 .role-dashboard .dashboard-association > div { flex: 1 1 180px; min-width: 0; }
 .role-dashboard .dashboard-association p { margin-top: 8px; }
 .role-dashboard .dashboard-association .dashboard-kicker { margin-top: 0; }
@@ -101,6 +103,10 @@
 .role-dashboard .dashboard-association > .badge { align-self: flex-start; }
 .role-dashboard .dashboard-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 115px), 1fr)); gap: 12px; margin: 20px 0; }
 .role-dashboard .dashboard-summary > div { min-width: 0; padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 9px; }
+.association-workspace .role-dashboard .dashboard-summary > div { position: relative; }
+.association-workspace .role-dashboard .dashboard-application-status-link { color: inherit; text-decoration: none; }
+.association-workspace .role-dashboard .dashboard-application-status-link::after { content: ''; position: absolute; inset: 0; border-radius: 9px; }
+.association-workspace .role-dashboard .dashboard-summary > div:focus-within { outline: 2px solid var(--primary); outline-offset: 3px; }
 .role-dashboard .dashboard-summary dt { color: #475569; font-size: 12px; overflow-wrap: anywhere; }
 .role-dashboard .dashboard-summary dd { margin: 10px 0 0; color: #0f172a; font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .role-dashboard.admin-dashboard .dashboard-summary { margin-bottom: 0; }
@@ -204,7 +210,31 @@
 }
 
 /* Field officer presentation */
-.role-dashboard .dashboard-association-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 14px; }
+.role-dashboard .dashboard-association-summary { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(240px, 1fr); align-items: stretch; gap: 14px; }
+.role-dashboard .dashboard-association-group { margin-top: 20px; }
+.role-dashboard .dashboard-association-group h3 { color: #193650; font-weight: 700; }
+.role-dashboard .dashboard-association-details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 20px; margin: 10px 0 0; }
+.role-dashboard .dashboard-association-details > div { min-width: 0; border-top: 1px solid #dbe6ee; padding-top: 10px; }
+.role-dashboard .dashboard-association-details dt { display: flex; align-items: center; gap: 6px; color: #526f88; font-weight: 700; }
+.role-dashboard .dashboard-association-details dt .icon { width: 15px; height: 15px; flex: none; color: var(--primary); }
+.role-dashboard .dashboard-association-details dd { margin: 5px 0 0; color: #263f58; overflow-wrap: anywhere; }
+.role-dashboard .dashboard-gis-gallery { min-width: 0; margin: 0; padding: 0 0 0 18px; border-left: 1px solid #dbe6ee; }
+.role-dashboard .dashboard-gis-gallery-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+.role-dashboard .dashboard-gis-gallery-heading :is(h3, a) { display: inline-flex; align-items: center; gap: 6px; }
+.role-dashboard .dashboard-gis-gallery-heading .icon { width: 16px; height: 16px; }
+.role-dashboard .dashboard-gis-gallery-status { color: var(--text-secondary); }
+.role-dashboard .dashboard-gis-gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr)); gap: 10px; margin-top: 12px; }
+.role-dashboard .dashboard-gis-gallery-grid button { min-width: 0; padding: 0; overflow: hidden; border: 1px solid #dbe6ee; border-radius: 9px; background: #edf4fb; cursor: pointer; }
+.role-dashboard .dashboard-gis-gallery-grid img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.role-dashboard .dashboard-gis-gallery-grid button:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.role-dashboard .dashboard-gis-gallery-pages { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.role-dashboard .dashboard-gis-gallery-viewer { width: min(800px, 94vw); max-height: 90vh; padding: 16px; border: 1px solid #dbe6ee; border-radius: 12px; background: #fff; }
+.role-dashboard .dashboard-gis-gallery-viewer::backdrop { background: rgb(15 23 42 / 75%); }
+.role-dashboard .dashboard-gis-gallery-viewer img { display: block; max-width: 100%; max-height: 70vh; margin: 12px auto; object-fit: contain; }
+@media (prefers-reduced-motion: no-preference) { .role-dashboard .dashboard-gis-gallery-grid img { transition: transform 220ms ease; } .role-dashboard .dashboard-gis-gallery-grid button:hover img { transform: scale(1.06); } .role-dashboard .dashboard-gis-gallery-viewer[open] { animation: account-association-appear 180ms ease-out; } }
+@media (max-width: 1000px) { .role-dashboard .dashboard-association-details { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 850px) { .role-dashboard .dashboard-association { grid-template-columns: auto minmax(0, 1fr); } .role-dashboard .dashboard-gis-gallery { grid-column: 2; padding: 18px 0 0; border-left: 0; border-top: 1px solid #dbe6ee; } }
+@media (max-width: 480px) { .role-dashboard .dashboard-association-details { grid-template-columns: minmax(0, 1fr); } }
 .role-dashboard .dashboard-association-summary .dashboard-metrics { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 700px) { .role-dashboard .dashboard-association-summary { grid-template-columns: minmax(0, 1fr); } }
 .association-workspace .role-dashboard .dashboard-register .dashboard-records li { padding: 15px 12px; border-radius: 8px; }
