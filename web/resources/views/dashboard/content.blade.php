@@ -1,7 +1,7 @@
 @php
     $introduction = match ($role) {
         'system_admin' => 'Your overview of associations, members, and project implementation.',
-        'field_officer' => 'Operational records for your currently assigned active, unarchived associations.',
+        'field_officer' => 'Explore updates and records for your assigned active associations.',
         default => 'Your association records, applications, projects and monitoring overview.',
     };
     $roleLabel = match ($role) { 'system_admin' => 'System Administrator', 'field_officer' => 'Field Officer', default => 'Association Account' };
@@ -115,7 +115,7 @@
                     @foreach($dashboard['applications'] as $status => $count)<div><dt>{{ ucfirst($status) }}</dt><dd><x-summary-counter :value="number_format($count)" /></dd></div>@endforeach
                 </dl>
             @endif
-            <p class="dashboard-help">{{ $role === 'field_officer' ? 'Review pending applications through the existing workflow. Approval creates an official member record.' : 'Approval and rejection belong to the Field Officer. Application totals are separate from official member totals.' }}</p>
+            @if($role !== 'field_officer')<p class="dashboard-help">Approval and rejection belong to the Field Officer. Application totals are separate from official member totals.</p>@endif
             <a class="button button-primary" href="{{ route($prefix.'.member-applications.index', ['status' => 'pending']) }}">{{ $role === 'field_officer' ? 'Review pending applications' : 'Open Member Applications' }}</a>
         </section>
     @endif
@@ -124,9 +124,9 @@
             <div class="dashboard-panel-heading"><div><p class="dashboard-kicker">{{ $role === 'field_officer' ? 'Your assignments' : 'Association register' }}</p><h2 id="dashboard-associations-title">{{ $role === 'field_officer' ? 'Assigned associations' : 'Association overview' }}</h2></div>
                 @if($role === 'system_admin')
                     <a class="dashboard-associations-link" href="{{ route('admin.associations.index') }}">View associations <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0-6.75-6.75M19.5 12l-6.75 6.75" /></svg></a>
-                @else<span class="stat-icon"><x-icon name="building" /></span>@endif
+                @else<a class="dashboard-associations-link" href="{{ route('field-officer.associations.index') }}">View associations <x-icon name="arrow" /></a>@endif
             </div>
-            <p class="dashboard-help">{{ $role === 'system_admin' ? 'Member counts exclude archived records.' : 'Up to 10 associations, ordered by name. Member counts are active/unarchived; project counts are unarchived.' }}</p>
+            <p class="dashboard-help">{{ $role === 'system_admin' ? 'Member counts exclude archived records.' : 'Showing up to 10 assigned associations in alphabetical order. Counts include active, unarchived members and unarchived projects.' }}</p>
             @if($dashboard['associations'] === null)<p class="dashboard-empty">The association list is temporarily unavailable.</p>
             @elseif(!$dashboard['associations'])<p class="dashboard-empty">No eligible associations in this scope.</p>
             @else
@@ -183,7 +183,7 @@
     @else
     <section class="card dashboard-panel dashboard-register dashboard-projects" aria-labelledby="dashboard-projects-title">
         <div class="dashboard-panel-heading"><div><p class="dashboard-kicker">Project register</p><h2 id="dashboard-projects-title">Recently registered projects</h2></div><span class="stat-icon"><x-icon name="briefcase" /></span></div>
-        <p class="dashboard-help">Up to six unarchived projects, ordered by registration timestamp. This is a record list, not an audit feed.</p>
+        <p class="dashboard-help">Showing up to six unarchived projects, starting with the most recently registered. This list is not an audit log.</p>
         @if($dashboard['recent_projects'] === null)<p class="dashboard-empty">Project records are temporarily unavailable.</p>
         @elseif(!$dashboard['recent_projects'])<p class="dashboard-empty">No unarchived projects in this scope.</p>
         @else
@@ -204,16 +204,16 @@
             @else
                 <dl class="dashboard-summary"><div><dt>Recorded activities</dt><dd><x-summary-counter :value="number_format($dashboard['training']['records'])" /></dd></div><div><dt>Completed activities</dt><dd><x-summary-counter :value="number_format($dashboard['training']['completed'])" /></dd></div><div><dt>Distinct members marked present</dt><dd><x-summary-counter :value="number_format($dashboard['training']['distinct_present_members'])" /></dd></div></dl>
             @endif
-            @if($role !== 'system_admin')<p class="dashboard-help">All recorded dates. Archived training and member history is retained. Distinct attendees are people, not attendance occurrences.</p>@endif
+            @if($role !== 'system_admin')<p class="dashboard-help">Includes records from all dates, including archived training and member history. Each attendee is counted once.</p>@endif
         </section>
         <section class="card dashboard-panel" aria-labelledby="dashboard-monitoring-title">
             <div class="dashboard-panel-heading"><div><p class="dashboard-kicker">Quarterly records</p><h2 id="dashboard-monitoring-title">Monitoring overview</h2></div>@if($role === 'system_admin')<a class="dashboard-associations-link" href="{{ route('admin.monitoring.index') }}">View monitoring <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0-6.75-6.75M19.5 12l-6.75 6.75" /></svg></a>@else<span class="stat-icon"><x-icon name="chart" /></span>@endif</div>
             @if($dashboard['monitoring'] === null)<p class="dashboard-empty">Monitoring summaries are temporarily unavailable.</p>
             @else
                 <dl class="dashboard-summary"><div><dt>Quarterly records</dt><dd><x-summary-counter :value="number_format($dashboard['monitoring']['records'])" /></dd></div><div><dt>Distinct year / quarter periods</dt><dd><x-summary-counter :value="number_format($dashboard['monitoring']['periods'])" /></dd></div><div><dt>Visit reports</dt><dd><x-summary-counter :value="$dashboard['monitoring']['visits'] === null ? 'Unavailable' : number_format($dashboard['monitoring']['visits']['total'])" /></dd></div></dl>
-                @if($role !== 'system_admin')<p class="dashboard-help">{{ $dashboard['monitoring']['visits'] === null ? 'Visit-report data could not be read.' : number_format($dashboard['monitoring']['visits']['legacy_imports']).' visit reports are legacy imports.' }} Records, periods and visits are different measures.</p>@endif
+                @if($role === 'field_officer')<p class="dashboard-help dashboard-info-line">About these totals <x-area-info label="About monitoring totals">{{ $dashboard['monitoring']['visits'] === null ? 'Visit-report data is unavailable.' : number_format($dashboard['monitoring']['visits']['legacy_imports']).' visit reports were imported from earlier records.' }} Quarterly records, periods and visit reports are counted separately.</x-area-info></p>@elseif($role !== 'system_admin')<p class="dashboard-help">{{ $dashboard['monitoring']['visits'] === null ? 'Visit-report data could not be read.' : number_format($dashboard['monitoring']['visits']['legacy_imports']).' visit reports are legacy imports.' }} Records, periods and visits are different measures.</p>@endif
             @endif
-            @if($role !== 'system_admin')<p class="dashboard-help">All recorded years for unarchived projects. Missing records do not imply failed or incomplete activities.</p>
+            @if($role !== 'system_admin')<p class="dashboard-help">Includes all recorded years for unarchived projects. A missing record does not necessarily mean an activity failed or is incomplete.</p>
             <a class="button" href="{{ route($prefix.'.monitoring.index') }}">Open Monitoring</a>@endif
         </section>
     </div>
@@ -244,5 +244,5 @@
             @endif
         </section>
     </div>
-    @if($role !== 'system_admin')<p class="dashboard-help">Dashboard totals use the scopes stated above. Detailed reports can use different periods and retain additional archived project history. Income and production quantities are available in Reports &amp; Analytics.</p>@endif
+    @if($role === 'association_account')<p class="dashboard-help">Dashboard totals use the scopes stated above. Detailed reports can use different periods and retain additional archived project history. Income and production quantities are available in Reports &amp; Analytics.</p>@endif
 @endif

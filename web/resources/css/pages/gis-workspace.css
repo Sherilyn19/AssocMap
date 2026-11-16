@@ -348,3 +348,77 @@ html.gis-details-drawer-open { overflow: hidden; }
     [data-gis-administrator="true"] :is(.button, .gis-filters summary, .gis-map-legend > summary, .gis-map-guide summary) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease; }
     [data-gis-administrator="true"] .button:not(:disabled):hover { box-shadow: 0 8px 18px -12px #17304d26; }
 }
+
+/* Field officer presentation */
+
+.field-officer-polish [data-gis-manager="true"] { gap: 16px; }
+.field-officer-polish [data-gis-manager="true"] .gis-heading { position: relative; z-index: 5; border-radius: 12px; box-shadow: var(--shadow-sm); }
+.field-officer-polish [data-gis-manager="true"] .gis-header-info { position: relative; z-index: 5; display: flex; align-items: center; gap: 5px; margin-top: 8px; color: var(--text-secondary); }
+.field-officer-polish [data-gis-manager="true"] .gis-header-info .area-info { position: relative; flex: none; }
+.field-officer-polish [data-gis-manager="true"] .gis-header-info .area-info button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #386a96; cursor: pointer; }
+.field-officer-polish [data-gis-manager="true"] .gis-header-info .area-info button:hover, .field-officer-polish [data-gis-manager="true"] .gis-header-info .area-info button[aria-expanded="true"] { background: #edf4fb; }
+.field-officer-polish [data-gis-manager="true"] .gis-header-info .area-info svg { width: 18px; height: 18px; }
+.field-officer-polish [data-gis-manager="true"] .gis-header-info .area-info-popover { display: none; position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; width: min(300px, calc(100vw - 48px)); padding: 12px 14px; border: 1px solid #cfdeeb; border-radius: 8px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 16%); color: #334b63; line-height: 1.55; }
+.field-officer-polish [data-gis-manager="true"] .gis-header-info .area-info button[aria-expanded="true"] + .area-info-popover { display: block; }
+@media (hover: hover) { .field-officer-polish [data-gis-manager="true"] .gis-header-info .area-info:hover .area-info-popover { display: block; } }
+.field-officer-polish [data-gis-manager="true"] :is(.gis-search-panel, .gis-map-panel, .gis-register-panel, .gis-location-panel) { border: 1px solid #d5e3ec; border-radius: 12px; box-shadow: var(--shadow-sm); }
+.field-officer-polish [data-gis-manager="true"] .gis-toolbar { gap: 14px; background: #f8fbfd; }
+.field-officer-polish [data-gis-manager="true"] .gis-view-switch { border: 1px solid var(--border-color); background: #eaf2f7; }
+.field-officer-polish [data-gis-manager="true"] .gis-search-bar { gap: 12px; }
+.field-officer-polish [data-gis-manager="true"] .gis-panel-heading { background: #f9fbfc; }
+.field-officer-polish [data-gis-manager="true"] .gis-map-heading { padding: 12px 18px; }
+.field-officer-polish [data-gis-manager="true"] .gis-map { background: #e7eff2; }
+.field-officer-polish [data-gis-manager="true"] .gis-spatial-grid { gap: 18px; }
+.field-officer-polish [data-gis-manager="true"] :is(.gis-filters summary, .gis-map-legend > summary, .gis-map-guide summary):hover { color: var(--primary); background: var(--primary-soft); }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .gis-detail-section h4 { color: #17314d; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .gis-about-section dl > div:nth-child(2) dd { padding: 14px; border: 1px solid #dce6ee; border-radius: 7px; background: #f6f9fb; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .gis-position-section dl { padding: 0; background: transparent; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .gis-position-section dl > div { min-width: 0; padding: 12px; border: 1px solid #dce6ee; border-radius: 6px; background: #f6f9fb; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .gis-position-section dd { color: #17314d; font-family: monospace; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .gis-coordinate-system { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; margin: 14px 0 0; color: var(--text-secondary); line-height: 1.8; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .gis-coordinate-system span:last-child { color: #294e73; font-family: monospace; }
+.field-officer-polish [data-gis-manager="true"] .gis-filters { background: #f8fbfe; }
+.field-officer-polish [data-gis-manager="true"] .gis-filters summary { color: #193650; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
+.field-officer-polish [data-gis-manager="true"] .gis-filter-indicator { color: #526f88; font-weight: 500; letter-spacing: normal; text-transform: none; }
+.field-officer-polish [data-gis-manager="true"] .gis-filter-grid { gap: 16px; padding: 8px 18px 20px; }
+.field-officer-polish [data-gis-manager="true"] .gis-filter-grid .field { min-width: 0; }
+.field-officer-polish [data-gis-manager="true"] .gis-filter-grid label { display: block; margin-bottom: 7px; color: #193650; font-weight: 600; }
+.field-officer-polish [data-gis-manager="true"] .gis-filter-grid :is(select, input) { min-height: 44px; border: 1px solid #dce7f1; border-radius: 8px; background-color: #f2f7fc; color: #263f58; }
+.field-officer-polish [data-gis-manager="true"] .gis-filter-grid :is(select, input):focus-visible { outline-offset: 2px; }
+.field-officer-polish [data-gis-manager="true"] .gis-selection-heading { background: #edf4fb; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-panel:not(.has-selection) .gis-selection-heading { background: transparent; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content [data-gis-details] { display: grid; gap: 12px; padding: 16px; background: #f6f9fc; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content [data-gis-details]:empty { display: none; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .gis-detail-section { min-width: 0; margin: 0; padding: 16px; border: 1px solid #e0e9f1; border-radius: 9px; background: #fff; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .gis-detail-section h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; padding-bottom: 12px; border-bottom: 1px solid #edf1f5; }
+.field-officer-polish [data-gis-manager="true"] .gis-detail-icon { width: 16px; height: 16px; flex: none; color: #547b9c; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .gis-detail-section dt, .field-officer-polish [data-gis-manager="true"] .gis-history dt { color: #71869b; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .gis-detail-section dd, .field-officer-polish [data-gis-manager="true"] .gis-history dd { color: #263f58; font-weight: 600; }
+.field-officer-polish [data-gis-manager="true"] .gis-history summary, .field-officer-polish [data-gis-manager="true"] .gis-photos-heading h3 { color: #244969; font-weight: 700; }
+.field-officer-polish [data-gis-manager="true"] .gis-photo-title { display: flex; align-items: center; gap: 5px; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .area-info { position: relative; display: inline-flex; flex: none; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .gis-detail-info { margin-left: auto; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .area-info button { display: grid; place-items: center; width: 30px; height: 30px; min-height: 30px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #386a96; cursor: pointer; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .area-info button:hover, .field-officer-polish [data-gis-manager="true"] .gis-location-content .area-info button[aria-expanded="true"] { background: #edf4fb; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .area-info svg { width: 18px; height: 18px; }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .area-info-popover { display: none; position: absolute; z-index: 20; top: calc(100% + 4px); right: 0; width: min(260px, calc(100vw - 80px)); padding: 12px 14px; border: 1px solid #cfdeeb; border-radius: 8px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 16%); color: #334b63; font-weight: 400; letter-spacing: normal; line-height: 1.55; text-transform: none; }
+.field-officer-polish [data-gis-manager="true"] .gis-photo-title .area-info-popover { right: auto; left: 0; width: min(230px, calc(100vw - 160px)); }
+.field-officer-polish [data-gis-manager="true"] .gis-location-content .area-info button[aria-expanded="true"] + .area-info-popover { display: block; }
+@media (hover: hover) { .field-officer-polish [data-gis-manager="true"] .gis-location-content .area-info:hover .area-info-popover { display: block; } }
+@media (max-width: 540px) { .field-officer-polish [data-gis-manager="true"] .gis-filter-grid { padding: 4px 16px 16px; } }
+@media (max-width: 540px) { .field-officer-polish [data-gis-manager="true"] .gis-location-content [data-gis-details] { padding: 12px; } }
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish [data-gis-manager="true"] :is(.gis-heading, .gis-search-panel) { animation: gis-public-enter 340ms ease-out both; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish [data-gis-manager="true"] .gis-search-panel { animation-delay: 50ms; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish [data-gis-manager="true"] .gis-spatial-grid { animation: gis-public-map-enter 380ms ease-out both; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish [data-gis-manager="true"] :is(.button, .gis-filters summary, .gis-map-legend > summary, .gis-map-guide summary) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish [data-gis-manager="true"] .button:not(:disabled):hover { box-shadow: 0 8px 18px -12px #17304d26; }
+}

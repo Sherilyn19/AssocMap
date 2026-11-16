@@ -216,3 +216,52 @@
 .monitoring-photo-dialog img { display: block; max-width: 100%; max-height: 75dvh; margin: 12px auto; object-fit: contain; }
 .monitoring-photo-dialog p { margin-block: 14px; }
 .monitoring-photos [hidden] { display: none; }
+
+/* Field officer presentation */
+
+.field-officer-polish .monitoring-record-header { min-width: 0; padding: 20px 24px; border-color: #dbe6ee; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+.field-officer-polish .monitoring-record-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; min-width: 0; }
+.field-officer-polish .monitoring-record-heading > div { flex: 1 1 200px; min-width: 0; }
+.field-officer-polish .monitoring-record-heading h1 { margin: 0; color: #17314d; text-transform: uppercase; overflow-wrap: anywhere; }
+.field-officer-polish .monitoring-record-heading .eyebrow { margin-bottom: 4px; }
+.field-officer-polish .monitoring-record-heading .badge { max-width: 100%; white-space: normal; }
+.field-officer-polish .monitoring-record-header .monitoring-record-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 10px; background: #edf4fb; color: #386a96; }
+.field-officer-polish .monitoring-record-header .monitoring-record-icon svg { width: 22px; height: 22px; }
+.field-officer-polish .monitoring-record-identity { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 24px; margin: 16px 0 0; padding-top: 14px; border-top: 1px solid #edf1f5; }
+.field-officer-polish .monitoring-record-identity dt { margin-bottom: 4px; color: #71869b; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.field-officer-polish .monitoring-record-identity dd { margin: 0; color: #263f58; font-weight: 600; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .field-officer-polish .monitoring-record-header { padding: 18px; } }
+@media (max-width: 600px) { .field-officer-polish .monitoring-record-identity { grid-template-columns: minmax(0, 1fr); } }
+.field-officer-polish .monitoring-record-view .monitoring-heading { align-items: center; border-color: #dbe6ee; border-top-color: var(--primary); box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+.field-officer-polish .monitoring-record-view .monitoring-record-icon { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border-radius: 10px; background: #edf4fb; color: #386a96; }
+.field-officer-polish .monitoring-record-view .monitoring-record-icon svg { width: 24px; height: 24px; }
+.field-officer-polish .monitoring-record-view .monitoring-heading .monitoring-record-badges { display: flex; flex: 0 1 auto; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.field-officer-polish .monitoring-record-view .monitoring-record-badges .badge { max-width: 100%; white-space: normal; }
+.field-officer-polish .monitoring-record-view :is(.monitoring-overview, .monitoring-section, .monitoring-register) { border-color: #dbe6ee; border-radius: 12px; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+.field-officer-polish .monitoring-record-view .monitoring-section-heading h2 { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.field-officer-polish .monitoring-record-view .monitoring-heading-icon { width: 17px; height: 17px; flex: none; color: #547b9c; }
+.field-officer-polish .monitoring-record-view :is(.monitoring-overview, .monitoring-section) .monitoring-section-heading { margin: 0 22px 18px; padding: 20px 0 16px; border-bottom: 1px solid #edf1f5; }
+.field-officer-polish .monitoring-record-view :is(.monitoring-detail-grid, .monitoring-visit-notes) dt { color: #71869b; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.field-officer-polish .monitoring-record-view :is(.monitoring-detail-grid, .monitoring-visit-notes) dd { color: #263f58; font-weight: 600; overflow-wrap: anywhere; }
+.field-officer-polish .monitoring-record-view .monitoring-nav a { border-color: #dbe6ee; box-shadow: 0 2px 8px rgb(16 47 80 / 4%); }
+.field-officer-polish .monitoring-record-view .monitoring-nav a[aria-current="page"] { background: #1d628e; border-color: #1d628e; }
+@media (prefers-reduced-motion: no-preference) { .field-officer-polish .monitoring-record-view :is(.monitoring-nav a, .monitoring-card) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease; } }
+@media (prefers-reduced-motion: no-preference) { .field-officer-polish .monitoring-record-view .monitoring-card:hover { border-color: #bfd3e5; box-shadow: 0 5px 16px rgb(16 47 80 / 7%); } }
+@media (max-width: 640px) { .field-officer-polish .monitoring-record-view :is(.monitoring-overview, .monitoring-section) .monitoring-section-heading { margin-inline: 18px; } }
+@media (max-width: 640px) { .field-officer-polish .monitoring-record-view .monitoring-heading .monitoring-record-badges { flex-basis: 100%; } }
+.field-officer-polish .monitoring-management .monitoring-heading h1, .field-officer-polish .monitoring-management .monitoring-section-heading h2 { text-transform: uppercase; }
+.field-officer-polish .monitoring-management .workflow-navigation { margin: -8px 0 0; }
+.field-officer-polish .monitoring-management .workflow-navigation nav { order: -1; }
+.field-officer-polish .monitoring-management .workflow-navigation .back-link { padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; text-decoration: none; }
+.field-officer-polish .monitoring-management .workflow-navigation a:hover { color: #0b427b; }
+.field-officer-polish .monitoring-management .monitoring-register { overflow: visible; }
+.field-officer-polish .monitoring-management .monitoring-project-row { border-color: #dbe6ee; border-top-color: #8bb6d7; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .monitoring-management .monitoring-heading { animation: monitoring-arrive 400ms ease-out both; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .monitoring-management :is(.monitoring-project-row, .monitoring-quarter-slot, .monitoring-pagination a) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .monitoring-management .monitoring-project-row:hover { border-color: #a9c6df; box-shadow: 0 6px 20px rgb(16 47 80 / 9%); }
+}

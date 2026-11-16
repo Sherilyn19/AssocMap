@@ -13,7 +13,7 @@
     <div class="topbar-context">
         {{ $navigationToggle }}
         @if($scrollContext)
-            <div class="admin-header-trail"><span class="admin-header-workspace">{{ $workspace }}</span><span class="admin-header-page" data-admin-header-page><x-icon name="chevron" /><span class="workspace-header-context" @if($contextId) id="{{ $contextId }}" @endif>{{ $context }}</span></span></div>
+            <div class="admin-header-trail">@if($workspace)<span class="admin-header-workspace">{{ $workspace }}</span>@endif<span class="admin-header-page" data-admin-header-page>@if($workspace)<x-icon name="chevron" />@endif<span class="workspace-header-context" @if($contextId) id="{{ $contextId }}" @endif>{{ $context }}</span></span></div>
         @else
             @unless($compact)<div class="context-product">{{ $workspace }}</div><x-icon name="chevron" />@endunless
             <span class="workspace-header-context" @if($contextId) id="{{ $contextId }}" @endif>{{ $context }}</span>
@@ -26,7 +26,7 @@
         @endif
         <div class="account-copy">
             <strong>{{ $displayName }}</strong>
-            @unless($compact)<small>{{ $accountLabel }}</small>@endunless
+            @if(!$compact && $accountLabel)<small>{{ $accountLabel }}</small>@endif
         </div>
         <form method="POST" action="{{ route('logout') }}">
             @csrf

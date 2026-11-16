@@ -1,6 +1,6 @@
 import { initDisclosures } from './core/helpers.js';
 import { initDialogs } from './core/dialogs.js';
-import { initAdminNavigation } from './layouts/admin-navigation.js';
+import { initAdminNavigation, initWorkspaceHeaderScroll } from './layouts/admin-navigation.js';
 import { initWorkspaceSidebar } from './layouts/workspace-sidebar.js';
 import { initPublicNavigation } from './layouts/public-navigation.js';
 import { initForms } from './pages/admin/forms.js';
@@ -20,7 +20,7 @@ initFeedback();
 initDisclosures();
 initDialogs();
 const sidebar = initWorkspaceSidebar();
-initAdminNavigation(sidebar);
+initAdminNavigation(sidebar, initWorkspaceHeaderScroll());
 initPublicNavigation();
 initForms();
 initUserMenus();
