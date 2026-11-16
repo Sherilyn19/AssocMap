@@ -171,7 +171,7 @@ test('active filters exclude the report type and default year, invalidate export
     await f.change('quarter');
     assert.equal(f.count.textContent, '2');
     assert.equal(f.count.hidden, false);
-    assert.equal(f.toggle.getAttribute('aria-label'), 'Filters, 2 active');
+    assert.equal(f.toggle.getAttribute('aria-label'), 'Build your report, 2 active filters');
     assert.equal(f.preview.children.length, 0);
     assert.equal(f.exportForm.dataset.exportReady, 'false');
     assert.ok(f.exportButtons.every(button => button.disabled));

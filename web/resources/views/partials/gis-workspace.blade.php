@@ -1,12 +1,12 @@
 <section class="gis-module" data-gis-workspace data-workspace-module="gis" data-workspace-title="GIS Mapping"
-    data-gis-base="{{ $gisBaseUrl }}" data-gis-photos="true" data-gis-public="{{ $gisPublic ? 'true' : 'false' }}" data-gis-manager="{{ $gisManager ? 'true' : 'false' }}">
-    @component('partials.page-header', ['headingCard' => true, 'headingClass' => 'gis-heading', 'title' => $gisTitle, 'description' => $gisDescription, 'eyebrow' => $gisPublic ? 'Explore AssocMap' : 'Geographic information'])
+    data-gis-base="{{ $gisBaseUrl }}" data-gis-photos="true" data-gis-public="{{ $gisPublic ? 'true' : 'false' }}" data-gis-manager="{{ $gisManager ? 'true' : 'false' }}" data-gis-administrator="{{ ($gisAdministrator ?? false) ? 'true' : 'false' }}">
+    @component('partials.page-header', ['headingCard' => true, 'headingClass' => 'gis-heading', 'title' => ($gisAdministrator ?? false) ? 'GIS Management' : $gisTitle, 'description' => ($gisAdministrator ?? false) ? 'Explore and manage project locations and boundaries.' : $gisDescription, 'eyebrow' => $gisPublic ? 'Explore AssocMap' : 'Geographic information'])
+        @if($gisAdministrator ?? false)@slot('headerContext')<div class="gis-header-info"><span>About GIS records</span><x-area-info label="About GIS record history">History includes locations of archived associations and projects. Historical locations allow geometry correction only. The Lifecycle filter applies to the GIS location itself.</x-area-info></div>@endslot @endif
         @slot('actions')
         @if($gisManager)<a href="{{ $gisBaseUrl }}/create" class="button button-primary"><x-icon name="plus" />Add GIS location</a>@endif
         @unless($gisManager)<span class="gis-access-label"><x-icon name="eye" />{{ $gisPublic ? 'Public viewer' : 'Read-only viewer' }}</span>@endunless
         @endslot
     @endcomponent
-    @if($gisAdministrator ?? false)<p class="notice">Administrator history includes mapped locations of archived associations and projects. Historical locations offer geometry correction only. The Lifecycle filter refers to the GIS location's own archival state.</p>@endif
     <div class="card gis-search-panel">
         <div class="gis-toolbar">
             <div class="gis-view-switch" role="group" aria-label="GIS view">
@@ -25,7 +25,7 @@
                 <button type="submit" class="button button-primary">Search</button><button type="reset" class="button">Reset</button>
             </div>
             <details class="gis-filters">
-                <summary><span><x-icon name="filter" />Map filters</span><span class="gis-filter-indicator" data-gis-filter-summary>No additional filters</span><x-icon name="chevron-down" /></summary>
+                <summary><span>@if($gisAdministrator ?? false)<svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.446.248 8.057.722.73.132.943 1.059.417 1.585L15 10.78v5.72a.75.75 0 0 1-.332.624l-4.5 3A.75.75 0 0 1 9 19.5v-8.72L3.526 5.307c-.526-.526-.313-1.453.417-1.585A45.12 45.12 0 0 1 12 3Z" /></svg>@else<x-icon name="filter" />@endif Map filters</span><span class="gis-filter-indicator" data-gis-filter-summary>No additional filters</span><x-icon name="chevron-down" /></summary>
                 <div class="gis-filter-grid">
                     <div class="field"><label for="gis-type">Geometry type</label><select id="gis-type" name="location_type"><option value="">All project geometry types</option><option value="project_point">Project Point</option><option value="project_boundary">Project Boundary</option></select></div>
                     <div class="field"><label for="gis-site-type">Site classification</label><select id="gis-site-type" name="site_type_id"><option value="">All site classifications</option><option value="unclassified">Unclassified</option>@foreach($gisSiteTypes as $siteType)<option value="{{ $siteType['id'] }}">{{ $siteType['name'] }}</option>@endforeach</select><small>Physical site type, independent of geometry and fisheries category.</small></div>

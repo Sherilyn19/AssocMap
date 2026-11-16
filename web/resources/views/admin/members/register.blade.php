@@ -10,10 +10,10 @@
 @section('content')
 <section class="member-management" data-workspace-module="members" data-workspace-title="Member Management">
     @include('members.partials.workflow-navigation')
-    <header class="card member-heading"><div><p class="eyebrow">System Administrator</p><h1 tabindex="-1">Member Management</h1><p>View official member profiles, association positions, and membership history.</p></div><span class="badge badge-blue">View only</span></header>
+    <header class="card member-heading"><div><h1 tabindex="-1">Member Management</h1><p>Browse member profiles, positions, and membership history.</p></div><span class="badge badge-blue">View only</span></header>
     @include('members.partials.summary')
     <section class="card member-register" aria-labelledby="member-register-title">
-        <div class="member-section-heading"><div><h2 id="member-register-title">Member register</h2><p>{{ number_format($members->total()) }} matching member(s)</p></div><p>Members are admitted through approved applications.</p></div>
+        <div class="member-section-heading"><div><div class="member-heading-title"><h2 id="member-register-title">Member register</h2><x-area-info label="About member admission">Members are admitted through approved applications.</x-area-info></div><p>{{ number_format($members->total()) }} matching member(s)</p></div></div>
         @include('members.partials.filters')
         <div class="table-scroll" role="region" aria-label="Member register" tabindex="0"><table class="data-table member-register-table"><caption class="sr-only">Official association members. Administrator access is view only.</caption>
             <thead><tr><th scope="col">Member</th><th scope="col">Association</th><th scope="col">Position</th><th scope="col">FishR number</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead><tbody>
@@ -33,9 +33,9 @@
 </section>
 @foreach($members as $member)
     @php($fullName = collect([$member->first_name, $member->middle_name, $member->last_name, $member->suffix])->filter(fn ($part) => filled($part))->implode(' '))
-    <x-modal :id="'admin-member-'.$member->id" title="Member Details">
-        <div class="member-record-dialog">@include('members.partials.details')</div>
-        <div class="modal-actions"><button class="button" type="button" data-close-dialog>Close</button></div>
-    </x-modal>
+    <dialog id="admin-member-{{ $member->id }}" class="modal admin-member-modal" aria-labelledby="admin-member-{{ $member->id }}-title">
+        <div class="modal-heading"><span class="member-modal-icon" aria-hidden="true"><x-icon name="user" /></span><div class="member-modal-title"><div><h2 id="admin-member-{{ $member->id }}-title">Member Details</h2>@if($member->fishr_registration_number)<span class="member-number">{{ $member->fishr_registration_number }}</span>@endif</div><p>Association member record</p></div><button type="button" class="icon-button" data-close-dialog aria-label="Close dialog"><x-icon name="close" /></button></div>
+        <div class="member-record-dialog">@include('admin.members.details')</div>
+    </dialog>
 @endforeach
 @endsection

@@ -10,7 +10,7 @@
         <button class="button button-primary" type="submit">Search</button>
         <button class="button" type="button" data-disclosure="monitoring-filter-panel" aria-controls="monitoring-filter-panel" aria-expanded="false"><x-icon name="filter" />Filters<x-icon name="chevron-down" /></button>
         <a class="button" href="{{ $filterAction }}">Reset</a>
-        <span class="monitoring-filter-indicator" role="status">{{ $activeFilterCount ? $activeFilterCount.' active filter(s)' : 'Default view' }}</span>
+        @if($activeFilterCount || !request()->routeIs('admin.*'))<span class="monitoring-filter-indicator" role="status">{{ $activeFilterCount ? $activeFilterCount.' active filter(s)' : 'Default view' }}</span>@endif
     </div>
     <div id="monitoring-filter-panel" class="monitoring-filter-panel" hidden>
         <div class="monitoring-filter-grid">

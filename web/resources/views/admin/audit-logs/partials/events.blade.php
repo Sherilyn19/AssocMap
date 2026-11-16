@@ -2,7 +2,7 @@
 <div class="table-scroll" role="region" aria-label="Recorded audit events" tabindex="0" aria-describedby="audit-scroll-help">
     <table class="data-table audit-table {{ $logs->count() ? '' : 'audit-table-empty' }}">
         <caption class="sr-only">Recorded audit events, newest first. Times shown in {{ $timezone }}.</caption>
-        <thead><tr><th scope="col">Date and time</th><th scope="col">Event / module</th><th scope="col">Actor</th><th scope="col">Affected record</th><th scope="col"><span class="sr-only">Details</span></th></tr></thead>
+        <thead><tr><th scope="col">Date and time</th><th scope="col">Event / module</th><th scope="col">Actor</th><th scope="col">Affected record</th><th scope="col">Details</th></tr></thead>
         <tbody>
             @forelse($logs as $event)
                 <tr>

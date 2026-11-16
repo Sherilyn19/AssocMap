@@ -7,7 +7,7 @@
     </p>
     <nav class="audit-pagination" aria-label="Audit pagination">
         @if($logs->currentPage() > 1)<a class="button" href="{{ $logs->url(1) }}">First page</a>@endif
-        @if($logs->previousPageUrl())<a class="button" href="{{ $logs->previousPageUrl() }}" rel="prev"><x-icon name="back" />Previous</a>@endif
-        @if($logs->nextPageUrl())<a class="button" href="{{ $logs->nextPageUrl() }}" rel="next">Next<x-icon name="arrow" /></a>@endif
+        @if($logs->previousPageUrl())<a class="button" href="{{ $logs->previousPageUrl() }}" rel="prev">Previous</a>@else<span class="audit-page-disabled" aria-disabled="true">Previous</span>@endif
+        @if($logs->nextPageUrl())<a class="button" href="{{ $logs->nextPageUrl() }}" rel="next">Next</a>@else<span class="audit-page-disabled" aria-disabled="true">Next</span>@endif
     </nav>
 </footer>

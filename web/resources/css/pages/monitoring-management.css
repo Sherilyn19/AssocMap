@@ -3,17 +3,59 @@
 .monitoring-management .monitoring-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding: 24px; border-top: 3px solid var(--primary); }
 .monitoring-management .monitoring-heading > div { flex: 1 1 280px; min-width: 0; overflow-wrap: anywhere; }
 .monitoring-management .monitoring-heading p:not(.eyebrow) { font-size: 13px; margin-top: 7px; }
+.admin-workspace .monitoring-record-header { min-width: 0; padding: 20px 24px; border-color: #dbe6ee; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+.admin-workspace .monitoring-record-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; min-width: 0; }
+.admin-workspace .monitoring-record-heading > div { flex: 1 1 200px; min-width: 0; }
+.admin-workspace .monitoring-record-heading h1 { margin: 0; color: #17314d; text-transform: uppercase; overflow-wrap: anywhere; }
+.admin-workspace .monitoring-record-heading .eyebrow { margin-bottom: 4px; }
+.admin-workspace .monitoring-record-heading .badge { max-width: 100%; white-space: normal; }
+.admin-workspace .monitoring-record-header .monitoring-record-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 10px; background: #edf4fb; color: #386a96; }
+.admin-workspace .monitoring-record-header .monitoring-record-icon svg { width: 22px; height: 22px; }
+.admin-workspace .monitoring-record-identity { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 24px; margin: 16px 0 0; padding-top: 14px; border-top: 1px solid #edf1f5; }
+.admin-workspace .monitoring-record-identity dt { margin-bottom: 4px; color: #71869b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.admin-workspace .monitoring-record-identity dd { margin: 0; color: #263f58; font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .admin-workspace .monitoring-record-header { padding: 18px; } .admin-workspace .monitoring-record-identity { grid-template-columns: minmax(0, 1fr); } }
+.admin-workspace .monitoring-record-view .monitoring-heading { align-items: center; border-color: #dbe6ee; border-top-color: var(--primary); box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+.admin-workspace .monitoring-record-view .monitoring-record-icon { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border-radius: 10px; background: #edf4fb; color: #386a96; }
+.admin-workspace .monitoring-record-view .monitoring-record-icon svg { width: 24px; height: 24px; }
+.admin-workspace .monitoring-record-view .monitoring-heading .monitoring-record-badges { display: flex; flex: 0 1 auto; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.admin-workspace .monitoring-record-view .monitoring-record-badges .badge { max-width: 100%; white-space: normal; }
+.admin-workspace .monitoring-record-view :is(.monitoring-overview, .monitoring-section, .monitoring-register) { border-color: #dbe6ee; border-radius: 12px; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+.admin-workspace .monitoring-record-view .monitoring-section-heading h2 { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.admin-workspace .monitoring-record-view .monitoring-heading-icon { width: 17px; height: 17px; flex: none; color: #547b9c; }
+.admin-workspace .monitoring-record-view :is(.monitoring-overview, .monitoring-section) .monitoring-section-heading { margin: 0 22px 18px; padding: 20px 0 16px; border-bottom: 1px solid #edf1f5; }
+.admin-workspace .monitoring-record-view :is(.monitoring-detail-grid, .monitoring-visit-notes) dt { color: #71869b; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.admin-workspace .monitoring-record-view :is(.monitoring-detail-grid, .monitoring-visit-notes) dd { color: #263f58; font-weight: 600; overflow-wrap: anywhere; }
+.admin-workspace .monitoring-record-view .monitoring-nav a { border-color: #dbe6ee; box-shadow: 0 2px 8px rgb(16 47 80 / 4%); }
+.admin-workspace .monitoring-record-view .monitoring-nav a[aria-current="page"] { background: #1d628e; border-color: #1d628e; }
+@media (prefers-reduced-motion: no-preference) { .admin-workspace .monitoring-record-view :is(.monitoring-nav a, .monitoring-card) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease; } .admin-workspace .monitoring-record-view .monitoring-card:hover { border-color: #bfd3e5; box-shadow: 0 5px 16px rgb(16 47 80 / 7%); } }
+@media (max-width: 640px) { .admin-workspace .monitoring-record-view :is(.monitoring-overview, .monitoring-section) .monitoring-section-heading { margin-inline: 18px; } .admin-workspace .monitoring-record-view .monitoring-heading .monitoring-record-badges { flex-basis: 100%; } }
+.admin-workspace .monitoring-management .monitoring-heading h1, .admin-workspace .monitoring-management .monitoring-section-heading h2 { text-transform: uppercase; }
+.admin-workspace .monitoring-management .workflow-navigation { margin: -8px 0 0; }
+.admin-workspace .monitoring-management .workflow-navigation nav { order: -1; }
+.admin-workspace .monitoring-management .workflow-navigation .back-link { padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; text-decoration: none; }
+.admin-workspace .monitoring-management .workflow-navigation a:hover { color: #0b427b; }
 .monitoring-management .monitoring-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .monitoring-management .monitoring-summary .stat-top { font-size: 12px; }
 .monitoring-management .monitoring-summary .stat-card strong { color: var(--primary); }
-.monitoring-management .monitoring-summary-selected { background: #0b427b; border-color: #0b427b; }
+.monitoring-management .monitoring-summary-selected { background: #1d628e; border-color: #1d628e; --summary-counter-surface: #1d628e; }
 .monitoring-management .monitoring-summary .monitoring-summary-selected :is(.stat-top, strong, small) { color: #fff; }
 .monitoring-management .monitoring-summary-selected .stat-icon { color: #fff; background: rgb(255 255 255 / 15%); }
 .monitoring-management .monitoring-section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding: 22px; }
+.monitoring-management .monitoring-section-heading { position: relative; z-index: 3; }
+.monitoring-management .monitoring-heading-title { display: flex; align-items: center; gap: 5px; }
+.monitoring-management .area-info { position: relative; flex: none; }
+.monitoring-management .area-info button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #386a96; cursor: pointer; }
+.monitoring-management .area-info button:hover, .monitoring-management .area-info button[aria-expanded="true"] { background: #edf4fb; }
+.monitoring-management .area-info svg { width: 18px; height: 18px; }
+.monitoring-management .area-info-popover { display: none; position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; width: min(300px, calc(100vw - 48px)); padding: 12px 14px; border: 1px solid #cfdeeb; border-radius: 8px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 16%); color: #334b63; font-size: 12px; line-height: 1.55; }
+.monitoring-management .area-info button[aria-expanded="true"] + .area-info-popover { display: block; }
+@media (hover: hover) { .monitoring-management .area-info:hover .area-info-popover { display: block; } }
 .monitoring-management .monitoring-section-heading > div { min-width: 0; }
 .monitoring-management .monitoring-section-heading h2 { font-size: 17px; color: #263f58; }
 .monitoring-management .monitoring-section-heading p { font-size: 12px; margin-top: 5px; }
 .monitoring-management :is(.monitoring-register, .monitoring-section) { min-width: 0; overflow: hidden; }
+.admin-workspace .monitoring-management .monitoring-register { overflow: visible; }
 .monitoring-management .monitoring-search-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; padding: 0 22px 22px; }
 .monitoring-management .monitoring-search { flex: 1 1 320px; }
 .monitoring-management .monitoring-search > div { position: relative; }
@@ -26,6 +68,7 @@
 .monitoring-management .monitoring-detail-table tbody th { text-align: left; font-weight: 600; color: #284967; background: transparent; white-space: normal; }
 .monitoring-management .monitoring-project-list { display: grid; gap: 20px; padding: 0 22px 22px; min-width: 0; }
 .monitoring-management .monitoring-project-row { min-width: 0; padding: 20px; border: 1px solid var(--border-color); border-top: 3px solid var(--primary); border-radius: var(--radius-md); background: #fff; }
+.admin-workspace .monitoring-management .monitoring-project-row { border-color: #dbe6ee; border-top-color: #8bb6d7; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
 .monitoring-management .monitoring-project-heading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
 .monitoring-management .monitoring-project-heading > div:first-child { flex: 1 1 260px; min-width: 0; }
 .monitoring-management .monitoring-project-heading h3 { font-size: 18px; }
@@ -48,8 +91,18 @@
 .monitoring-management .monitoring-quarter-empty .icon { color: #66809a; }
 .monitoring-management .monitoring-quarter-empty p { font-size: 13px; font-weight: 600; }
 .monitoring-management .monitoring-quarter-empty small { font-size: 11px; color: var(--text-secondary); overflow-wrap: anywhere; }
-.monitoring-management .monitoring-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding: 20px 22px; border-top: 1px solid var(--border-color); }
+.monitoring-management .monitoring-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 0 22px 22px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
 .monitoring-management .monitoring-pagination > p { font-size: 12px; }
+.monitoring-management .monitoring-pagination nav { display: flex; flex-wrap: wrap; gap: 4px; }
+.monitoring-management .monitoring-pagination nav > * { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; padding: 6px 9px; border: 1px solid #dbe4ef; border-radius: 6px; background: #fff; color: #334155; font-size: 12px; font-weight: 600; }
+.monitoring-management .monitoring-pagination nav a:hover { border-color: #9bbad8; background: #edf4fb; color: var(--primary); }
+.monitoring-management .monitoring-pagination nav [aria-disabled="true"] { color: #94a3b8; background: #f8fafc; }
+@media (prefers-reduced-motion: no-preference) {
+    .admin-workspace .monitoring-management .monitoring-heading { animation: monitoring-arrive 400ms ease-out both; }
+    .admin-workspace .monitoring-management :is(.monitoring-project-row, .monitoring-quarter-slot, .monitoring-pagination a) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease; }
+    .admin-workspace .monitoring-management .monitoring-project-row:hover { border-color: #a9c6df; box-shadow: 0 6px 20px rgb(16 47 80 / 9%); }
+    @keyframes monitoring-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+}
 .monitoring-management .monitoring-nav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
 .monitoring-management .monitoring-nav a { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 18px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: #fff; color: #365673; font-size: 13px; font-weight: 600; }
 .monitoring-management .monitoring-nav a:hover { border-color: #92b7db; background: #f3f7fd; }

@@ -2,6 +2,7 @@
 .user-management { display: grid; gap: 22px; min-width: 0; }
 .user-management .user-page-heading { padding: 24px; border-top: 3px solid var(--primary); }
 .user-management .user-page-heading .page-header { margin: 0; }
+.user-management[data-workspace-title="User Management"] :is(.user-page-heading h1, .user-section-heading h2, .user-register-heading h2, .user-table thead th) { text-transform: uppercase; }
 .user-management .user-summary-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
 .user-management .user-summary-card { color: inherit; min-width: 0; border-radius: var(--radius-md); }
 .user-management .user-summary-card .stat-card { height: 100%; padding: 18px; transition: border-color 150ms, box-shadow 150ms; }
@@ -12,6 +13,11 @@
 .user-management .user-summary-card strong { margin: 12px 0 6px; font-size: 28px; line-height: 1.2; color: var(--primary); }
 .user-management .user-summary-card small { font-size: 11px; }
 .user-management .user-summary-card:is(:hover, [aria-current="page"]) .stat-card { border-color: #82abd1; background: #f7faff; box-shadow: 0 2px 8px rgb(11 76 140 / 8%); }
+.user-management .user-summary-card[aria-current="page"] { --summary-counter-surface: #1d628e; }
+.user-management .user-summary-card[aria-current="page"] .stat-card { background: #1d628e; border-color: #1d628e; box-shadow: 0 4px 14px rgb(11 66 123 / 15%); }
+.user-management .user-summary-card[aria-current="page"] :is(.stat-top, strong) { color: #fff; }
+.user-management .user-summary-card[aria-current="page"] .stat-icon { color: #fff; background: rgb(255 255 255 / 15%); }
+.user-management .user-summary-card:not([aria-current="page"]):hover { --summary-counter-surface: #f7faff; }
 .user-management .user-filter-card { padding: 22px; }
 .user-management .user-section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; margin-bottom: 18px; }
 .user-management h2 { font-size: 16px; color: #263f58; }
@@ -24,9 +30,20 @@
 .user-management .user-filter-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border-color); }
 .user-management .user-register { overflow: visible; }
 .user-management .user-register-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; padding: 22px; }
+.user-management .user-register-heading { position: relative; z-index: 3; }
+.user-management .user-heading-title { display: flex; align-items: center; gap: 5px; }
+.user-management .area-info { position: relative; flex: none; }
+.user-management .area-info button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #386a96; cursor: pointer; }
+.user-management .area-info button:hover, .user-management .area-info button[aria-expanded="true"] { background: #edf4fb; }
+.user-management .area-info svg { width: 18px; height: 18px; }
+.user-management .area-info-popover { display: none; position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; width: min(300px, calc(100vw - 48px)); padding: 12px 14px; border: 1px solid #cfdeeb; border-radius: 8px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 16%); color: #334b63; font-size: 12px; line-height: 1.55; }
+.user-management .area-info button[aria-expanded="true"] + .area-info-popover { display: block; }
+@media (hover: hover) { .user-management .area-info:hover .area-info-popover { display: block; } }
 .user-management .user-register-note { margin: 0; padding: 0 22px 18px; color: var(--text-secondary); font-size: 12px; }
 .user-management .user-register > .notice { margin: 0 22px 22px; }
 .user-management .user-table { min-width: 820px; }
+.user-management .user-table thead th { padding: 14px 18px; background: #f8fafc; color: #475569; font-size: 12px; font-weight: 700; }
+.user-management .user-table tbody tr:hover { background: #f4f8fc; }
 .user-management .user-table td { vertical-align: middle; padding-block: 18px; }
 .user-management .user-table td:first-child { min-width: 290px; max-width: 420px; }
 .user-management .user-account-cell { display: flex; gap: 12px; align-items: flex-start; }
@@ -52,7 +69,11 @@
 .user-management .user-actions-panel .icon { width: 16px; height: 16px; margin-top: 1px; flex-shrink: 0; }
 .user-management .user-actions-panel button:disabled { cursor: not-allowed; color: #7b8795; }
 .user-management .user-actions-panel small { display: block; color: var(--text-secondary); font-size: 11px; margin-top: 2px; }
-.user-management .user-table-footer nav { display: flex; gap: 8px; }
+.user-management .user-table-footer { margin: 16px 22px 22px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #475569; font-size: 12px; }
+.user-management .user-table-footer nav { display: flex; flex-wrap: wrap; gap: 4px; }
+.user-management .user-table-footer nav > * { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; padding: 6px 9px; border: 1px solid #dbe4ef; border-radius: 6px; background: #fff; color: #334155; font-size: 12px; font-weight: 600; }
+.user-management .user-table-footer nav a:hover { border-color: #9bbad8; background: #edf4fb; color: var(--primary); }
+.user-management .user-table-footer nav [aria-disabled="true"] { color: #94a3b8; background: #f8fafc; }
 .user-management .user-details-card { padding: 24px; }
 .user-management .user-details-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; padding-bottom: 22px; border-bottom: 1px solid var(--border-color); }
 .user-management .user-details-heading .user-avatar { width: 48px; height: 48px; font-size: 20px; }
@@ -67,6 +88,7 @@
     .user-management .user-summary-grid, .user-management .user-filter-grid, .user-management .user-details-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .user-management .user-page-heading, .user-management .user-filter-card, .user-management .user-register-heading, .user-management .user-details-card { padding: 18px; }
     .user-management .user-table-footer { align-items: flex-start; flex-direction: column; }
+    .user-management .user-table-footer { margin-inline: 18px; }
 }
 @media (max-width: 480px) {
     .user-management .user-filter-grid, .user-management .user-details-grid { grid-template-columns: minmax(0, 1fr); }
@@ -75,3 +97,9 @@
     .user-management .user-register-heading > .button { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .user-management .user-summary-card .stat-card { transition: none; } }
+@media (prefers-reduced-motion: no-preference) {
+    .user-management[data-workspace-title="User Management"] .user-page-heading { animation: user-register-arrive 400ms ease-out both; }
+    .user-management :is(.user-summary-card .stat-card, .user-table tbody tr, .user-table-footer a) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease; }
+    .user-management .user-summary-card:hover .stat-card { box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }
+    @keyframes user-register-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+}

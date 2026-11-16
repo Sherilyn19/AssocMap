@@ -13,7 +13,7 @@
 @section('content')
 <section class="user-management" data-user-management data-workspace-module="users" data-workspace-title="User Management">
     <div class="card user-page-heading">
-        @include('partials.page-header', ['title' => 'User Management', 'description' => 'Manage AssocMap application profiles, invitations, and organizational assignments.', 'eyebrow' => 'System Administrator'])
+        @include('partials.page-header', ['title' => 'User Management', 'description' => 'Manage AssocMap application profiles, invitations, and organizational assignments.', 'eyebrow' => ''])
     </div>
 
     <nav class="user-summary-grid" aria-label="Filter users by account group">
@@ -23,13 +23,13 @@
                 $cardUrl = route('admin.users.index', ['q' => $filters['q'], 'sort' => $filters['sort'], 'role' => $card['role'], 'status' => $card['status']]);
             @endphp
             <a class="user-summary-card" href="{{ $cardUrl }}" @if($selected) aria-current="page" @endif data-user-summary="{{ $card['key'] }}">
-                <x-stat-card :label="$card['label']" :value="$summary === null ? '?' : number_format($summary[$card['key']])" :icon="$card['icon']" note="View matching accounts" :animate="false" />
+                <x-stat-card :label="$card['label']" :value="$summary === null ? '?' : number_format($summary[$card['key']])" :icon="$card['icon']" />
             </a>
         @endforeach
     </nav>
 
     <section class="card user-filter-card" aria-labelledby="user-filters-title">
-        <div class="user-section-heading"><h2 id="user-filters-title"><x-icon name="filter" />Filter Users</h2><p>Card totals include all application profiles. Cards keep your search and sort.</p></div>
+        <div class="user-section-heading"><h2 id="user-filters-title"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.446.248 8.057.722.73.132.943 1.059.417 1.585L15 10.78v5.72a.75.75 0 0 1-.332.624l-4.5 3A.75.75 0 0 1 9 19.5v-8.72L3.526 5.307c-.526-.526-.313-1.453.417-1.585A45.12 45.12 0 0 1 12 3Z" /></svg>Filter Users</h2></div>
         <form method="GET" action="{{ route('admin.users.index') }}" class="user-filter-form" data-feedback-error-bag="default">
             @if($errors->any())<div id="user-filter-errors" class="notice notice-error" role="alert"><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
             <div class="user-filter-grid">
@@ -44,17 +44,16 @@
 
     <section class="card user-register" aria-labelledby="user-register-title">
         <header class="user-register-heading">
-            <div><h2 id="user-register-title">User Accounts</h2><p>{{ $users === null ? 'Records unavailable' : number_format($users->total()).' matching application profile(s)' }}</p></div>
+            <div><div class="user-heading-title"><h2 id="user-register-title">User Accounts</h2><x-area-info label="About account status">Profile status alone does not confirm sign-in access. Auth identities without an application profile are not listed.</x-area-info></div><p>{{ $users === null ? 'Records unavailable' : number_format($users->total()).' matching application profile(s)' }}</p></div>
             <a class="button button-primary" href="{{ route('admin.user-invitations.create') }}"><x-icon name="plus" />Invite User</a>
         </header>
-        <p class="user-register-note">Profile status does not confirm sign-in availability. Auth-only identities are not application accounts and are not listed.</p>
         @if($users === null)
             <div class="notice notice-error" role="alert" data-feedback-fallback>User records are unavailable. No account data was changed. Reload to retry.</div>
         @else
             <div class="table-scroll" tabindex="0" role="region" aria-label="User accounts">
                 <table class="data-table user-table">
                     <caption class="sr-only">Application profiles, current Auth emails, invitation state, and organizational links.</caption>
-                    <thead><tr><th scope="col">Account</th><th scope="col">Role</th><th scope="col">Account status</th><th scope="col">Linked association</th><th scope="col">Invitation</th><th scope="col">Created</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+                    <thead><tr><th scope="col">Account</th><th scope="col">Role</th><th scope="col">Account status</th><th scope="col">Linked association</th><th scope="col">Invitation</th><th scope="col">Created</th><th scope="col">Actions</th></tr></thead>
                     <tbody>
                     @forelse($users as $user)
                         @php($detailUrl = route('admin.users.show', ['userProfile' => $user['id']] + $filters + ['page' => $users->currentPage()]))
@@ -104,8 +103,8 @@
                 </table>
             </div>
             <div class="table-footer user-table-footer">
-                <span>{{ $users->firstItem() ?? 0 }} to {{ $users->lastItem() ?? 0 }} of {{ number_format($users->total()) }} matching profiles / Page {{ $users->currentPage() }} of {{ $users->lastPage() }}</span>
-                <nav aria-label="User register pages">@if($users->previousPageUrl())<a class="button" href="{{ $users->previousPageUrl() }}" rel="prev">Previous</a>@endif @if($users->nextPageUrl())<a class="button" href="{{ $users->nextPageUrl() }}" rel="next">Next</a>@endif</nav>
+                <span>Showing {{ number_format($users->firstItem() ?? 0) }}–{{ number_format($users->lastItem() ?? 0) }} of {{ number_format($users->total()) }} matching profiles <span aria-hidden="true">·</span> Page {{ $users->currentPage() }} of {{ $users->lastPage() }}</span>
+                <nav aria-label="User register pages">@if($users->previousPageUrl())<a href="{{ $users->previousPageUrl() }}" rel="prev">Previous</a>@else<span aria-disabled="true">Previous</span>@endif @if($users->nextPageUrl())<a href="{{ $users->nextPageUrl() }}" rel="next">Next</a>@else<span aria-disabled="true">Next</span>@endif</nav>
             </div>
         @endif
     </section>

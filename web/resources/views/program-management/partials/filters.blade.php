@@ -8,7 +8,7 @@
         <button class="button button-primary" type="submit">Search</button>
         <button class="button" type="button" data-disclosure="program-extra-filters" aria-controls="program-extra-filters" aria-expanded="false"><x-icon name="filter" />Filters<x-icon name="chevron-down" /></button>
         <a class="button" href="{{ route($prefix.'.'.$module.'.index') }}">Reset</a>
-        <span class="program-filter-indicator" role="status">{{ $activeFilterCount ? $activeFilterCount.' active filter(s)' : 'Default view' }}</span>
+        @if($activeFilterCount || !request()->routeIs('admin.*'))<span class="program-filter-indicator" role="status">{{ $activeFilterCount ? $activeFilterCount.' active filter(s)' : 'Default view' }}</span>@endif
     </div>
     <div id="program-extra-filters" class="program-filter-panel" hidden>
         <div class="program-filter-grid">

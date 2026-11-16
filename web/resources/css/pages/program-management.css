@@ -4,6 +4,10 @@
 .program-management .program-heading > div:first-child { flex: 1 1 280px; min-width: 0; overflow-wrap: anywhere; }
 .program-management .program-heading p:not(.eyebrow) { margin-top: 8px; font-size: 13px; }
 .program-management .program-heading-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) :is(.program-heading h1, .program-section-heading h2, .program-register-table thead th) { text-transform: uppercase; }
+.admin-workspace .program-management .project-heading-actions { align-items: center; justify-content: flex-end; gap: 8px; margin-top: -10px; }
+.admin-workspace .program-management .project-heading-actions .contextual-report { flex: 0 1 auto; }
+.admin-workspace .program-management .project-heading-actions .button { min-height: 38px; padding: 8px 12px; font-size: 12px; }
 .program-management .program-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; }
 .program-management .program-summary > a { color: inherit; border-radius: var(--radius-md); min-width: 0; }
 .program-management .program-summary .stat-card { height: 100%; transition: background-color 150ms, border-color 150ms; }
@@ -13,6 +17,20 @@
 .program-management .program-summary a[aria-current="page"] .stat-card { background: #0b427b; border-color: #0b427b; }
 .program-management .program-summary a[aria-current="page"] :is(.stat-top, strong, small) { color: #fff; }
 .program-management .program-summary a[aria-current="page"] .stat-icon { color: #fff; background: rgb(255 255 255 / 15%); }
+.admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-summary a[aria-current="page"] { --summary-counter-surface: #1d628e; }
+.admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-summary a[aria-current="page"] .stat-card { background: #1d628e; border-color: #1d628e; }
+.admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-summary a:not([aria-current="page"]):hover { --summary-counter-surface: #f3f7fd; }
+.admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-register { overflow: visible; }
+.program-management .program-info-row { position: relative; z-index: 4; display: flex; align-items: center; gap: 5px; margin-top: -10px; color: var(--text-secondary); font-size: 12px; }
+.program-management .program-heading-title { display: flex; align-items: center; gap: 5px; }
+.program-management .program-section-heading { position: relative; z-index: 3; }
+.program-management .area-info { position: relative; flex: none; }
+.program-management .area-info button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #386a96; cursor: pointer; }
+.program-management .area-info button:hover, .program-management .area-info button[aria-expanded="true"] { background: #edf4fb; }
+.program-management .area-info svg { width: 18px; height: 18px; }
+.program-management .area-info-popover { display: none; position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; width: min(300px, calc(100vw - 48px)); padding: 12px 14px; border: 1px solid #cfdeeb; border-radius: 8px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 16%); color: #334b63; font-size: 12px; line-height: 1.55; }
+.program-management .area-info button[aria-expanded="true"] + .area-info-popover { display: block; }
+@media (hover: hover) { .program-management .area-info:hover .area-info-popover { display: block; } }
 .program-management .program-help { font-size: 12px; line-height: 1.7; margin-top: -6px; }
 .program-management .program-register { min-width: 0; overflow: hidden; }
 .program-management .program-section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 22px; }
@@ -29,7 +47,14 @@
 .program-management .program-filter-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 .program-management .program-register-table { min-width: 780px; }
 .program-management .program-register-table :is(tbody th, td) { padding: 17px 20px; vertical-align: middle; font-size: 13px; max-width: 300px; overflow-wrap: anywhere; }
+.admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-register-table thead th { padding: 14px 20px; background: #f8fafc; color: #475569; font-size: 12px; font-weight: 700; }
+.admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-register-table tbody th { background: transparent; border-bottom: 1px solid #eef2f6; }
+.admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-register-table tbody tr:hover { background: #f4f8fc; }
 .program-management .program-register-table tbody th { text-align: left; font-weight: 600; min-width: 190px; }
+.program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-register-table tbody th { white-space: normal; overflow-wrap: anywhere; }
+.program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .project-register-identity { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .project-register-identity .project-cover-thumbnail { flex: 0 0 80px; margin: 0; }
+.program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .project-register-copy { flex: 1 1 auto; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 .program-management .program-register-table small { display: block; font-size: 11px; color: var(--text-secondary); font-weight: 400; margin-top: 5px; }
 .program-management .program-register-table .badge + .badge { margin-top: 6px; }
 .program-management .program-register-table a:hover { text-decoration: underline; }
@@ -49,7 +74,13 @@
 .program-management .project-actions-panel .icon { width: 16px; height: 16px; flex-shrink: 0; }
 .program-management .project-actions-panel .project-action-finalize { border-top: 1px solid var(--border-color); }
 .program-management .project-actions-panel .project-action-danger { color: #b42318; }
+.program-management .project-actions-panel .program-action-note { margin: 0; padding: 10px; color: #64788d; font-size: 12px; line-height: 1.5; }
 .program-management .program-pagination, .program-management .program-pagination nav { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-pagination { justify-content: space-between; margin: 16px 22px 22px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #475569; font-size: 12px; }
+.admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-pagination nav { gap: 4px; }
+.admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-pagination nav > * { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; padding: 6px 9px; border: 1px solid #dbe4ef; border-radius: 6px; background: #fff; color: #334155; font-size: 12px; font-weight: 600; }
+.admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-pagination nav a:hover { border-color: #9bbad8; background: #edf4fb; color: var(--primary); }
+.admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-pagination nav .program-page-disabled { color: #94a3b8; background: #f8fafc; }
 .program-management :is(a, button, input, select, summary, [tabindex]):focus-visible,
 .program-editor :is(a, button, input, select, textarea):focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
 .program-management .program-information { padding: 24px; min-width: 0; }
@@ -63,6 +94,21 @@
 .program-management .program-information nav { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 .program-management .program-preserve-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 .modal:has(.program-editor) { width: min(940px, calc(100% - 30px)); }
+:is(#project-editor, #training-editor, #program-activity-editor) { width: min(650px, calc(100% - 30px)); padding: 26px; border-radius: 14px; background: #fff; }
+:is(#project-editor, #training-editor, #program-activity-editor) .modal-heading { gap: 12px; margin-bottom: 22px; }
+:is(#project-editor, #training-editor, #program-activity-editor) .modal-heading h2 { flex: 1; text-transform: uppercase; }
+:is(#project-editor, #training-editor, #program-activity-editor) .area-modal-icon { display: grid; place-items: center; width: 38px; height: 38px; flex: none; border-radius: 9px; background: #e8f2fb; color: #135c91; }
+:is(#project-editor, #training-editor, #program-activity-editor) .area-modal-icon .icon { width: 19px; height: 19px; }
+:is(#project-editor, #training-editor, #program-activity-editor) .form-grid { gap: 16px; }
+:is(#project-editor, #training-editor, #program-activity-editor) :is(label, legend) { color: #193650; font-size: 13px; font-weight: 600; }
+:is(#project-editor, #training-editor, #program-activity-editor) :is(input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), select, textarea) { min-height: 44px; border: 1px solid #dce7f1; border-radius: 8px; background-color: #f2f7fc; color: #263f58; }
+:is(#project-editor, #training-editor, #program-activity-editor) .program-editor form > h3 { margin: 24px 0 16px; padding-bottom: 10px; border-bottom: 1px solid #e4edf5; color: #193650; font-size: 14px; }
+:is(#project-editor, #training-editor, #program-activity-editor) .program-editor :is(form > p, .section-help) { color: #5b7187; line-height: 1.6; }
+:is(#project-editor, #training-editor, #program-activity-editor) .repeat-row, :is(#project-editor, #training-editor, #program-activity-editor) .program-choice-search { border-color: #dce7f1; border-radius: 9px; background: #f8fbfe; }
+:is(#project-editor, #training-editor, #program-activity-editor) .modal-actions { gap: 10px; margin-top: 24px; }
+:is(#project-editor, #training-editor, #program-activity-editor) [hidden] { display: none !important; }
+@media (max-width: 480px) { :is(#project-editor, #training-editor, #program-activity-editor) { padding: 20px; } }
+@media (prefers-reduced-motion: no-preference) { :is(#project-editor, #training-editor, #program-activity-editor)[open] { animation: project-arrive 250ms ease-out both; } }
 .program-editor { min-width: 0; }
 .program-editor form > h3 { font-size: 16px; margin: 28px 0 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
 .program-editor :is(form > p, .section-help) { font-size: 13px; line-height: 1.8; margin-block: 16px; }
@@ -81,6 +127,7 @@
     .program-management .program-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .program-management .program-heading, .program-management .program-section-heading, .program-management .program-information { padding: 18px; }
     .program-management .program-pagination { flex-direction: column; align-items: flex-start; }
+    .admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-pagination { margin-inline: 18px; }
     .program-management .program-information .detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 480px) {
@@ -88,8 +135,15 @@
     .program-management .program-summary .stat-top { flex-direction: column; align-items: flex-start; gap: 10px; }
     .program-management .program-search-bar { padding-inline: 18px; }
     .program-management .program-filter-grid, .program-management .program-information .detail-grid, .program-editor .form-grid { grid-template-columns: minmax(0, 1fr); }
+    .admin-workspace .program-management .project-heading-actions { justify-content: flex-start; }
 }
 @media (prefers-reduced-motion: reduce) { .program-management .program-summary .stat-card { transition: none; } }
+@media (prefers-reduced-motion: no-preference) {
+    .admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-heading { animation: project-arrive 400ms ease-out both; }
+    .admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) :is(.program-summary .stat-card, .program-register-table tbody tr, .program-pagination nav a, .area-info button) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease; }
+    .admin-workspace .program-management:is([data-workspace-title="Project Management"], [data-workspace-title="Training Management"], [data-workspace-title="Program Activity Management"]) .program-summary a:hover .stat-card { box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }
+    @keyframes project-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+}
 
 /* Program Activity controls reuse the shared workspace layout. */
 .activity-management .activity-register-table tbody th { white-space: normal; }
@@ -105,3 +159,4 @@
 .activity-management .activity-actions-panel :is(a, button):hover { background: #eef5fc; text-decoration: none; }
 .activity-management .activity-actions-panel .icon { width: 16px; height: 16px; flex-shrink: 0; }
 .activity-management .activity-actions-panel .activity-action-danger { color: #b42318; }
+.activity-management .activity-actions-panel .program-action-note { margin: 0; padding: 10px; color: #64788d; font-size: 12px; line-height: 1.5; }

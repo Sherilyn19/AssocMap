@@ -18,14 +18,12 @@
 <section class="audit-module" data-workspace-module="audit-logs" data-workspace-title="Audit Log">
     <header class="card audit-page-heading">
         <div>
-            <p class="eyebrow">System Administrator</p>
             <h1 tabindex="-1">Audit Log</h1>
-            <p>Review recorded system activity, the people involved, and affected records.</p>
+            <p>Review recorded activity, actors, and affected records.</p>
+            <div class="audit-info-row"><span>About this log</span><x-area-info label="About audit coverage">This log shows recorded events; some workflows may not yet produce audit events.</x-area-info></div>
         </div>
         <span class="audit-readonly"><x-icon name="shield" />Read-only history</span>
     </header>
-
-    <p class="audit-context"><x-icon name="info" /><span>This register shows recorded events. Some workflows may not yet generate audit events.</span></p>
 
     @if($invalidFilters ?? false)
         <div id="audit-filter-errors" class="notice notice-error" role="alert">
@@ -41,14 +39,8 @@
 
     <details class="card audit-filter-disclosure" @if($activeFilterCount || ($invalidFilters ?? false)) open @endif>
         <summary class="audit-filter-summary" aria-controls="audit-filter-panel">
-            <span class="audit-filter-copy"><strong>Filter audit events</strong><small>{{ $activeFilterCount ? $activeFilterCount.' active filter(s)' : 'All recorded events' }}</small></span>
-            <span class="button audit-filter-toggle">
-                <x-icon name="filter" />Filters
-                @if($activeFilterCount)
-                    <span class="audit-filter-count">{{ $activeFilterCount }}<span class="sr-only"> active filters</span></span>
-                @endif
-                <x-icon name="chevron-down" />
-            </span>
+            <span class="audit-filter-copy"><strong>Filter audit events</strong></span>
+            <x-icon name="chevron-down" />
         </summary>
         @include('admin.audit-logs.partials.filters')
     </details>
@@ -57,7 +49,7 @@
         <header class="audit-register-heading">
             <div><h2 id="audit-register-title">Audit events</h2>
                 @if($logs !== null)
-                    <p><strong>{{ number_format($logs->total()) }}</strong> {{ $activeFilterCount ? 'matching event(s)' : 'recorded event(s)' }}</p>
+                    <p><strong><x-summary-counter :value="number_format($logs->total())" /></strong> {{ $activeFilterCount ? 'matching event(s)' : 'recorded event(s)' }}</p>
                 @else
                     <p>{{ ($invalidFilters ?? false) ? 'Correct the filters to load records.' : 'Records unavailable' }}</p>
                 @endif

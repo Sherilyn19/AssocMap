@@ -14,12 +14,12 @@
 @section('content')
 <section class="program-management activity-management" data-workspace-module="program-activities" data-workspace-title="Program Activity Management" data-program-activities>
     <header class="card program-heading">
-        <div><p class="eyebrow">{{ $prefix === 'admin' ? 'System Administrator' : 'Field Officer' }}</p><h1 tabindex="-1">Program Activity Management</h1><p>{{ $prefix === 'admin' ? 'Manage association-specific and program-wide SAAD activities.' : 'Manage program activities for your assigned active associations.' }}</p></div>
+        <div>@if($prefix !== 'admin')<p class="eyebrow">Field Officer</p>@endif<h1 tabindex="-1">Program Activity Management</h1><p>{{ $prefix === 'admin' ? 'Manage association-specific and program-wide SAAD activities.' : 'Manage program activities for your assigned active associations.' }}</p></div>
         <a class="button button-primary" href="{{ route($activityPrefix.'.index', $filters + ['editor' => 'create']) }}"><x-icon name="plus" />Add Program Activity</a>
     </header>
     @include('program-management.partials.summary')
     <section class="card program-register" aria-labelledby="activity-register-title">
-        <div class="program-section-heading"><div><h2 id="activity-register-title">Activity register</h2><p>{{ number_format($records->total()) }} matching activity record(s)</p></div><p>Program-wide and association-specific records retain their existing scope.</p></div>
+        <div class="program-section-heading"><div><div class="program-heading-title"><h2 id="activity-register-title">Activity register</h2>@if($prefix === 'admin')<x-area-info label="About activity scope">Activities may be program-wide or linked to an association.</x-area-info>@endif</div><p>{{ number_format($records->total()) }} matching activity record(s)</p></div>@if($prefix !== 'admin')<p>Program-wide and association-specific records retain their existing scope.</p>@endif</div>
         @include('program-management.partials.filters', ['searchPlaceholder' => 'Search title, association, or SAAD activity'])
         <div class="table-scroll" role="region" aria-label="Program activity register" tabindex="0">
             <table class="data-table program-register-table activity-register-table">
@@ -50,20 +50,20 @@
                             </td>
                             <td class="activity-actions-cell">
                                 <div class="row-actions activity-row-actions">
-                                    <a class="button button-quiet" href="{{ $workflow->to($activityPrefix.'.show', [$row['id']]) }}" aria-label="View {{ $row['title'] }}"><x-icon name="eye" />View</a>
-                                    @if($row['can_manage'])
                                         <details class="activity-actions" data-user-actions>
                                             <summary aria-label="Actions for {{ $row['title'] }}"><x-icon name="ellipsis" /></summary>
                                             <div class="activity-actions-panel" data-user-actions-panel>
+                                                <a href="{{ $workflow->to($activityPrefix.'.show', [$row['id']]) }}"><x-icon name="eye" />View Activity</a>
+                                                @if($row['can_manage'])
                                                 @if(!$row['archived'])
                                                     <a href="{{ route($activityPrefix.'.edit', $row['id']) }}"><x-icon name="pencil" />Edit Activity</a>
                                                 @endif
                                                 <button type="button" @class(['activity-action-danger' => !$row['archived']]) data-dialog="program-activity-action-{{ $row['id'] }}"><x-icon :name="$row['archived'] ? 'archive-restore' : 'archive'" />{{ $row['archived'] ? 'Restore Activity' : 'Archive Activity' }}</button>
+                                                @else
+                                                    <p class="program-action-note">{{ $row['project_finalized'] ? 'Read-only: project finalized' : ($row['association_archived'] ? 'Read-only: association archived' : 'Read-only: association unavailable or inactive') }}</p>
+                                                @endif
                                             </div>
                                         </details>
-                                    @else
-                                        <small class="activity-read-only">Read-only</small>
-                                    @endif
                                 </div>
                                 @if($row['project_finalized'])
                                     <small>Project finalized</small>
@@ -80,7 +80,7 @@
                 </tbody>
             </table>
         </div>
-        @include('program-management.partials.pagination', ['paginator' => $records, 'label' => 'activities'])
+        @include('program-management.partials.pagination', ['paginator' => $records, 'label' => 'activities', 'projectRegister' => $prefix === 'admin'])
     </section>
 </section>
 @foreach($rows as $row)

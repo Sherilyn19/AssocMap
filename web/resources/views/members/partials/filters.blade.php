@@ -13,7 +13,7 @@
         </div>
         <button class="button button-primary" type="submit">Search</button>
         <a class="button" href="{{ route($indexRoute) }}">Reset</a>
-        <span class="member-filter-indicator" role="status">{{ $activeFilters ? $activeFilters.' active filter(s)' : 'Default view' }}</span>
+        @if($activeFilters || !request()->routeIs('admin.*'))<span class="member-filter-indicator" role="status">{{ $activeFilters ? $activeFilters.' active filter(s)' : 'Default view' }}</span>@endif
     </div>
     <details class="member-filter-disclosure" @if($activeFilters) open @endif>
         <summary class="button"><x-icon name="filter" />Filters &amp; sorting<x-icon name="chevron-down" /></summary>

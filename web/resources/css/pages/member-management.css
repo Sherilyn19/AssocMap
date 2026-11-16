@@ -3,6 +3,21 @@
 .member-management .member-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding: 24px; border-top: 3px solid var(--primary); }
 .member-management .member-heading > div { flex: 1 1 300px; min-width: 0; }
 .member-management .member-heading p:not(.eyebrow) { margin-top: 8px; font-size: 13px; }
+.admin-workspace .member-management[data-workspace-title="Member Management"] :is(.member-heading h1, .member-section-heading h2, .member-register-table thead th) { text-transform: uppercase; }
+.admin-workspace .member-management[data-workspace-title="Member Management"] .member-summary a[aria-current="page"] { --summary-counter-surface: #1d628e; }
+.admin-workspace .member-management[data-workspace-title="Member Management"] .member-summary a[aria-current="page"] .stat-card { background: #1d628e; border-color: #1d628e; }
+.admin-workspace .member-management[data-workspace-title="Member Management"] .member-summary a:not([aria-current="page"]):hover { --summary-counter-surface: #f3f7fd; }
+.admin-workspace .member-management[data-workspace-title="Member Management"] .member-register { overflow: visible; }
+.member-management .member-info-row { position: relative; z-index: 4; display: flex; align-items: center; gap: 5px; margin-top: -10px; color: var(--text-secondary); font-size: 12px; }
+.member-management .member-heading-title { display: flex; align-items: center; gap: 5px; }
+.member-management .member-section-heading { position: relative; z-index: 3; }
+.member-management .area-info { position: relative; flex: none; }
+.member-management .area-info button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #386a96; cursor: pointer; }
+.member-management .area-info button:hover, .member-management .area-info button[aria-expanded="true"] { background: #edf4fb; }
+.member-management .area-info svg { width: 18px; height: 18px; }
+.member-management .area-info-popover { display: none; position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; width: min(300px, calc(100vw - 48px)); padding: 12px 14px; border: 1px solid #cfdeeb; border-radius: 8px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 16%); color: #334b63; font-size: 12px; line-height: 1.55; }
+.member-management .area-info button[aria-expanded="true"] + .area-info-popover { display: block; }
+@media (hover: hover) { .member-management .area-info:hover .area-info-popover { display: block; } }
 .member-management .member-summary-help { font-size: 12px; line-height: 1.7; margin-top: -6px; }
 .member-management .member-register { min-width: 0; overflow: hidden; }
 .member-management .member-section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 22px; }
@@ -24,6 +39,9 @@
 .member-management .member-filter-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 .member-management .member-register-table { min-width: 820px; }
 .member-management .member-register-table :is(tbody th, td) { padding: 17px 22px; vertical-align: middle; font-size: 13px; max-width: 320px; overflow-wrap: anywhere; }
+.admin-workspace .member-management[data-workspace-title="Member Management"] .member-register-table thead th { padding: 14px 22px; background: #f8fafc; color: #475569; font-size: 12px; font-weight: 700; }
+.admin-workspace .member-management[data-workspace-title="Member Management"] .member-register-table tbody th { background: transparent; border-bottom: 1px solid #eef2f6; }
+.admin-workspace .member-management[data-workspace-title="Member Management"] .member-register-table tbody tr:hover { background: #f4f8fc; }
 .member-management .member-register-table tbody th { text-align: left; font-weight: 600; min-width: 190px; }
 .member-management .member-register-table small { display: block; font-size: 11px; color: var(--text-secondary); font-weight: 400; margin-top: 5px; }
 .member-management .member-row-actions { flex-wrap: wrap; gap: 6px; min-width: 180px; }
@@ -31,11 +49,36 @@
 .member-management .member-register-table .button .icon { width: 15px; height: 15px; }
 .member-management .member-register-notice { margin: 0 22px 18px; }
 .member-management .member-register-pagination, .member-management .member-register-pagination nav { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.admin-workspace .member-management[data-workspace-title="Member Management"] .member-register-pagination { justify-content: space-between; margin: 16px 22px 22px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #475569; font-size: 12px; }
+.admin-workspace .member-management[data-workspace-title="Member Management"] .member-register-pagination nav { gap: 4px; }
+.admin-workspace .member-management[data-workspace-title="Member Management"] .member-register-pagination nav > * { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; padding: 6px 9px; border: 1px solid #dbe4ef; border-radius: 6px; background: #fff; color: #334155; font-size: 12px; font-weight: 600; }
+.admin-workspace .member-management[data-workspace-title="Member Management"] .member-register-pagination nav a:hover { border-color: #9bbad8; background: #edf4fb; color: var(--primary); }
+.admin-workspace .member-management[data-workspace-title="Member Management"] .member-register-pagination nav .member-page-disabled { color: #94a3b8; background: #f8fafc; }
 .member-management .member-association-context { padding: 20px 22px; }
 .member-management .member-association-context summary { display: flex; justify-content: space-between; gap: 15px; cursor: pointer; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
 .member-management .member-association-context[open] summary { margin-bottom: 22px; }
 .member-management :is(a, button, input, select, summary, [tabindex]):focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
 .modal:has(.member-record-dialog) { width: min(800px, calc(100% - 30px)); }
+.admin-member-modal { padding: 0; background: #f6f9fc; }
+.admin-member-modal .modal-heading { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px; margin: 0; padding: 16px 20px; border-bottom: 1px solid #e2eaf2; background: #fff; }
+.admin-member-modal .member-modal-icon { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: 8px; background: #edf4fb; color: #496b8a; }
+.admin-member-modal .member-modal-icon .icon { width: 18px; height: 18px; }
+.admin-member-modal .member-modal-title { flex: 1; min-width: 0; }
+.admin-member-modal .member-modal-title > div { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.admin-member-modal .member-modal-title h2 { color: #193650; font-size: 17px; }
+.admin-member-modal .member-modal-title p { margin: 3px 0 0; color: #64788d; font-size: 12px; }
+.admin-member-modal .member-number { padding: 3px 7px; border-radius: 5px; background: #edf3f8; color: #526679; font-size: 11px; overflow-wrap: anywhere; }
+.admin-member-modal .member-record-dialog { display: grid; gap: 16px; padding: 20px; }
+.admin-member-modal .member-record-dialog .member-detail-banner { margin: 0; padding: 18px; background: #fff; border-color: #e0e9f1; }
+.admin-member-modal .member-record-dialog .member-detail-banner p { margin: 5px 0 0; color: #64788d; }
+.admin-member-modal .member-record-dialog .member-avatar { width: 48px; height: 48px; font-weight: 700; font-size: 15px; }
+.admin-member-modal .member-detail-card { min-width: 0; padding: 18px; border: 1px solid #e0e9f1; border-radius: 9px; background: #fff; }
+.admin-member-modal .member-detail-card h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid #edf1f5; color: #526679; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.admin-member-modal .member-detail-card h3 .icon { width: 15px; height: 15px; color: #6986a1; }
+.admin-member-modal .member-detail-card .detail-grid { margin: 0; gap: 18px; }
+.admin-member-modal .member-detail-card dt { color: #71869b; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.admin-member-modal .member-detail-card dd { margin: 5px 0 0; color: #263f58; font-size: 13px; overflow-wrap: anywhere; }
+@media (max-width: 480px) { .admin-member-modal .modal-heading { padding: 14px 16px; } .admin-member-modal .member-record-dialog { padding: 14px; } .admin-member-modal .member-detail-card { padding: 15px; } }
 .member-record-dialog { min-width: 0; }
 .member-record-dialog .member-detail-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 18px; margin-bottom: 24px; border: 1px solid #dae7f3; border-radius: 9px; background: #f4f8fd; }
 .member-record-dialog .member-detail-banner > div { flex: 1 1 200px; overflow-wrap: anywhere; }
@@ -57,6 +100,7 @@
 @media (max-width: 760px) {
     .member-management .member-heading, .member-management .member-section-heading { padding: 18px; }
     .member-management .member-register-pagination { align-items: flex-start; flex-direction: column; }
+    .admin-workspace .member-management[data-workspace-title="Member Management"] .member-register-pagination { margin-inline: 18px; }
     .member-record-dialog .detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 480px) {
@@ -65,3 +109,9 @@
     .member-record-dialog .detail-grid, .member-record-dialog .form-grid, .member-record-dialog .form-section { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) { .member-management .member-summary .stat-card { transition: none; } }
+@media (prefers-reduced-motion: no-preference) {
+    .admin-workspace .member-management[data-workspace-title="Member Management"] .member-heading { animation: member-arrive 400ms ease-out both; }
+    .admin-workspace .member-management[data-workspace-title="Member Management"] :is(.member-summary .stat-card, .member-register-table tbody tr, .member-register-pagination nav a, .area-info button) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease; }
+    .admin-workspace .member-management[data-workspace-title="Member Management"] .member-summary a:hover .stat-card { box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }
+    @keyframes member-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+}
