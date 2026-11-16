@@ -7,6 +7,7 @@
     'avatar' => null,
     'compact' => false,
     'scrollContext' => false,
+    'associationName' => null,
 ])
 
 <header @class(['topbar', 'workspace-header', 'workspace-header--compact' => $compact, 'workspace-header--scroll-context' => $scrollContext])>
@@ -25,7 +26,11 @@
             <span class="avatar">{{ $avatar }}</span>
         @endif
         <div class="account-copy">
-            <strong>{{ $displayName }}</strong>
+            @if($associationName)
+                <details class="account-association"><summary><strong>{{ $displayName }}</strong><x-icon name="chevron-down" /></summary><div class="account-association-popover"><x-icon name="building" /><span><small>Association</small><strong>{{ $associationName }}</strong></span></div></details>
+            @else
+                <strong>{{ $displayName }}</strong>
+            @endif
             @if(!$compact && $accountLabel)<small>{{ $accountLabel }}</small>@endif
         </div>
         <form method="POST" action="{{ route('logout') }}">

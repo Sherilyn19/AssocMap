@@ -63,6 +63,18 @@
 .avatar-small { width: 33px; height: 33px; font-size: 10px; }
 .account-copy strong { display: block; font-size: 12px; }
 .account-copy small { display: block; color: var(--text-secondary); font-size: 10px; }
+.association-workspace .account-association { position: relative; }
+.association-workspace .account-association summary { display: flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; border-radius: 6px; }
+.association-workspace .account-association summary::-webkit-details-marker { display: none; }
+.association-workspace .account-association summary > .icon { width: 14px; height: 14px; flex: none; color: var(--primary); }
+.association-workspace .account-association summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
+.association-workspace .account-association-popover { position: absolute; right: 0; top: calc(100% + 4px); z-index: 40; display: none; align-items: flex-start; gap: 10px; width: max-content; max-width: min(300px, 80vw); padding: 12px; border: 1px solid #dbe6ee; border-radius: 9px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 14%); overflow-wrap: anywhere; }
+.association-workspace .account-association-popover > .icon { width: 18px; height: 18px; flex: none; color: var(--primary); }
+.association-workspace .account-association-popover strong { color: #193650; line-height: 1.45; }
+.association-workspace .account-association[open] .account-association-popover { display: flex; }
+@media (hover: hover) { .association-workspace .account-association:hover .account-association-popover { display: flex; } }
+@media (prefers-reduced-motion: no-preference) { .association-workspace .account-association summary > .icon { transition: transform 180ms ease; } .association-workspace .account-association[open] summary > .icon { transform: rotate(180deg); } .association-workspace .account-association-popover { animation: account-association-appear 180ms ease-out; } }
+@keyframes account-association-appear { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 .icon-button { background: transparent; border: 0; width: 36px; height: 36px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-secondary); }
 .icon-button:hover { background: #edf3f9; color: var(--primary); }
 .mobile-menu { display: none; }
