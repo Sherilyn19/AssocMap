@@ -8,7 +8,19 @@ export function initDashboardGisGallery() {
         const pageLabel = root.querySelector('[data-gallery-page]');
         const viewer = root.querySelector('[data-gallery-viewer]');
         const image = root.querySelector('[data-gallery-image]');
-        let page = 1, lastPage = 1, opener = null;
+        const viewerPrevious = root.querySelector('[data-viewer-previous]');
+        const viewerNext = root.querySelector('[data-viewer-next]');
+        let page = 1, lastPage = 1, opener = null, photos = [], photoIndex = 0, touchStart = null;
+
+        const showPhoto = index => {
+            if (index < 0 || index >= photos.length) return;
+            photoIndex = index;
+            const photo = photos[index];
+            image.alt = `Photo of ${photo.title}`; image.src = photo.display;
+            root.querySelector('[data-gallery-caption]').textContent = photo.title;
+            root.querySelector('[data-viewer-count]').textContent = `${index + 1} / ${photos.length}`;
+            viewerPrevious.disabled = index === 0; viewerNext.disabled = index === photos.length - 1;
+        };
 
         const get = async (path, allowUnavailableLocation = false) => {
             const url = new URL(path, window.location.origin);
@@ -21,7 +33,7 @@ export function initDashboardGisGallery() {
         const uuid = value => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
         const load = async () => {
             previous.disabled = next.disabled = true;
-            grid.replaceChildren(); status.textContent = 'Loading GIS photos…';
+            grid.replaceChildren(); photos = []; status.textContent = 'Loading GIS photos…';
             try {
                 const data = await get(`${base}/data?mode=list&page=${page}`);
                 if (!Array.isArray(data.features) || !data.meta) throw new Error('Locations unavailable');
@@ -44,17 +56,18 @@ export function initDashboardGisGallery() {
                             const button = document.createElement('button'); button.type = 'button';
                             button.setAttribute('aria-label', `View photo of ${title}`);
                             const img = document.createElement('img'); img.src = thumbnail; img.alt = `Photo of ${title}`; img.loading = 'lazy';
-                            img.onerror = () => { button.remove(); status.textContent = grid.children.length ? 'Some photos could not be displayed. Try again later or visit the GIS map.' : 'Photos could not be displayed. Try again later or visit the GIS map.'; };
+                            const photoEntry = { title, display };
+                            photos.push(photoEntry);
+                            img.onerror = () => { const index = photos.indexOf(photoEntry); if (index !== -1) photos.splice(index, 1); button.remove(); status.textContent = grid.children.length ? 'Some photos could not be displayed. Try again later or visit the GIS map.' : 'Photos could not be displayed. Try again later or visit the GIS map.'; };
                             button.append(img); button.addEventListener('click', () => {
-                                opener = button; image.alt = `Photo of ${title}`; image.src = display;
-                                root.querySelector('[data-gallery-caption]').textContent = title;
+                                opener = button; showPhoto(photos.indexOf(photoEntry));
                                 viewer.showModal(); root.querySelector('[data-gallery-close]').focus();
                             });
                             grid.append(button); count++;
                         } catch { failed++; }
                     });
                 });
-                status.textContent = failed ? (count ? 'Some location photos could not be loaded. Try again later.' : 'Photos could not be loaded. Try again later or visit the GIS map.') : (count ? 'Approved photos from your GIS locations.' : 'No approved photos are available for the locations on this page.');
+                status.textContent = failed ? (count ? 'Some location photos could not be loaded. Try again later.' : 'Photos could not be loaded. Try again later or visit the GIS map.') : (count ? '' : 'No approved photos are available for the locations on this page.');
                 pageLabel.textContent = `Locations page ${page} of ${lastPage}`;
                 previous.disabled = page <= 1; next.disabled = page >= lastPage;
             } catch {
@@ -65,6 +78,14 @@ export function initDashboardGisGallery() {
         previous.addEventListener('click', () => { if (page > 1) { page--; void load(); } });
         next.addEventListener('click', () => { if (page < lastPage) { page++; void load(); } });
         root.querySelector('[data-gallery-close]').addEventListener('click', () => viewer.close());
+        viewerPrevious.addEventListener('click', () => showPhoto(photoIndex - 1));
+        viewerNext.addEventListener('click', () => showPhoto(photoIndex + 1));
+        viewer.addEventListener('keydown', event => {
+            if (event.key === 'ArrowLeft') { event.preventDefault(); showPhoto(photoIndex - 1); }
+            if (event.key === 'ArrowRight') { event.preventDefault(); showPhoto(photoIndex + 1); }
+        });
+        image.addEventListener('touchstart', event => { touchStart = event.changedTouches[0].clientX; }, { passive: true });
+        image.addEventListener('touchend', event => { if (touchStart === null) return; const distance = event.changedTouches[0].clientX - touchStart; if (Math.abs(distance) > 50) showPhoto(photoIndex + (distance < 0 ? 1 : -1)); touchStart = null; }, { passive: true });
         viewer.addEventListener('close', () => { image.removeAttribute('src'); opener?.focus(); });
         image.addEventListener('error', () => { root.querySelector('[data-gallery-caption]').textContent = 'Photo unavailable.'; });
         void load();
