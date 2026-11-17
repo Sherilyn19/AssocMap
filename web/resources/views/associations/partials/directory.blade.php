@@ -1,3 +1,4 @@
+{{-- Both registers share the same heading, filters, table, and pagination. --}}
 <section class="association-management" data-association-ui data-workspace-module="associations" data-workspace-title="{{ $officerDirectory ? 'Association Officers' : ($prefix === 'admin' ? 'Association Management' : 'Assigned Associations') }}">
     <header class="card association-heading">
         <div><h1 tabindex="-1">{{ $officerDirectory ? 'Association Officers' : ($prefix === 'admin' ? 'Association Management' : 'Assigned Associations') }}</h1><p>{{ $officerDirectory ? 'Manage organizational positions held by eligible association members.' : ($prefix === 'admin' ? 'Manage association records, locations, and organizational officers.' : 'Review association records and manage officers within your current assignments.') }}</p></div>
@@ -7,11 +8,15 @@
                 <a class="button" href="{{ route($prefix.'.association-officers.index') }}">{{ $prefix === 'admin' ? 'Manage Association Officers' : 'Assign Officers' }}</a>
                 <x-contextual-report :prefix="$prefix" type="associations" :related="true" :show-scope="false" :scope="$prefix === 'admin' ? 'All associations, including archived records. Register filters do not apply.' : 'Assigned active associations; register filters do not apply.'" />
                 @if($prefix === 'admin')<a class="button button-primary" href="{{ route('admin.associations.index', $filters + ['editor' => 'create']) }}"><x-icon name="plus" />Add Association</a>@endif
+            @elseif($prefix === 'field-officer')
+                {{-- Put the back button first and the path on the right, as on association details. --}}
+                <div class="workflow-navigation association-officer-navigation"><a class="back-link" href="{{ route($prefix.'.associations.index') }}"><x-icon name="back" />Back to Assigned Associations</a><nav aria-label="Breadcrumb"><ol><li><a href="{{ route($prefix.'.associations.index') }}">Assigned Associations</a><span aria-hidden="true">/</span></li><li><span aria-current="page">Association Officers</span></li></ol></nav></div>
             @else
                 <nav class="association-officer-path" aria-label="Association officer navigation"><a href="{{ route($prefix.'.associations.index') }}">{{ $prefix === 'admin' ? 'Association Management' : 'Assigned Associations' }}</a><span aria-hidden="true">/</span><a href="{{ route($prefix.'.association-officers.index') }}" aria-current="page">{{ $prefix === 'admin' ? 'Manage Association Officers' : 'Association Officers' }}</a></nav>
                 <a class="button" href="{{ route($prefix.'.associations.index') }}">Back to {{ $prefix === 'admin' ? 'Association Management' : 'Assigned Associations' }}</a>
             @endif
         </div>
+    {{-- The administrator sees the existing association totals. --}}
     @if($summary !== null)
         <nav class="association-summary" aria-label="Association status groups">
             @foreach(['total' => ['Total Associations', 'all', 'building'], 'active' => ['Active Associations', 'active', 'check'], 'inactive' => ['Inactive Associations', 'inactive', 'users'], 'archived' => ['Archived Associations', 'archived', 'archive']] as $key => [$label, $status, $icon])
@@ -23,6 +28,7 @@
         <div class="association-info-row"><span>About these totals</span><x-area-info label="About association totals">Total includes archived associations. Active and inactive totals exclude archived records. The report includes all authorized associations; register filters do not apply.</x-area-info></div>
     @endif
     @if($officerDirectory)<p class="notice">Officers are association members. Assigning a position does not create an account or change access permissions.</p>@endif
+    {{-- Search and display only associations available to this account. --}}
     <section class="card association-register" aria-labelledby="association-records-title">
         <div class="association-section-heading"><div class="association-heading-title"><h2 id="association-records-title">{{ $officerDirectory ? 'Associations and officers' : 'Association records' }}</h2>@if(!$officerDirectory && $prefix === 'admin')<x-area-info label="About member counts">Member counts include active, unarchived members.</x-area-info>@endif</div>@if($prefix !== 'admin')<p>{{ number_format($associations->total()) }} matching association(s)</p>@endif</div>
         @include('associations.partials.filters')

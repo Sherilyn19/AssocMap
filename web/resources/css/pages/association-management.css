@@ -141,6 +141,64 @@
 }
 
 /* Field officer presentation */
+/* Match officer management to the association detail page without changing admin screens. */
+.field-officer-workspace .association-officer-navigation { width: 100%; }
+.field-officer-workspace .association-officer-navigation .back-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
+.field-officer-workspace .association-officer-navigation .back-link:hover { border-color: #9bbad8; background: #edf4fb; }
+.field-officer-workspace .association-officer-navigation nav a { font-weight: 600; text-decoration: none; }
+.field-officer-workspace .association-officer-navigation nav a:hover { text-decoration: underline; }
+
+/* Keep officer tables, forms, and page controls aligned with related records. */
+.field-officer-workspace .association-officers .officer-record-section { min-width: 0; }
+.field-officer-workspace .association-officers .officer-record-section > h2 { color: #263f58; font-weight: 700; text-transform: uppercase; overflow-wrap: anywhere; }
+.field-officer-workspace .association-officers .officer-record-section > h2 .icon { width: 18px; height: 18px; margin-right: 6px; vertical-align: -3px; color: var(--primary); }
+.field-officer-workspace .association-officers .officer-record-section .association-pagination { margin: 16px 0 0; }
+.field-officer-workspace .association-officers .association-table td { vertical-align: middle; }
+.field-officer-workspace .association-officers .association-table td form label { display: block; line-height: 1.5; margin-bottom: 10px; }
+.field-officer-workspace .association-officers :is(.form-section, .notice) { min-width: 0; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-workspace .association-officers :is(.button, .text-button, .association-table tbody tr),
+    .field-officer-workspace .association-officer-navigation a { transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease; }
+}
+
+/* Use the same date markers as the association training timeline. */
+.field-officer-workspace .officer-association-detail .training-timeline-date { position: relative; min-width: 150px; padding-left: 42px; }
+.field-officer-workspace .officer-association-detail .training-timeline-date::before { content: ''; position: absolute; left: 25px; top: 0; bottom: 0; border-left: 2px solid #dbe6ee; }
+.field-officer-workspace .officer-association-detail .training-timeline-marker { position: absolute; left: 20px; top: 23px; width: 12px; height: 12px; border: 3px solid #fff; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 1px #9bbad8; }
+@media (prefers-reduced-motion: no-preference) { .field-officer-workspace .officer-association-detail .training-timeline-marker { transition: box-shadow 180ms ease; } .field-officer-workspace .officer-association-detail tr:hover .training-timeline-marker { box-shadow: 0 0 0 4px #dbe6ee; } }
+
+/* Keep association details clear and consistent with the association workspace. */
+/* Keep location details on the left and photos on the right. */
+.field-officer-workspace .officer-location-layout { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: start; }
+.field-officer-workspace .officer-location-layout > .association-section-heading { grid-column: 1 / -1; }
+.field-officer-workspace .officer-location-layout > .association-info-grid { grid-column: 1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.field-officer-workspace .officer-location-layout > .association-section-note { grid-column: 1; }
+.field-officer-workspace .association-location-gallery { grid-column: 2; grid-row: 2 / span 2; margin: 0 22px 22px 0; padding: 0 0 0 18px; border-left: 1px solid #dbe6ee; }
+.field-officer-workspace .association-location-gallery .dashboard-gis-gallery { max-width: 480px; padding: 0; border: 0; }
+@media (max-width: 850px) { .field-officer-workspace .officer-location-layout { grid-template-columns: minmax(0, 1fr); } .field-officer-workspace .association-location-gallery { grid-column: 1; grid-row: auto; margin: 0 22px 22px; padding: 16px 0 0; border-left: 0; border-top: 1px solid #dbe6ee; } }
+@media (max-width: 480px) { .field-officer-workspace .officer-location-layout > .association-info-grid { grid-template-columns: minmax(0, 1fr); } }
+.field-officer-workspace .officer-association-detail .association-info-grid dt .area-info { position: relative; display: inline-flex; vertical-align: middle; }
+.field-officer-workspace .officer-association-detail .association-info-grid .area-info button { display: grid; place-items: center; width: 30px; height: 30px; padding: 4px; border: 0; border-radius: 6px; background: transparent; color: var(--primary); cursor: pointer; }
+.field-officer-workspace .officer-association-detail .association-info-grid .area-info svg { width: 18px; height: 18px; }
+.field-officer-workspace .officer-association-detail .association-info-grid .area-info-popover { display: none; position: absolute; z-index: 20; top: 100%; right: 0; width: min(280px, 70vw); padding: 12px; border: 1px solid #cfdeeb; border-radius: 8px; background: #fff; color: #334b63; box-shadow: 0 8px 24px rgb(16 47 80 / 14%); text-transform: none; font-weight: 400; }
+.field-officer-workspace .officer-association-detail .association-info-grid .area-info button[aria-expanded="true"] + .area-info-popover { display: block; }
+.field-officer-workspace .officer-association-detail .workflow-navigation { margin: 0; }
+.field-officer-workspace .officer-association-detail .workflow-navigation .back-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
+.field-officer-workspace .officer-association-detail .workflow-navigation .back-link:hover { border-color: #9bbad8; background: #edf4fb; }
+.field-officer-workspace .officer-association-detail .workflow-navigation nav a { font-weight: 600; text-decoration: none; }
+.field-officer-workspace .officer-association-detail .workflow-navigation nav a:hover { text-decoration: underline; }
+.field-officer-workspace .officer-association-detail :is(.association-heading > div, .association-information, .association-register) { min-width: 0; overflow-wrap: anywhere; }
+.field-officer-workspace .officer-association-detail :is(.association-section-heading h2, .association-info-grid dt, .association-table thead th) { font-weight: 700; text-transform: uppercase; }
+.field-officer-workspace .officer-association-detail .association-section-heading h2 .icon { width: 18px; height: 18px; margin-right: 6px; vertical-align: -3px; color: var(--primary); }
+.field-officer-workspace .officer-association-detail .association-info-grid { gap: 12px 20px; }
+.field-officer-workspace .officer-association-detail .association-info-grid > div { min-width: 0; padding: 10px 0; border-bottom: 1px solid #dce7f1; }
+.field-officer-workspace .officer-association-detail .association-info-grid :is(dt, dd) { line-height: 1.5; overflow-wrap: anywhere; }
+.field-officer-workspace .officer-association-detail .table-scroll { max-width: 100%; overflow-x: auto; }
+.field-officer-workspace .officer-association-detail .association-table :is(th, td) { white-space: normal; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: no-preference) {
+    .field-officer-workspace .officer-association-detail :is(.workflow-navigation a, .association-related-tabs a, .association-pagination a, .association-info-grid > div) { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; }
+    .field-officer-workspace .officer-association-detail .association-info-grid > div:hover { border-color: #9bbad8; }
+}
 
 .field-officer-polish .association-management .association-heading h1, .field-officer-polish .association-management .association-section-heading h2, .field-officer-polish .association-management .association-table thead th { text-transform: uppercase; }
 .field-officer-polish .association-management .association-heading-actions { justify-content: flex-end; margin-top: -10px; gap: 8px; }

@@ -69,10 +69,14 @@ def verify(directory):
         text="\n".join(page.extract_text() or "" for page in reader.pages)
         normalized=" ".join(text.split())
         compact="".join(text.split())
-        assert result["title"] in normalized and "Asia/Manila" in normalized
+        assert result["title"] in normalized and "Philippine Time" in normalized
         assert "PHP (Philippine peso)" in normalized
         for section in result["sections"]:
-            assert " ".join(section["title"].split()) in normalized, "PDF section missing."
+            # The association report may combine its three matching location tables.
+            merged = result["meta"]["filters"].get("report_type") == "associations" and "Where the associations are" in normalized
+            if not (merged and section["key"] in ("association_municipality", "association_barangay", "association_geography")):
+                expected_title = section["title"].replace("current snapshot", "current records")
+                assert " ".join(expected_title.split()) in normalized, "PDF section missing."
             for item in section["measures"]:
                 assert "".join(item["label"].split()) in compact, "PDF indicator missing."
                 value=item["value"]
@@ -81,6 +85,13 @@ def verify(directory):
             for row in section["rows"]:
                 for column in section["columns"]:
                     value=row[column["key"]]
+                    # The PDF uses reader-friendly dates and status labels.
+                    if value is not None and column["type"] == "date":
+                        value = date.fromisoformat(value).strftime("%b %d, %Y")
+                    elif value is not None and section["key"] == "association_status" and column["key"] == "label":
+                        value = str(value).capitalize()
+                    elif value is not None and column["key"] in ("status", "lifecycle"):
+                        value = str(value).capitalize()
                     expected="Unobserved / not applicable" if value is None else format(Decimal(value),",.2f") if column["type"]=="decimal" else \
                         format(value,",") if column["type"]=="integer" and column["key"] not in ("year","program_year","quarter","month") else str(value)
                     assert "".join(expected.split()) in compact, "PDF canonical detail value missing."

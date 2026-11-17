@@ -3,7 +3,7 @@
         <thead><tr>
         @if($section === 'members')<th scope="col">Member</th><th scope="col">Position</th><th scope="col">Status</th><th scope="col">Open</th>
         @elseif($section === 'registrations')<th scope="col">Agency</th><th scope="col">Registration number</th><th scope="col">Registration date</th><th scope="col">Expiration</th><th scope="col">Primary</th>
-        @else<th scope="col">{{ $section === 'activities' ? 'Program Activity' : ucfirst(rtrim($section, 's')) }}</th><th scope="col">Status</th>@if($section !== 'projects')<th scope="col">Date</th>@endif<th scope="col">Open</th>@endif
+        @else @if($prefix === 'field-officer')<th scope="col">{{ $section === 'projects' ? 'Implementation dates' : ($section === 'trainings' ? 'Training dates' : 'Activity date') }}</th>@endif<th scope="col">{{ $section === 'activities' ? 'Program Activity' : ucfirst(rtrim($section, 's')) }}</th><th scope="col">Status</th>@if($prefix !== 'field-officer' && $section !== 'projects')<th scope="col">Date</th>@endif<th scope="col">Open</th>@endif
         </tr></thead><tbody>
         @forelse($related as $item)
             <tr>
@@ -18,8 +18,13 @@
                 </th><td>{{ $item->registration_number }}@if($prefix === 'admin' && filled($item->remarks))<small>{{ $item->remarks }}</small>@endif</td><td>{{ $item->registration_date?->format('M d, Y') ?? 'Not recorded' }}</td><td>{{ $item->expiration_date?->format('M d, Y') ?? 'Not recorded' }}</td><td>{{ $item->is_primary ? 'Yes' : 'No' }}</td>
             @else
                 @php($recordRoute = $section === 'activities' ? 'program-activities' : $section)
-                <th scope="row"><a href="{{ $workflow->to($prefix.'.'.$recordRoute.'.show', [$item->id], 'related-association-records') }}">{{ $item->title }}</a></th><td><x-status-badge :value="ucfirst($item->status)" />@if($item->archived_at)<span class="badge badge-neutral">Archived</span>@endif</td>
-                @if($section !== 'projects')<td>{{ ($section === 'trainings' ? $item->start_date : $item->activity_date)?->format('M d, Y') ?? 'Not recorded' }}</td>@endif
+                {{-- Match the training timeline using the project's saved dates. --}}
+                @if($prefix === 'field-officer' && $section === 'projects')<td class="training-timeline-date"><span class="training-timeline-marker" aria-hidden="true"></span><span>{{ $item->implementation_start_date?->format('M j, Y') ?? 'Not recorded' }}<small>End: {{ $item->implementation_end_date?->format('M j, Y') ?? 'Not recorded' }}</small></span></td>@endif
+                {{-- Show saved training and activity dates in the same timeline. --}}
+                @if($prefix === 'field-officer' && $section === 'trainings')<td class="training-timeline-date"><span class="training-timeline-marker" aria-hidden="true"></span><span>{{ $item->start_date?->format('M j, Y') ?? 'Not recorded' }}<small>End: {{ $item->end_date?->format('M j, Y') ?? 'Not recorded' }}</small></span></td>@endif
+                @if($prefix === 'field-officer' && $section === 'activities')<td class="training-timeline-date"><span class="training-timeline-marker" aria-hidden="true"></span><span>{{ $item->activity_date?->format('M j, Y') ?? 'Not recorded' }}</span></td>@endif
+                <th scope="row"><a href="{{ $workflow->to($prefix.'.'.$recordRoute.'.show', [$item->id], 'related-association-records') }}">{{ $item->title }}</a>@if($prefix === 'field-officer' && $section === 'projects')<small>Program year: {{ $item->program_year ?? 'Not recorded' }}</small>@endif</th><td><x-status-badge :value="ucfirst($item->status)" />@if($item->archived_at)<span class="badge badge-neutral">Archived</span>@endif</td>
+                @if($prefix !== 'field-officer' && $section !== 'projects')<td>{{ ($section === 'trainings' ? $item->start_date : $item->activity_date)?->format('M d, Y') ?? 'Not recorded' }}</td>@endif
                 <td><a class="text-button" href="{{ $workflow->to($prefix.'.'.$recordRoute.'.show', [$item->id], 'related-association-records') }}"><x-icon name="eye" />View</a></td>
             @endif
             </tr>

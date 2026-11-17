@@ -89,7 +89,14 @@ def validate(payload):
     require(type(payload) is dict and set(payload) == {"version", "action", "meta", "datasets"})
     require(payload["version"] == VERSION and payload["action"] in ("analytics", "pdf", "xlsx"))
     meta = payload["meta"]
-    require(type(meta) is dict and set(meta) == {"report_type", "filters", "generated_at", "timezone", "scope", "scope_basis", "currency"})
+    required_meta = {"report_type", "filters", "generated_at", "timezone", "scope", "scope_basis", "currency"}
+    require(type(meta) is dict and required_meta <= set(meta) and set(meta) <= required_meta | {"prepared_by"})
+    # The optional author comes from the signed-in account, never from a report filter.
+    if "prepared_by" in meta:
+        author = meta["prepared_by"]
+        require(type(author) is dict and set(author) == {"name", "role"})
+        for value in author.values():
+            field(value, "text")
     require(meta["report_type"] in TITLES and meta["timezone"] == "Asia/Manila" and meta["currency"] == "PHP")
     field(meta["generated_at"], "timestamp")
     require(datetime.fromisoformat(meta["generated_at"]).utcoffset().total_seconds() == 28800)
