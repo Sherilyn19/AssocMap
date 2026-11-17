@@ -11,6 +11,9 @@ export function createGisPhotos(root, { base, manager, csrf }) {
     const confirmation = find('[data-photo-confirm]');
     const grid = find('[data-photo-grid]');
     let current, opener, removalId, previewUrl, requestId, busy = false, canManage = false, slots = 0, photos = [], photoIndex = 0;
+    let photoRequest = 0;
+    // The public viewer receives its new presentation only on desktop.
+    const desktopPublic = () => root.closest('[data-gis-public="true"]') && window.matchMedia('(min-width: 768px)').matches;
     const message = text => { status.textContent = text; };
     const resetFile = (clearInput = true) => {
         if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -51,6 +54,7 @@ export function createGisPhotos(root, { base, manager, csrf }) {
         });
         return body;
     };
+    // Show a loading message while the selected full-size photo arrives.
     const showPhoto = index => {
         if (index < 0 || index >= photos.length) return;
         photoIndex = index;
@@ -59,9 +63,33 @@ export function createGisPhotos(root, { base, manager, csrf }) {
         find('[data-photo-next]').disabled = index === photos.length - 1;
         find('[data-photo-viewer-count]').textContent = `${index + 1} / ${photos.length}`;
         display.alt = `Location photo ${index + 1} of ${photos.length}`;
-        find('[data-photo-image-status]').textContent = 'Loading photo...';
-        display.onload = () => { find('[data-photo-image-status]').textContent = ''; };
-        display.onerror = () => { display.removeAttribute('src'); find('[data-photo-image-status]').textContent = 'Photo unavailable. Close and refresh the gallery.'; };
+        const imageStatus = find('[data-photo-image-status]');
+        const activeRequest = ++photoRequest;
+        if (!desktopPublic()) {
+            display.hidden = false;
+            imageStatus.classList.remove('is-loading');
+            imageStatus.textContent = 'Loading photo...';
+            display.onload = () => { imageStatus.textContent = ''; };
+            display.onerror = () => { display.removeAttribute('src'); imageStatus.textContent = 'Photo unavailable. Close and refresh the gallery.'; };
+            display.src = photo.display_url;
+            return;
+        }
+        display.hidden = true;
+        display.removeAttribute('src');
+        imageStatus.classList.add('is-loading');
+        imageStatus.textContent = 'Loading photo…';
+        display.onload = () => {
+            if (activeRequest !== photoRequest) return;
+            display.hidden = false;
+            imageStatus.classList.remove('is-loading');
+            imageStatus.textContent = '';
+        };
+        display.onerror = () => {
+            if (activeRequest !== photoRequest) return;
+            display.removeAttribute('src');
+            imageStatus.classList.remove('is-loading');
+            imageStatus.textContent = 'Photo unavailable. Please try again later.';
+        };
         display.src = photo.display_url;
     };
     const openPhoto = (photo, source) => {
@@ -155,6 +183,7 @@ export function createGisPhotos(root, { base, manager, csrf }) {
         void mutate(async context => { await request(context.endpoint, 'POST', body); if (current === context) resetFile(); }, 'Photo uploaded privately.');
     });
     find('[data-photo-refresh]').addEventListener('click', refresh);
+    // Keep the existing photo controls usable with a mouse or keyboard.
     find('[data-photo-close]').addEventListener('click', () => viewer.close());
     find('[data-photo-prev]').addEventListener('click', () => showPhoto(photoIndex - 1));
     find('[data-photo-next]').addEventListener('click', () => showPhoto(photoIndex + 1));
@@ -162,7 +191,7 @@ export function createGisPhotos(root, { base, manager, csrf }) {
         if (event.key === 'ArrowLeft') { event.preventDefault(); showPhoto(photoIndex - 1); }
         if (event.key === 'ArrowRight') { event.preventDefault(); showPhoto(photoIndex + 1); }
     });
-    viewer.addEventListener('close', () => { display.removeAttribute('src'); opener?.isConnected && opener.focus(); });
+    viewer.addEventListener('close', () => { photoRequest++; display.removeAttribute('src'); display.hidden = false; find('[data-photo-image-status]').classList.remove('is-loading'); opener?.isConnected && opener.focus(); });
     if (confirmation) {
         find('[data-photo-cancel]').addEventListener('click', () => confirmation.close());
         find('[data-photo-remove]').addEventListener('click', () => { confirmation.close(); if (removalId) void mutate(

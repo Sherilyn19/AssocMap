@@ -286,6 +286,13 @@
 .role-dashboard .dashboard-gis-gallery-pages { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; padding-top: 14px; border-top: 1px solid #dbe6ee; }
 .role-dashboard .dashboard-gis-gallery-pages > span { margin-left: auto; color: #334b63; }
 .role-dashboard .dashboard-gis-gallery-pages .button { min-height: 38px; padding: 8px 10px; }
+/* Give linked admin dashboard cards the same gentle feedback as association cards. */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .admin-workspace .role-dashboard :is(.dashboard-summary-link > .stat-card, .dashboard-shortcut) { transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease; }
+    @media (hover: hover) {
+        .admin-workspace .role-dashboard :is(.dashboard-summary-link:hover > .stat-card, .dashboard-shortcut:hover) { transform: translateY(-3px); box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }
+    }
+}
 /* Keep the larger photo viewer usable on different screen sizes. */
 .role-dashboard .dashboard-gis-gallery-viewer { position: fixed; inset: 0; width: min(800px, calc(100vw - 24px)); max-width: calc(100vw - 24px); max-height: 90dvh; margin: auto; padding: 16px; border: 1px solid #dbe6ee; border-radius: 12px; background: #fff; overflow: auto; }
 .role-dashboard .dashboard-gis-gallery-viewer::backdrop { background: rgb(15 23 42 / 75%); }

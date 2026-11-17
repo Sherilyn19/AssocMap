@@ -14,12 +14,13 @@
     @endif
     <div class="gis-photo-grid" data-photo-grid></div>
     <ul data-photo-pending></ul>
+    {{-- Show each location photo in a keyboard-accessible viewer. --}}
     <dialog class="modal gis-photo-viewer" data-photo-viewer aria-label="Location photo">
         <button type="button" class="gis-photo-viewer-close" data-photo-close aria-label="Close photo"><x-icon name="close" /></button>
         <p class="gis-photo-viewer-status" data-photo-image-status role="status" aria-live="polite"></p>
         <img data-photo-display alt="Location photo">
-        <button type="button" class="gis-photo-viewer-nav gis-photo-viewer-prev" data-photo-prev aria-label="Previous photo">&#8249;</button>
-        <button type="button" class="gis-photo-viewer-nav gis-photo-viewer-next" data-photo-next aria-label="Next photo">&#8250;</button>
+        <button type="button" class="gis-photo-viewer-nav gis-photo-viewer-prev" data-photo-prev aria-label="Previous photo">@if($gisPublic ?? false)<x-icon name="chevron-right" class="gis-public-desktop-arrow" /><span class="gis-public-original-arrow">&#8249;</span>@else&#8249;@endif</button>
+        <button type="button" class="gis-photo-viewer-nav gis-photo-viewer-next" data-photo-next aria-label="Next photo">@if($gisPublic ?? false)<x-icon name="chevron-right" class="gis-public-desktop-arrow" /><span class="gis-public-original-arrow">&#8250;</span>@else&#8250;@endif</button>
         <p class="gis-photo-viewer-count" data-photo-viewer-count aria-live="polite"></p>
     </dialog>
     @if($gisManager)
