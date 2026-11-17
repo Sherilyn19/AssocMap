@@ -5,12 +5,13 @@ namespace App\Services\Areas;
 use App\Models\Municipality;
 use App\Models\UserProfile;
 use App\Services\Programs\ProgramActorService;
+use App\Services\Audit\AuditLogService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class MunicipalityService
 {
-    public function __construct(private ProgramActorService $actors) {}
+    public function __construct(private ProgramActorService $actors, private AuditLogService $audit) {}
 
     public function update(Municipality $municipality, array $data, UserProfile $currentUser): void
     {
@@ -27,6 +28,8 @@ class MunicipalityService
             }
 
             $municipality->update(['name' => $name, 'psgc_code' => $data['psgc_code'] ?? null]);
+            // Keep the activity history with the saved change.
+            if ($municipality->wasChanged()) $this->audit->recordActor($actor, 'UPDATE MUNICIPALITY', 'Area Management', 'municipality', (string) $municipality->id);
         });
     }
 
@@ -36,6 +39,7 @@ class MunicipalityService
             $actor = $this->actors->lock($currentUser);
             abort_unless($actor->role?->code === 'system_admin', 403);
             $municipality->update(['is_active' => false]);
+            if ($municipality->wasChanged()) $this->audit->recordActor($actor, 'DEACTIVATE MUNICIPALITY', 'Area Management', 'municipality', (string) $municipality->id);
         });
     }
 
@@ -69,8 +73,10 @@ class MunicipalityService
             ]);
 
             $municipality->created_by = $currentUser->id;
+            $municipality->id = (string) \Illuminate\Support\Str::uuid();
 
             $municipality->save();
+            $this->audit->recordActor($currentUser, 'CREATE MUNICIPALITY', 'Area Management', 'municipality', (string) $municipality->id);
 
             return $municipality;
         });

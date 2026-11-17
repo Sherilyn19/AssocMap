@@ -7,12 +7,13 @@ use App\Models\Barangay;
 use App\Models\Municipality;
 use App\Models\UserProfile;
 use App\Services\Programs\ProgramActorService;
+use App\Services\Audit\AuditLogService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class AreaService
 {
-    public function __construct(private ProgramActorService $actors) {}
+    public function __construct(private ProgramActorService $actors, private AuditLogService $audit) {}
 
     public function create(
         array $data,
@@ -57,8 +58,11 @@ class AreaService
             ]);
 
             $area->created_by = $currentUser->id;
+            $area->id = (string) \Illuminate\Support\Str::uuid();
 
             $area->save();
+            // Save the history together with the new area.
+            $this->audit->recordActor($currentUser, 'CREATE SPECIFIC AREA', 'Area Management', 'area', (string) $area->id);
 
             return $area;
         });

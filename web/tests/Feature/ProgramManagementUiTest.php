@@ -79,7 +79,7 @@ class ProgramManagementUiTest extends TestCase
             CREATE TABLE monitoring_records (id TEXT PRIMARY KEY, project_id TEXT, year INTEGER, quarter_id INTEGER, monitoring_date TEXT, project_status TEXT);
             CREATE TABLE quarters (id INTEGER PRIMARY KEY, quarter_number INTEGER);
             CREATE TABLE program_activity_records (id TEXT PRIMARY KEY, related_project_id TEXT, association_id TEXT, saad_activity_id INTEGER, title TEXT, description TEXT, program_year INTEGER, activity_date TEXT, venue TEXT, status TEXT, conducted_by TEXT, conducted_by_user_id TEXT, remarks TEXT, archived_at TEXT, archived_by TEXT, created_by TEXT, updated_by TEXT, created_at TEXT, updated_at TEXT);
-            CREATE TABLE audit_logs (id TEXT PRIMARY KEY, entity_type TEXT, entity_id TEXT, action_type TEXT, performed_at TEXT);
+            CREATE TABLE audit_logs (id TEXT PRIMARY KEY, actor_user_id TEXT, module TEXT, entity_type TEXT, entity_id TEXT, action_type TEXT, old_values TEXT, new_values TEXT, performed_at TEXT);
             SQL);
         foreach (['gis_locations', 'monitoring_visit_reports', 'monitoring_materials'] as $table) {
             DB::statement('CREATE TABLE '.$table.' (id TEXT PRIMARY KEY)');
@@ -345,6 +345,7 @@ class ProgramManagementUiTest extends TestCase
                 $this->patchJson('/'.$prefix.'/trainings/'.$this->id($trainingId), $payload)->assertUnprocessable()->assertJsonValidationErrors('related_project_id');
             } else {
                 $this->patch('/'.$prefix.'/trainings/'.$this->id($trainingId), $payload)->assertRedirect(route($prefix.'.trainings.index'));
+                $this->assertDatabaseHas('audit_logs', ['action_type' => 'UPDATE TRAINING', 'entity_id' => $this->id($trainingId), 'actor_user_id' => $this->id($actor)]);
             }
             $this->assertDatabaseHas('trainings', ['id' => $this->id($trainingId), 'related_project_id' => $this->id($id)]);
         }
@@ -1005,6 +1006,10 @@ class ProgramManagementUiTest extends TestCase
             $this->assertSame($action === 'archive', $record->fresh()->archived_at !== null);
         }
         $this->assertDatabaseHas('program_activity_records', ['id' => $record->id, 'association_id' => $this->id(11), 'related_project_id' => $this->id(101), 'title' => 'Edited Activity']);
+        // Each saved action must have an entry for the same activity and user.
+        foreach (['CREATE PROGRAM ACTIVITY', 'UPDATE PROGRAM ACTIVITY', 'ARCHIVE PROGRAM ACTIVITY', 'RESTORE PROGRAM ACTIVITY'] as $action) {
+            $this->assertDatabaseHas('audit_logs', ['action_type' => $action, 'entity_id' => $record->id, 'actor_user_id' => $this->id($actor)]);
+        }
         foreach ([102, 103] as $invalid) {
             $payload['related_project_id'] = $this->id($invalid);
             $this->patchJson('/'.$prefix.'/program-activities/'.$record->id, $payload)->assertUnprocessable()->assertJsonValidationErrors('related_project_id');

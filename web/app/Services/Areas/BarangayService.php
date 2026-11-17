@@ -5,12 +5,13 @@ namespace App\Services\Areas;
 use App\Models\Barangay;
 use App\Models\UserProfile;
 use App\Services\Programs\ProgramActorService;
+use App\Services\Audit\AuditLogService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class BarangayService
 {
-    public function __construct(private ProgramActorService $actors) {}
+    public function __construct(private ProgramActorService $actors, private AuditLogService $audit) {}
 
     public function update(Barangay $barangay, array $data, UserProfile $currentUser): void
     {
@@ -31,6 +32,8 @@ class BarangayService
                 'municipality_id' => $data['municipality_id'],
                 'psgc_code' => $data['psgc_code'] ?? null,
             ]);
+            // Keep the activity history with the saved change.
+            if ($barangay->wasChanged()) $this->audit->recordActor($actor, 'UPDATE BARANGAY', 'Area Management', 'barangay', (string) $barangay->id);
         });
     }
 
@@ -40,6 +43,7 @@ class BarangayService
             $actor = $this->actors->lock($currentUser);
             abort_unless($actor->role?->code === 'system_admin', 403);
             $barangay->update(['is_active' => false]);
+            if ($barangay->wasChanged()) $this->audit->recordActor($actor, 'DEACTIVATE BARANGAY', 'Area Management', 'barangay', (string) $barangay->id);
         });
     }
 
@@ -72,8 +76,10 @@ class BarangayService
             ]);
 
             $barangay->created_by = $currentUser->id;
+            $barangay->id = (string) \Illuminate\Support\Str::uuid();
 
             $barangay->save();
+            $this->audit->recordActor($currentUser, 'CREATE BARANGAY', 'Area Management', 'barangay', (string) $barangay->id);
 
             return $barangay;
         });

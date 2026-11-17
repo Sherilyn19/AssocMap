@@ -1,8 +1,13 @@
 @php
     $defaultYear = (int) now('Asia/Manila')->format('Y');
-    $plainLabels = $role === 'association_account' ? json_decode(file_get_contents(resource_path('ui/report-plain-language.json')), true, 512, JSON_THROW_ON_ERROR) : [];
+    // Reuse the same clear display labels for association and admin reports.
+    $plainLabels = in_array($role, ['association_account', 'system_admin'], true) ? json_decode(file_get_contents(resource_path('ui/report-plain-language.json')), true, 512, JSON_THROW_ON_ERROR) : [];
     $plain = function ($text) use ($plainLabels, $role) {
-        if ($role === 'association_account' && preg_match('/^(\d+) quarterly entries excluded: quarterly income cannot be allocated to the selected month\.$/', $text, $matches)) {
+        // Keep the explanation accurate for admin reports covering several associations.
+        if ($role === 'system_admin' && $text === 'Archived records are retained within the current authorized association scope. Counts describe recorded data only.') {
+            return 'Archived records are included for associations covered by this report. Counts reflect only information recorded in the system.';
+        }
+        if (in_array($role, ['association_account', 'system_admin'], true) && preg_match('/^(\d+) quarterly entries excluded: quarterly income cannot be allocated to the selected month\.$/', $text, $matches)) {
             return $matches[1].' quarterly income entries are excluded because they cannot be assigned to the selected month.';
         }
         return $plainLabels[$text] ?? $text;
@@ -38,6 +43,10 @@
         @endslot
         @slot('actions')
         <div class="report-toolbar" role="group" aria-label="Report actions">
+            {{-- Reload the report using the selected filters. --}}
+            @if($role === 'system_admin')
+                <button class="button" type="submit" form="report-filter-panel" data-report-refresh><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.7-2L20 12M4 12l2.7 5A7 7 0 0 0 18.4 15"/></svg>Refresh</button>
+            @endif
             @if($canExport)
                 <details class="report-export-menu" data-report-export-menu>
                     <summary class="button button-primary"><x-icon name="download" />Export<x-icon name="chevron-down" /></summary>
@@ -120,12 +129,12 @@
                     @if($result['empty'])<p class="notice">No recorded results match the selected report and filters.</p>@endif
                     <section class="report-summary" id="report-summary" tabindex="-1" aria-labelledby="report-summary-title">
                         <div class="report-section-heading"><div><h3 id="report-summary-title">At a glance</h3><p>{{ $plain('Recorded indicators within the applied scope. Unobserved values are not zero.') }}</p></div></div>
-                        <dl class="report-measures report-primary-measures" data-report-kpis>@foreach($primaryMeasures as $measure)<div><dt>{{ $plain($measure['label']) }}@if($role === 'association_account')<x-icon :name="match (true) { str_contains(strtolower($measure['label']), 'member') => 'users', str_contains(strtolower($measure['label']), 'project') => 'briefcase', str_contains(strtolower($measure['label']), 'training') => 'graduation', default => 'chart' }" />@endif</dt><dd>{{ $plain($measureValue($measure['value'])) }}</dd></div>@endforeach</dl>
+                        <dl class="report-measures report-primary-measures" data-report-kpis>@foreach($primaryMeasures as $measure)<div><dt>{{ $plain($measure['label']) }}@if(in_array($role, ['association_account', 'system_admin'], true))<x-icon :name="match (true) { str_contains(strtolower($measure['label']), 'member') => 'users', str_contains(strtolower($measure['label']), 'project') => 'briefcase', str_contains(strtolower($measure['label']), 'training') => 'graduation', default => 'chart' }" />@endif</dt><dd>{{ $plain($measureValue($measure['value'])) }}</dd></div>@endforeach</dl>
                         <details class="report-all-measures"><summary>All report measures</summary>
                         <p class="field-help">{{ $plain('Recorded values within the applied scope. Unobserved values are not zero.') }}</p>
                         <div class="report-measure-groups">@foreach($result['sections'] as $section)
                             @if($section['measures'])
-                                <section class="report-measure-group"><h4>@if($role === 'association_account')<x-icon :name="match ($section['key']) { 'associations' => 'building', 'members' => 'users', 'projects' => 'briefcase', 'trainings' => 'graduation', 'income' => 'receipt', 'activities' => 'calendar', 'monitoring' => 'clipboard-check', default => 'chart' }" />@endif<span>{{ $plain($section['title']) }}</span></h4>
+                                <section class="report-measure-group"><h4>@if(in_array($role, ['association_account', 'system_admin'], true))<x-icon :name="match ($section['key']) { 'associations' => 'building', 'members' => 'users', 'projects' => 'briefcase', 'trainings' => 'graduation', 'income' => 'receipt', 'activities' => 'calendar', 'monitoring' => 'clipboard-check', default => 'chart' }" />@endif<span>{{ $plain($section['title']) }}</span></h4>
                                 <dl class="report-secondary-measures">@foreach($section['measures'] as $measure)<div><dt>{{ $plain($measure['label']) }}</dt><dd>{{ $plain($measureValue($measure['value'])) }}</dd></div>@endforeach</dl>
                                 </section>
                             @endif

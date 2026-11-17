@@ -241,6 +241,10 @@ html.gis-details-drawer-open { overflow: hidden; }
 /* Preserve the original arrows on mobile and use the gallery icons on desktop. */
 .gis-public-desktop-arrow { display: none; }
 @media (min-width: 768px) {
+    /* Keep each photo tile clear while its image is loading. */
+    [data-gis-public="true"] .gis-photo-open.is-loading img { visibility: hidden; }
+    [data-gis-public="true"] .gis-photo-open .gis-thumbnail-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px; background: var(--surface-subtle); color: var(--text-secondary); font-size: 12px; }
+    [data-gis-public="true"] .gis-thumbnail-loading::before { content: ''; width: 24px; height: 24px; border: 3px solid #dbe6ee; border-top-color: var(--primary); border-radius: 50%; }
     [data-gis-public="true"] .gis-public-desktop-arrow { display: block; width: 20px; height: 20px; }
     [data-gis-public="true"] .gis-public-original-arrow { display: none; }
     [data-gis-public="true"] .gis-photo-viewer-prev .icon { transform: rotate(180deg); }
@@ -252,7 +256,7 @@ html.gis-details-drawer-open { overflow: hidden; }
     [data-gis-public="true"] .gis-photo-viewer :is(.gis-photo-viewer-close, .gis-photo-viewer-nav) { color: var(--primary); border-color: #dbe6ee; box-shadow: 0 3px 12px rgb(16 47 80 / 16%); }
     [data-gis-public="true"] .gis-photo-viewer-status:not(:empty) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: min(50vh, 320px); padding: 24px 55px; color: var(--text-secondary); text-align: center; }
     [data-gis-public="true"] .gis-photo-viewer-status.is-loading::before { content: ''; width: 28px; height: 28px; border: 3px solid #dbe6ee; border-top-color: var(--primary); border-radius: 50%; }
-    @media (prefers-reduced-motion: no-preference) { [data-gis-public="true"] .gis-photo-viewer-status.is-loading::before { animation: gis-photo-spin .8s linear infinite; } }
+    @media (prefers-reduced-motion: no-preference) { [data-gis-public="true"] :is(.gis-photo-viewer-status.is-loading, .gis-thumbnail-loading)::before { animation: gis-photo-spin .8s linear infinite; } }
 }
 @keyframes gis-photo-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: no-preference) { .gis-photo-viewer[open] { animation: gis-photo-enter 220ms ease-out; } .gis-photo-viewer :is(button) { transition: background-color 180ms ease, color 180ms ease; } .gis-photo-viewer :is(button):hover:not(:disabled) { background: #eaf3f8; } }
@@ -347,6 +351,32 @@ html.gis-details-drawer-open { overflow: hidden; }
 [data-gis-administrator="true"] .gis-location-content .gis-detail-section dt, [data-gis-administrator="true"] .gis-history dt { color: #71869b; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
 [data-gis-administrator="true"] .gis-location-content .gis-detail-section dd, [data-gis-administrator="true"] .gis-history dd { color: #263f58; font-weight: 600; }
 [data-gis-administrator="true"] .gis-history summary, [data-gis-administrator="true"] .gis-photos-heading h3 { color: #244969; font-weight: 700; }
+/* Organize the administrator's history and photo controls without changing their data. */
+@media (min-width: 768px) {
+    [data-gis-administrator="true"] .gis-history { margin: 0 16px 16px; padding: 0; border: 1px solid #e0e9f1; border-radius: 9px; background: #fff; }
+    [data-gis-administrator="true"] .gis-history summary { display: flex; align-items: center; gap: 9px; padding: 15px 16px; list-style: none; }
+    [data-gis-administrator="true"] .gis-history summary::-webkit-details-marker { display: none; }
+    [data-gis-administrator="true"] .gis-history summary .icon { width: 17px; height: 17px; flex: none; color: var(--primary); }
+    [data-gis-administrator="true"] .gis-history summary .icon:last-child { margin-left: auto; }
+    [data-gis-administrator="true"] .gis-history[open] summary { border-bottom: 1px solid #e0e9f1; }
+    [data-gis-administrator="true"] .gis-history[open] summary .icon:last-child { transform: rotate(180deg); }
+    [data-gis-administrator="true"] .gis-history dl { display: grid; gap: 0; margin: 0; padding: 0 16px; }
+    [data-gis-administrator="true"] .gis-history dl > div { min-width: 0; padding: 12px 0; border-bottom: 1px solid #edf1f5; overflow-wrap: anywhere; }
+    [data-gis-administrator="true"] .gis-history dl > div:last-child { border-bottom: 0; }
+    [data-gis-administrator="true"] .gis-photo-grid figure:first-child { grid-column: auto; }
+    [data-gis-administrator="true"] .gis-photo-grid figure:first-child img { aspect-ratio: 4 / 3; }
+    [data-gis-administrator="true"] .gis-photo-open.is-loading img { visibility: hidden; }
+    [data-gis-administrator="true"] .gis-photo-open .gis-thumbnail-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px; background: var(--surface-subtle); color: var(--text-secondary); font-size: 12px; }
+    [data-gis-administrator="true"] .gis-thumbnail-loading::before, [data-gis-administrator="true"] .gis-photo-viewer-status.is-loading::before { content: ''; width: 24px; height: 24px; border: 3px solid #dbe6ee; border-top-color: var(--primary); border-radius: 50%; }
+    [data-gis-administrator="true"] .gis-public-desktop-arrow { display: block; width: 20px; height: 20px; }
+    [data-gis-administrator="true"] .gis-public-original-arrow { display: none; }
+    [data-gis-administrator="true"] .gis-photo-viewer-prev .icon { transform: rotate(180deg); }
+    [data-gis-administrator="true"] .gis-photo-viewer { width: min(800px, calc(100vw - 24px)); max-width: calc(100vw - 24px); max-height: 90dvh; margin: auto; padding: 64px 60px 30px; border-radius: 12px; }
+    [data-gis-administrator="true"] .gis-photo-viewer::backdrop { background: rgb(15 23 42 / 75%); }
+    [data-gis-administrator="true"] .gis-photo-viewer img[hidden] { display: none; }
+    [data-gis-administrator="true"] .gis-photo-viewer-status:not(:empty) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: min(50vh, 320px); padding: 24px 55px; color: var(--text-secondary); text-align: center; }
+    @media (prefers-reduced-motion: no-preference) { [data-gis-administrator="true"] :is(.gis-photo-viewer-status.is-loading, .gis-thumbnail-loading)::before { animation: gis-photo-spin .8s linear infinite; } }
+}
 [data-gis-administrator="true"] .gis-photo-title { display: flex; align-items: center; gap: 5px; }
 [data-gis-administrator="true"] .gis-location-content .area-info { position: relative; display: inline-flex; flex: none; }
 [data-gis-administrator="true"] .gis-location-content .gis-detail-info { margin-left: auto; }

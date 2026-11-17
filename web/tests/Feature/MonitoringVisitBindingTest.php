@@ -197,7 +197,9 @@ class MonitoringVisitBindingTest extends TestCase
             'overall_remarks' => 'Updated synthetic visit', 'updated_by' => $actor,
         ]);
         $after = $this->snapshot();
-        unset($before['monitoring_visit_reports'], $after['monitoring_visit_reports']);
+        // The visit and its new audit entry are expected to change.
+        $this->assertDatabaseHas('audit_logs', ['action_type' => 'UPDATE VISIT REPORT', 'actor_user_id' => $actor]);
+        unset($before['monitoring_visit_reports'], $after['monitoring_visit_reports'], $before['audit_logs'], $after['audit_logs']);
         $this->assertSame($before, $after);
         $this->assertDatabaseCount('monitoring_visit_reports', 3);
     }
@@ -347,7 +349,8 @@ class MonitoringVisitBindingTest extends TestCase
         ]);
         $this->assertDatabaseCount('monitoring_visit_reports', $creating ? 4 : 3);
         $after = $this->snapshot();
-        unset($before['monitoring_visit_reports'], $after['monitoring_visit_reports']);
+        $this->assertDatabaseHas('audit_logs', ['action_type' => $creating ? 'CREATE VISIT REPORT' : 'UPDATE VISIT REPORT', 'actor_user_id' => $actor]);
+        unset($before['monitoring_visit_reports'], $after['monitoring_visit_reports'], $before['audit_logs'], $after['audit_logs']);
         $this->assertSame($before, $after);
     }
 

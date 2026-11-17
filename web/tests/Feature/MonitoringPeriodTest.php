@@ -63,6 +63,12 @@ class MonitoringPeriodTest extends TestCase
 
     private function schema(): void
     {
+        // Keep monitoring history in the isolated test database.
+        Schema::create('audit_logs', function (Blueprint $table) {
+            $table->uuid('id')->primary(); $table->uuid('actor_user_id'); $table->string('action_type'); $table->string('module');
+            $table->string('entity_type')->nullable(); $table->string('entity_id')->nullable();
+            $table->text('old_values')->nullable(); $table->text('new_values')->nullable(); $table->timestamp('performed_at');
+        });
         Schema::create('roles', function (Blueprint $table) {
             $table->id(); $table->string('code'); $table->string('name'); $table->boolean('is_active');
             $table->timestamps();

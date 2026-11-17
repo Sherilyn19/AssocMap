@@ -63,6 +63,12 @@ class AreaManagementTest extends TestCase
 
     private function schema(): void
     {
+        // Record area changes in the isolated test database.
+        Schema::create('audit_logs', function (Blueprint $t) {
+            $t->uuid('id')->primary(); $t->uuid('actor_user_id'); $t->string('action_type'); $t->string('module');
+            $t->string('entity_type')->nullable(); $t->string('entity_id')->nullable();
+            $t->text('old_values')->nullable(); $t->text('new_values')->nullable(); $t->timestamp('performed_at');
+        });
         Schema::create('roles', function (Blueprint $t) {
             $t->id(); $t->string('code'); $t->string('name'); $t->boolean('is_active'); $t->timestamps();
             $t->text('description')->nullable();
@@ -466,6 +472,10 @@ class AreaManagementTest extends TestCase
         $before = DB::table('associations')->orderBy('id')->get()->toJson();
         $this->patch('/admin/municipalities/'.self::id(1).'/deactivate')->assertRedirect(route('admin.areas.index'));
         $this->patch('/admin/barangays/'.self::id(11).'/deactivate')->assertRedirect(route('admin.areas.index'));
+        // Each saved geographic action gets a separate history entry.
+        foreach (['CREATE MUNICIPALITY', 'CREATE BARANGAY', 'CREATE SPECIFIC AREA', 'UPDATE MUNICIPALITY', 'DEACTIVATE MUNICIPALITY', 'DEACTIVATE BARANGAY'] as $action) {
+            $this->assertDatabaseHas('audit_logs', ['action_type' => $action, 'module' => 'Area Management']);
+        }
         $this->assertSame($before, DB::table('associations')->orderBy('id')->get()->toJson());
         $this->get('/admin/barangays/'.self::id(11))->assertOk()->assertSee('Archived Association')->assertSee('Purok One');
         $this->postJson('/admin/areas', ['municipality_id' => self::id(1), 'barangay_id' => self::id(11), 'address' => 'Blocked'])->assertUnprocessable();

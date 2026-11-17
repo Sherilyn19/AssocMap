@@ -13,6 +13,14 @@ use RuntimeException;
 
 class AuditLogService
 {
+    // Record an action for the user who made it, without copying private fields.
+    public function recordActor(UserProfile $actor, string $action, string $module, string $entityType, string $entityId): void
+    {
+        $request = new Request;
+        $request->attributes->set('current_user', $actor);
+        $this->record($request, $action, $module, $entityType, $entityId);
+    }
+
     private const MAX_SNAPSHOT_BYTES = 131072;
 
     private const DISPLAY_FIELDS = [
@@ -30,6 +38,7 @@ class AuditLogService
         'project_closure' => ['project_id', 'association_id', 'status', 'closed_at', 'closed_by', 'actor_role'],
         'project_termination' => ['project_id', 'association_id', 'status', 'closed_at', 'closed_by', 'actor_role'],
         'member' => ['association_id', 'member_status', 'archived_at', 'archived_by', 'changed_fields'],
+        'member_application' => ['association_id', 'status'],
         'member_officer_position' => ['association_id', 'position_id', 'member_status', 'archived_at'],
         'gis_location' => ['association_id', 'project_id', 'location_type', 'site_type_id', 'location_name', 'address',
             'public_title', 'public_description', 'public_address', 'is_published', 'published_by',
