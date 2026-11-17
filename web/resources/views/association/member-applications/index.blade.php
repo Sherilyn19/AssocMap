@@ -94,7 +94,8 @@
         @if($submissionErrors)
             <div class="notice notice-error" role="alert"><div>@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div></div>
         @endif
-        <form method="POST" action="{{ route('association.member-applications.store') }}" id="member-application-form" data-feedback-error-bag="default" enctype="multipart/form-data">
+        {{-- Keep the selected list filters after submission. --}}
+        <form method="POST" action="{{ route('association.member-applications.store', request()->query->all()) }}" id="member-application-form" data-feedback-error-bag="default" enctype="multipart/form-data">
             @csrf
             <fieldset @disabled(!$canSubmit) class="member-application-fields"><legend>Applicant information</legend><p class="member-form-help">Required fields are marked *. Approval by your assigned Field Officer creates the official member record.</p>
             <div class="form-grid">

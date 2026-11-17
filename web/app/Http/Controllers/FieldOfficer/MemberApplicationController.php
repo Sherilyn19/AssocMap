@@ -10,9 +10,12 @@ use App\Services\Members\MemberDirectoryQueryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Support\MemberApplicationReturn;
+use Illuminate\Validation\ValidationException;
 
 class MemberApplicationController extends Controller
 {
+    // Show applications assigned to this field officer.
     public function index(MemberRegisterRequest $request, MemberDirectoryQueryService $directory): View
     {
         $currentUser = $request->attributes->get('current_user');
@@ -28,6 +31,7 @@ class MemberApplicationController extends Controller
         return view('field-officer.member-applications.index', compact('applications', 'statusFilter', 'filters', 'associations', 'summary'));
     }
 
+    // Approve the application and return to the same list.
     public function approve(
         Request $request,
         MemberApplication $memberApplication,
@@ -35,40 +39,42 @@ class MemberApplicationController extends Controller
     ): RedirectResponse {
         $currentUser = $request->attributes->get('current_user');
 
-        $memberApplicationService->approve(
-            $memberApplication,
-            $currentUser
-        );
+        try {
+            $memberApplicationService->approve($memberApplication, $currentUser);
+        } catch (ValidationException $exception) {
+            throw $exception->redirectTo(MemberApplicationReturn::url($request, 'field-officer.member-applications.index'));
+        }
 
-        return back()
+        return redirect()->to(MemberApplicationReturn::url($request, 'field-officer.member-applications.index'))
             ->with(
                 'success',
                 'Member application approved successfully.'
             );
     }
 
+    // Check the reason, reject the application, and return to the list.
     public function reject(
         Request $request,
         MemberApplication $memberApplication,
         MemberApplicationService $memberApplicationService
     ): RedirectResponse {
-        $request->validate([
-            'rejection_reason' => [
-                'required',
-                'string',
-                'max:1000',
-            ],
-        ]);
+        try {
+            $request->validate([
+                'rejection_reason' => ['required', 'string', 'max:1000'],
+            ]);
 
-        $currentUser = $request->attributes->get('current_user');
+            $currentUser = $request->attributes->get('current_user');
 
-        $memberApplicationService->reject(
-            $memberApplication,
-            $currentUser,
-            $request->string('rejection_reason')->toString()
-        );
+            $memberApplicationService->reject(
+                $memberApplication,
+                $currentUser,
+                $request->string('rejection_reason')->toString()
+            );
+        } catch (ValidationException $exception) {
+            throw $exception->redirectTo(MemberApplicationReturn::url($request, 'field-officer.member-applications.index'));
+        }
 
-        return back()
+        return redirect()->to(MemberApplicationReturn::url($request, 'field-officer.member-applications.index'))
             ->with(
                 'success',
                 'Member application rejected.'

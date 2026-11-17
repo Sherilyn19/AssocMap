@@ -22,6 +22,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class MemberApplicationController extends Controller
 {
+    // Show applications and choices for the linked association.
     public function index(MemberRegisterRequest $request, MemberExecutivePositionService $executivePositions, MemberDirectoryQueryService $directory): View
     {
         $currentUser = $request->attributes->get('current_user');
@@ -92,6 +93,7 @@ class MemberApplicationController extends Controller
         );
     }
 
+    // Save the application and return to the selected list.
     public function store(
         StoreMemberApplicationRequest $request,
         MemberApplicationService $memberApplicationService
@@ -103,7 +105,10 @@ class MemberApplicationController extends Controller
                 $request->validated(),
                 $currentUser
             );
+        } catch (ValidationException $exception) {
+            throw $exception->redirectTo(\App\Support\MemberApplicationReturn::url($request, 'association.member-applications.index'));
         } catch (MemberApplicationPhotoUnavailableException $exception) {
+            // Keep entered details available if the photo cannot be saved.
             $message = $exception->getMessage();
             if ($request->expectsJson()) return response()->json(['message' => $message], 503);
             $request->flashOnly(['first_name', 'middle_name', 'last_name', 'suffix', 'birth_date', 'sex_id',
@@ -117,13 +122,13 @@ class MemberApplicationController extends Controller
                 'code' => 'application_submission_database_failure',
             ]);
 
-            return redirect()->route('association.member-applications.index')->with(
+            return redirect()->to(\App\Support\MemberApplicationReturn::url($request, 'association.member-applications.index'))->with(
                 'error',
                 'Submission could not be confirmed. Review your application list before submitting again. If it is unavailable, contact the administrator.'
             );
         }
 
-        return back()
+        return redirect()->to(\App\Support\MemberApplicationReturn::url($request, 'association.member-applications.index'))
             ->with(
                 'success',
                 'Member application submitted successfully.'
