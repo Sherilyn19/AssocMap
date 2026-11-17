@@ -21,7 +21,8 @@ class MemberApplicationPhotoService
 {
     private const DISK = 'member_application_photos';
     private const R2_DISK = 'media_private';
-    private const MAX_BYTES = 2 * 1024 * 1024;
+    // Allow photos up to 5 MiB when saving and reading them.
+    private const MAX_BYTES = 5 * 1024 * 1024;
     private const READ_SECONDS = 30;
     private mixed $transport;
 
@@ -303,7 +304,7 @@ class MemberApplicationPhotoService
     private function invalidPhoto(): ValidationException
     {
         return ValidationException::withMessages([
-            'applicant_photo' => 'Use an uncorrupted JPEG or PNG photo with a matching filename extension, at most 2 MiB and 2048 by 2048 pixels. The processed photo must also fit the size limit.',
+            'applicant_photo' => 'Use an uncorrupted JPEG or PNG photo with a matching filename extension, at most 5 MiB and 2048 by 2048 pixels. The processed photo must also fit the size limit.',
         ]);
     }
 }

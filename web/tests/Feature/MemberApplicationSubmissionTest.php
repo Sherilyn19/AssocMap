@@ -178,6 +178,7 @@ class MemberApplicationSubmissionTest extends TestCase
     public function test_valid_application_text_is_trimmed_and_optional_blanks_remain_nullable(): void
     {
         $this->postJson(self::URL, array_replace($this->applicationData(), [
+            'applicant_photo' => UploadedFile::fake()->image('portrait.png', 32, 48),
             'first_name' => '  Synthetic  ', 'last_name' => '  Applicant  ', 'middle_name' => '  ',
             'suffix' => null, 'contact_number' => '  09123456789  ', 'fishr_registration_number' => '  REG-1  ',
             'endorsement_letter' => '  Private synthetic letter  ',
@@ -230,21 +231,13 @@ class MemberApplicationSubmissionTest extends TestCase
     }
 
     #[DataProvider('omittedPhotos')]
-    public function test_submission_without_photo_stores_null_and_preserves_application_data(array $photo, string $transport): void
+    public function test_submission_without_photo_is_rejected(array $photo, string $transport): void
     {
         $this->usePhotoTransport($transport);
         Storage::shouldReceive('disk')->never();
         $this->from(self::URL)->post(self::URL, array_merge($this->applicationData(), $photo))
-            ->assertRedirect(self::URL)->assertSessionHasNoErrors()
-            ->assertSessionHas('success', 'Member application submitted successfully.');
-        $application = MemberApplication::sole();
-        $this->assertNull($application->applicant_photo_path);
-        $this->assertSame(self::ASSOCIATION, $application->association_id);
-        $this->assertSame(self::ACCOUNT, $application->submitted_by_user_id);
-        $this->assertSame('pending', $application->status);
-        $this->assertSame(2, $application->position_id);
-        $this->assertSame('Private synthetic letter', $application->endorsement_letter);
-        $this->assertSame([1], $application->classifications()->pluck('member_classifications.id')->all());
+            ->assertRedirect(self::URL)->assertSessionHasErrors('applicant_photo');
+        $this->assertDatabaseCount('member_applications', 0);
     }
 
     public static function validPhotoExtensions(): array
@@ -254,6 +247,7 @@ class MemberApplicationSubmissionTest extends TestCase
     }
 
     #[DataProvider('validPhotoExtensions')]
+    // Confirm a photo is saved with the application.
     public function test_submission_with_valid_photo_preserves_private_upload(string $extension, string $transport): void
     {
         $disk = $this->usePhotoTransport($transport);
@@ -269,6 +263,15 @@ class MemberApplicationSubmissionTest extends TestCase
         $this->assertArrayNotHasKey('applicant_photo_path', $application->toArray());
     }
 
+    // Accept the stated size limit and keep the saved photo available.
+    public function test_web_photo_at_five_mib_is_accepted(): void
+    {
+        $photo = UploadedFile::fake()->image('portrait.png', 32, 48)->size(5120);
+        $this->from(self::URL)->post(self::URL, array_merge($this->applicationData(), ['applicant_photo' => $photo]))
+            ->assertRedirect(self::URL)->assertSessionHasNoErrors()->assertSessionHas('success');
+        Storage::disk('member_application_photos')->assertExists(MemberApplication::sole()->applicant_photo_path);
+    }
+
     public static function invalidPhotos(): array
     {
         return ['corrupt image' => ['corrupt'], 'oversized image' => ['size'],
@@ -279,7 +282,7 @@ class MemberApplicationSubmissionTest extends TestCase
     public function test_optional_photos_are_still_validated_when_supplied(string $kind): void
     {
         $photo = match ($kind) {
-            'size' => UploadedFile::fake()->image('portrait.png', 32, 32)->size(2049),
+            'size' => UploadedFile::fake()->image('portrait.png', 32, 32)->size(5121),
             'dimensions' => UploadedFile::fake()->image('portrait.png', 2049, 1),
             'type' => UploadedFile::fake()->create('portrait.svg', 1, 'image/svg+xml'),
             'nonfile' => 'not a file',
