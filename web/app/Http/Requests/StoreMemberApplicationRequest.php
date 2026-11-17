@@ -38,13 +38,13 @@ class StoreMemberApplicationRequest extends FormRequest
 
             'applicant_photo' => [
                 'bail',
-                'nullable',
+                $this->routeIs('association.member-applications.store') ? 'required' : 'nullable',
                 'file',
                 'image',
                 'mimes:jpg,jpeg,png',
                 'mimetypes:image/jpeg,image/png',
                 'extensions:jpg,jpeg,png',
-                'max:2048',
+                $this->routeIs('association.member-applications.store') ? 'max:5120' : 'max:2048',
                 'dimensions:max_width=2048,max_height=2048',
             ],
 
@@ -133,7 +133,8 @@ class StoreMemberApplicationRequest extends FormRequest
             'applicant_photo.mimes' => 'Only JPEG and PNG photos are accepted.',
             'applicant_photo.mimetypes' => 'Only JPEG and PNG image content is accepted.',
             'applicant_photo.extensions' => 'Use a .jpg, .jpeg, or .png filename matching the image format.',
-            'applicant_photo.max' => 'The applicant photo must not exceed 2 MiB.',
+            'applicant_photo.required' => 'Please select an applicant photo.',
+            'applicant_photo.max' => $this->routeIs('association.member-applications.store') ? 'The applicant photo must not exceed 5 MiB.' : 'The applicant photo must not exceed 2 MiB.',
             'applicant_photo.dimensions' => 'Photo dimensions must not exceed 2048 by 2048 pixels.',
             'birth_date.before_or_equal' =>
                 'Birth date cannot be in the future.',

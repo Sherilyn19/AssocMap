@@ -218,19 +218,29 @@
 .role-dashboard .dashboard-association-details dt { display: flex; align-items: center; gap: 6px; color: #526f88; font-weight: 700; }
 .role-dashboard .dashboard-association-details dt .icon { width: 15px; height: 15px; flex: none; color: var(--primary); }
 .role-dashboard .dashboard-association-details dd { margin: 5px 0 0; color: #263f58; overflow-wrap: anywhere; }
+/* Arrange the gallery and its photo browsing controls. */
 .role-dashboard .dashboard-gis-gallery { min-width: 0; margin: 0; padding: 0 0 0 18px; border-left: 1px solid #dbe6ee; }
 .role-dashboard .dashboard-gis-gallery-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
 .role-dashboard .dashboard-gis-gallery-heading :is(h3, a) { display: inline-flex; align-items: center; gap: 6px; }
 .role-dashboard .dashboard-gis-gallery-heading .icon { width: 16px; height: 16px; }
+.role-dashboard .dashboard-gis-gallery-heading a { padding: 3px 0; color: var(--primary); font-weight: 600; text-decoration: none; }
+.role-dashboard .dashboard-gis-gallery-heading a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.role-dashboard .dashboard-gis-gallery-heading a:focus-visible, .role-dashboard .dashboard-gallery-photo-pages button:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
 .role-dashboard .dashboard-gis-gallery-status { color: var(--text-secondary); }
 .role-dashboard .dashboard-gis-gallery-status:empty { display: none; }
 .role-dashboard .dashboard-gis-gallery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
 .role-dashboard .dashboard-gis-gallery-grid button { position: relative; min-width: 0; padding: 0; overflow: hidden; border: 1px solid #dbe6ee; border-radius: 9px; background: #edf4fb; cursor: pointer; }
+.role-dashboard .dashboard-gis-gallery-grid button[hidden] { display: none; }
+.role-dashboard .dashboard-gallery-photo-pages { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 12px; color: var(--text-secondary); }
+.role-dashboard .dashboard-gallery-photo-pages button { width: 36px; height: 36px; border: 1px solid #bfd1e1; border-radius: 50%; background: #fff; color: var(--primary); font-size: 22px; line-height: 1; cursor: pointer; }
+.role-dashboard .dashboard-gallery-photo-pages button:disabled { opacity: .45; cursor: default; }
+@media (prefers-reduced-motion: no-preference) { .role-dashboard .dashboard-gis-gallery-heading a, .role-dashboard .dashboard-gallery-photo-pages button { transition: background-color 180ms ease, border-color 180ms ease; } }
 .role-dashboard .dashboard-gis-gallery-grid img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
 .role-dashboard .dashboard-gis-gallery-grid button:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
 .role-dashboard .dashboard-gis-gallery-pages { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; padding-top: 14px; border-top: 1px solid #dbe6ee; }
 .role-dashboard .dashboard-gis-gallery-pages > span { margin-left: auto; color: #334b63; }
 .role-dashboard .dashboard-gis-gallery-pages .button { min-height: 38px; padding: 8px 10px; }
+/* Keep the larger photo viewer usable on different screen sizes. */
 .role-dashboard .dashboard-gis-gallery-viewer { position: fixed; inset: 0; width: min(800px, calc(100vw - 24px)); max-width: calc(100vw - 24px); max-height: 90dvh; margin: auto; padding: 16px; border: 1px solid #dbe6ee; border-radius: 12px; background: #fff; overflow: auto; }
 .role-dashboard .dashboard-gis-gallery-viewer::backdrop { background: rgb(15 23 42 / 75%); }
 .role-dashboard .gallery-viewer-image { position: relative; display: flex; align-items: center; justify-content: center; min-width: 0; margin-top: 8px; }

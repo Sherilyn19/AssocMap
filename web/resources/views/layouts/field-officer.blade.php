@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{{-- Choose the page title shown in the officer workspace. --}}
 @php
     $workspaceHeading = request()->routeIs('field-officer.members.*') ? 'Member Management' : (request()->routeIs('field-officer.gis.*') ? 'GIS Mapping' : (request()->routeIs('field-officer.monitoring.*') ? 'Monitoring' : (request()->routeIs('field-officer.program-activities.*') ? 'Program Activities' : (request()->routeIs('field-officer.trainings.*') ? 'Trainings' : (request()->routeIs('field-officer.projects.*') ? 'Projects' : 'Member Applications')))));
 @endphp
@@ -15,6 +16,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body @class(['field-officer-workspace', 'field-officer-polish' => !request()->routeIs('field-officer.reports.*')])>
+    {{-- The sidebar provides access to the officer's assigned work. --}}
     <a class="skip-link" href="#main-content">Skip to content</a>
     <x-workspace-sidebar :dashboard-url="route('field-officer.dashboard')" workspace="FIELD OFFICER WORKSPACE" id="field-officer-sidebar" aria-label="Field Officer navigation">
         <x-workspace-nav-section id="field-officer-overview" label="OVERVIEW">
@@ -39,10 +41,14 @@
     </x-workspace-sidebar>
     <button type="button" class="sidebar-backdrop" data-fo-close hidden aria-label="Close navigation"></button>
     <div class="main-shell">
+        {{-- Show the signed-in account and the current page. --}}
         <x-workspace-header
             workspace="Field Officer workspace"
             :context="request()->routeIs('field-officer.association-officers.*') ? 'Association Officers' : $workspaceHeading"
-            :display-name="$currentUser->display_name ?? 'Field Officer'"
+            :display-name="request()->attributes->get('current_user_email') ?: 'Email unavailable'"
+            :association-name="$currentUser->display_name ?? 'Field Officer'"
+            association-label="Field Officer"
+            :avatar="collect(preg_split('/\s+/u', trim($currentUser->display_name ?? '')) ?: [])->filter()->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('') ?: 'FO'"
             account-label=""
             :scroll-context="true"
         >

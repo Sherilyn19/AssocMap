@@ -8,9 +8,10 @@
     $summaryNote = 'Current, Active and Inactive exclude archived members. Archived records remain available for reference.';
 @endphp
 @section('content')
-<section class="member-management" data-workspace-module="members" data-workspace-title="Member Management">
+{{-- Show the registered member list and its existing controls. --}}
+<section class="member-management" data-workspace-module="members" data-workspace-title="Registered Members">
     @include('members.partials.workflow-navigation')
-    <header class="card member-heading"><div><h1 tabindex="-1">Member Management</h1><p>Browse member profiles, positions, and membership history.</p></div><span class="badge badge-blue">View only</span></header>
+    <header class="card member-heading"><div><h1 tabindex="-1">Registered Members</h1><p>Browse member profiles, positions, and membership history.</p></div><span class="badge badge-blue">View only</span></header>
     @include('members.partials.summary')
     <section class="card member-register" aria-labelledby="member-register-title">
         <div class="member-section-heading"><div><div class="member-heading-title"><h2 id="member-register-title">Member register</h2><x-area-info label="About member admission">Members are admitted through approved applications.</x-area-info></div><p>{{ number_format($members->total()) }} matching member(s)</p></div></div>

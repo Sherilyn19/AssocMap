@@ -12,7 +12,8 @@ use RuntimeException;
 class SupabaseStorageService
 {
     private const BUCKET = 'member-application-photos';
-    private const MAX_BYTES = 2 * 1024 * 1024;
+    // Keep the storage limit in line with application photo uploads.
+    private const MAX_BYTES = 5 * 1024 * 1024;
     private const MAX_JSON_BYTES = 16384;
 
     public function upload(string $path, string $contents, string $mimeType): array
