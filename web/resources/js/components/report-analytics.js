@@ -199,7 +199,8 @@ function horizontalBars(chart, container, width, ticks) {
         cursor += 24;
     });
     plot.setAttribute('viewBox', `0 0 ${width} ${cursor}`);
-    container.append(node('p', `Value (${chart.unit}) · zero-based scale`, 'report-chart-axis'));
+    // Explain the scale in everyday language while keeping the unit visible.
+    container.append(node('p', chart.adminView ? `Values start at zero (${chart.unit}).` : `Value (${chart.unit}) · zero-based scale`, 'report-chart-axis'));
     seriesLegend(chart, container); plotRegion(plot, chart, container);
 }
 function barPlot(chart, container) {
@@ -313,7 +314,17 @@ function chartTable(chart, container, scope, filters) {
     const period = chart.associationView && chart.snapshot
         ? `${filters.program_year ? `Program year ${filters.program_year}. ` : ''}Current information; it does not show past changes.`
         : reportPeriod(filters, chart.snapshot);
-    details.append(node('p', `${chart.associationView ? 'Coverage' : 'Scope'}: ${scope}. Period: ${period} Unit: ${chart.unit}.`, 'report-chart-context'));
+    // Keep coverage, period, and units together without repeating the count on each admin chart.
+    if (chart.adminView) {
+        const chartScope = scope.includes('authorized associations') ? 'Selected associations' : scope;
+        const context = node('p', undefined, 'report-chart-context');
+        for (const [label, value] of [['Coverage', chartScope], ['Period', period], ['Unit', chart.unit]]) {
+            const line = node('span', undefined, 'report-context-item');
+            line.append(node('strong', `${label}: `), node('span', value));
+            context.append(line);
+        }
+        details.append(context);
+    } else details.append(node('p', `${chart.associationView ? 'Coverage' : 'Scope'}: ${scope}. Period: ${period} Unit: ${chart.unit}.`, 'report-chart-context'));
     if (chart.ranking) details.append(node('p', chart.associationView
         ? 'Equal counts receive the same rank (for example, 1, 1, 3). Ties are ordered by name, then by their original record order. The top five may not show every tied entry; see the detailed records for the full list.'
         : 'Equal counts share competition rank (1, 1, 3). Ties are ordered by label, then canonical source order. Top 5 may cut a tie; full detail retains every row.', 'report-chart-explanation'));
@@ -377,11 +388,13 @@ export function renderReportGeography(result, container) {
 export function renderReportAnalytics(result, container) {
     const heading = node('div', undefined, 'report-section-heading'), copy = node('div');
     const title = node('h3', 'Visual analytics'); title.id = 'report-analytics-title';
-    copy.append(title, node('p', 'Compare recorded values and explore the detail behind each chart.'));
+    const adminDesktop = Boolean(container.closest?.('.admin-workspace') && window.matchMedia('(min-width: 768px)').matches);
+    copy.append(title, node('p', adminDesktop ? 'Explore recorded results and view the details behind each chart.' : 'Compare recorded values and explore the detail behind each chart.'));
     heading.append(copy); container.replaceChildren(heading);
     const charts = buildReportCharts(result);
     if (!charts.length) container.append(node('p', 'No suitable recorded chart data for this selection. Review the summary indicators and detailed tables below.', 'report-empty'));
-    const associationView = Boolean(container.closest?.('.association-workspace'));
+    // Use the same chart presentation for desktop administrators.
+    const associationView = Boolean(container.closest?.('.association-workspace') || (container.closest?.('.admin-workspace') && window.matchMedia('(min-width: 768px)').matches));
     if (associationView) charts.forEach(chart => {
         chart.title = reportPlainLanguage[chart.title] || chart.title;
         const rankingSuffix = ' Ranked by recorded count, not success, effectiveness or financial performance.';
@@ -443,6 +456,7 @@ export function renderReportAnalytics(result, container) {
     charts.forEach((chart, index) => {
         const figure = figures[index];
         chart.associationView = associationView;
+        chart.adminView = adminDesktop;
         const title = node('figcaption', chart.title);
         title.id = `report-chart-${index}`;
         figure.setAttribute('aria-labelledby', title.id);

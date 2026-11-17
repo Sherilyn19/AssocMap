@@ -216,6 +216,16 @@
 .program-management:is([data-association-projects], :is([data-association-trainings], [data-association-program-activities])) .member-search-bar { padding-top: 0; }
 .association-workspace :is([data-association-trainings], [data-association-program-activities]) .table-scroll { max-width: 100%; overflow-x: auto; }
 .association-workspace :is([data-association-trainings], [data-association-program-activities]) .program-register-table :is(th, td) { white-space: normal; overflow-wrap: anywhere; }
+/* Show date markers in desktop admin registers using the association timeline style. */
+@media (min-width: 768px) {
+    .admin-workspace .program-management .admin-timeline-date { position: relative; min-width: 150px; padding-left: 42px; }
+    .admin-workspace .program-management .admin-timeline-date::before { content: ''; position: absolute; left: 25px; top: 0; bottom: 0; border-left: 2px solid #dbe6ee; }
+    .admin-workspace .program-management .admin-timeline-marker { position: absolute; left: 20px; top: 23px; width: 12px; height: 12px; border: 3px solid #fff; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 1px #9bbad8; }
+}
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .admin-workspace .program-management .admin-timeline-marker { transition: box-shadow 180ms ease; }
+    .admin-workspace .program-management tr:hover .admin-timeline-marker { box-shadow: 0 0 0 4px #dbe6ee; }
+}
 .association-workspace :is([data-association-trainings], [data-association-program-activities]) .training-timeline-date { position: relative; min-width: 150px; padding-left: 42px; }
 .association-workspace :is([data-association-trainings], [data-association-program-activities]) .training-timeline-date::before { content: ''; position: absolute; left: 25px; top: 0; bottom: 0; border-left: 2px solid #dbe6ee; }
 .association-workspace :is([data-association-trainings], [data-association-program-activities]) .training-timeline-marker { position: absolute; left: 20px; top: 23px; width: 12px; height: 12px; border: 3px solid #fff; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 1px #9bbad8; }
@@ -224,6 +234,18 @@
     .association-workspace :is([data-association-trainings], [data-association-program-activities]) tr:hover .training-timeline-marker { box-shadow: 0 0 0 4px #dbe6ee; }
 }
 /* Project details: retain the existing information and controls in a readable layout. */
+/* Match admin detail pages to the association workspace on desktop. */
+@media (min-width: 768px) {
+    .admin-workspace .program-management:is([data-workspace-title="Project Details"], [data-workspace-title="Training Details"], [data-workspace-title="Program Activity Details"]) .workflow-navigation .back-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
+    .admin-workspace .program-management:is([data-workspace-title="Project Details"], [data-workspace-title="Training Details"], [data-workspace-title="Program Activity Details"]) .workflow-navigation .back-link:hover { border-color: #9bbad8; background: #edf4fb; }
+    .admin-workspace .program-management:is([data-workspace-title="Project Details"], [data-workspace-title="Training Details"], [data-workspace-title="Program Activity Details"]) :is(.program-information h2, .program-information h3, .detail-grid dt) { text-transform: uppercase; font-weight: 700; }
+    .admin-workspace .program-management:is([data-workspace-title="Project Details"], [data-workspace-title="Training Details"], [data-workspace-title="Program Activity Details"]) .detail-grid > div { min-width: 0; padding: 10px 0; border-bottom: 1px solid #dce7f1; overflow-wrap: anywhere; }
+    .admin-workspace .program-management .table-scroll { max-width: 100%; overflow-x: auto; }
+    .admin-workspace .program-management :is(.program-information, .program-register, .detail-grid dd) { min-width: 0; overflow-wrap: anywhere; }
+}
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .admin-workspace .program-management .workflow-navigation a { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; }
+}
 .association-workspace .association-record-detail { min-width: 0; }
 .association-workspace .association-record-detail .workflow-navigation { margin: 0; gap: 10px 20px; }
 .association-workspace .association-record-detail .workflow-navigation .back-link { display: inline-flex; align-items: center; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }

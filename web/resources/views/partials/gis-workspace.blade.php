@@ -85,7 +85,8 @@
                     <p data-gis-selection-note role="status" aria-live="polite">Choose a marker or a list result to explore its details and photos.</p>
                 </div>
                 <div data-gis-details></div>
-                @if($gisManager)<details class="gis-history" data-gis-history hidden><summary>Record history and public details</summary><dl data-gis-history-details></dl></details>@endif
+                {{-- Keep record history available while making the administrator section easy to scan. --}}
+                @if($gisManager)<details class="gis-history" data-gis-history hidden><summary>@if($gisAdministrator ?? false)<x-icon name="receipt" />@endif<span>Record history and public details</span>@if($gisAdministrator ?? false)<x-icon name="chevron-down" />@endif</summary><dl data-gis-history-details></dl></details>@endif
                 <div class="gis-record-actions" data-gis-record-actions></div>
                 @include('components.gis-photos')
             </div>

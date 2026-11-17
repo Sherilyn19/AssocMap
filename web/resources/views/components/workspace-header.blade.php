@@ -35,13 +35,8 @@
                 <details class="admin-account-details">
                     <summary><strong>{{ $displayName }}</strong><x-icon name="chevron-down" /></summary>
                     <div class="admin-account-popover">
-                        <div class="admin-account-title"><x-icon name="shield" /><span><small>Account</small><strong>{{ $adminAccount->display_name }}</strong></span></div>
-                        <dl>
-                            <div><dt><x-icon name="user" /> User ID</dt><dd>{{ $adminAccount->id }}</dd></div>
-                            <div><dt><x-icon name="calendar" /> Created</dt><dd>{{ $adminAccount->created_at?->copy()->timezone('Asia/Manila')->format('M d, Y · g:i A') ?? 'Not recorded' }}</dd></div>
-                            <div><dt><x-icon name="calendar" /> Activated</dt><dd>{{ $adminAccount->activated_at?->copy()->timezone('Asia/Manila')->format('M d, Y · g:i A') ?? 'Not recorded' }}</dd></div>
-                        </dl>
-                        <small>Times shown in Philippine time</small>
+                        {{-- Let administrators open their own account details. --}}
+                        <div class="admin-account-title"><x-icon name="shield" /><span><small>Account</small><a class="admin-account-profile-link" href="{{ route('admin.users.show', $adminAccount->id) }}"><strong>{{ $adminAccount->display_name }}</strong><x-icon name="arrow" /><span class="sr-only">View account details</span></a></span></div>
                     </div>
                 </details>
             @elseif($associationName)

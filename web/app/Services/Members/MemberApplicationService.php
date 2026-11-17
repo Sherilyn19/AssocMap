@@ -10,6 +10,8 @@ use App\Models\MemberApplication;
 use App\Models\Role;
 use App\Models\UserProfile;
 use App\Services\Associations\AssociationLifecycleService;
+use App\Services\Audit\AuditLogService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -24,8 +26,10 @@ class MemberApplicationService
         private MemberApplicationPhotoService $photos,
         private MemberPositionIntegrityService $positions,
         private AssociationLifecycleService $lifecycle,
+        private AuditLogService $audit,
     ) {}
 
+    // Check the association account before saving an application and its photo.
     public function submit(array $data, UserProfile $currentUser): MemberApplication
     {
         $this->ensureAssociationAccountCanSubmit($currentUser);
@@ -102,6 +106,7 @@ class MemberApplicationService
                 $application->id = $applicationId;
                 $application->save();
                 $application->classifications()->sync($data['classification_ids'] ?? []);
+                $this->recordApplicationAction($actor, $application, 'SUBMIT MEMBER APPLICATION');
                 $callbackCompleted = true;
 
                 return $application;
@@ -123,6 +128,7 @@ class MemberApplicationService
         }
     }
 
+    // Only a permitted association account may send an application.
     private function ensureAssociationAccountCanSubmit(?UserProfile $actor): void
     {
         if (! $actor || ! $actor->canAccessApplication(throwOnDatabaseError: true) || $actor->role?->code !== 'association_account') {
@@ -130,6 +136,7 @@ class MemberApplicationService
         }
     }
 
+    // Create the member and record the approval together.
     public function approve(
         MemberApplication $application,
         UserProfile $fieldOfficer
@@ -202,12 +209,14 @@ class MemberApplicationService
             $application->reviewed_at = Carbon::now();
             $application->rejection_reason = null;
             $application->save();
+            $this->recordApplicationAction($fieldOfficer, $application, 'APPROVE MEMBER APPLICATION');
             $this->positions->recordOfficerChange($fieldOfficer, $member, null, 'APPOINT ASSOCIATION OFFICER');
 
             return $member;
         });
     }
 
+    // Save the reason and record the rejection together.
     public function reject(
         MemberApplication $application,
         UserProfile $fieldOfficer,
@@ -242,11 +251,23 @@ class MemberApplicationService
             $application->rejection_reason = $reason;
 
             $application->save();
+            $this->recordApplicationAction($fieldOfficer, $application, 'REJECT MEMBER APPLICATION');
 
             return $application;
         });
     }
 
+    // Keep a simple history of each decision without copying private applicant details.
+    private function recordApplicationAction(UserProfile $actor, MemberApplication $application, string $action): void
+    {
+        $request = new Request;
+        $request->attributes->set('current_user', $actor);
+        $this->audit->record($request, $action, 'Member Applications', 'member_application', $application->id,
+            null, ['association_id' => $application->association_id, 'status' => $application->status],
+            ['association_id', 'status']);
+    }
+
+    // Recheck the officer and association before either decision.
     private function lockForReview(
         MemberApplication $application,
         UserProfile $fieldOfficer
@@ -271,6 +292,7 @@ class MemberApplicationService
         return [$application, $fieldOfficer];
     }
 
+    // Check the requested position and any extra description.
     private function validatePositionOtherText(
         array $data
     ): AssociationPosition {
@@ -312,6 +334,7 @@ class MemberApplicationService
         return $data['position_other_text'] ?? null;
     }
 
+    // Prevent the same FishR number from being used twice.
     private function ensureFishRAvailable(
         ?string $fishRNumber
     ): void {

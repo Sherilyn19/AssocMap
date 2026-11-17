@@ -13,6 +13,7 @@ use App\Models\ProjectProduct;
 use App\Models\Quarter;
 use App\Models\UserProfile;
 use App\Services\Associations\AssociationLifecycleService;
+use App\Services\Audit\AuditLogService;
 use App\Services\Programs\ProgramActorService;
 use App\Services\Projects\ProjectLifecycleService;
 use App\Services\Projects\ProjectService;
@@ -47,6 +48,8 @@ class MonitoringService
                 }
             }
             $record->update(['monitored_by' => $userId, 'site_validated' => (bool) $data['site_validated']]);
+            // Keep the record change and its history together.
+            app(AuditLogService::class)->recordActor($currentUser, 'UPDATE MONITORING OVERVIEW', 'Monitoring', 'monitoring_record', (string) $record->id);
         }, 3);
     }
 
@@ -89,6 +92,7 @@ class MonitoringService
                 }
                 $record->update(['updated_by' => $currentUser->id]
                     + ($section === 'production' ? ['project_status' => $data['project_status']] : []));
+                app(AuditLogService::class)->recordActor($currentUser, 'UPDATE MONITORING '.strtoupper($section), 'Monitoring', 'monitoring_record', (string) $record->id);
             }, 3);
         } catch (QueryException $exception) {
             if ($section === 'materials') $this->materialsWriteFailure($exception);
@@ -182,6 +186,7 @@ class MonitoringService
                 $data['materials'] ?? []
             );
 
+            app(AuditLogService::class)->recordActor($currentUser, 'CREATE MONITORING RECORD', 'Monitoring', 'monitoring_record', (string) $record->id);
             return $this->loadMonitoringRecord(
                 $record
             );
@@ -212,7 +217,9 @@ class MonitoringService
         return DB::transaction(function () use ($record, $data, $currentUser) {
             $record = $this->lockRecordForMutation($record, $currentUser);
 
-            return $this->persistVisitReport($record, $data, $currentUser);
+            $report = $this->persistVisitReport($record, $data, $currentUser);
+            app(AuditLogService::class)->recordActor($currentUser, 'CREATE VISIT REPORT', 'Monitoring', 'monitoring_visit_report', (string) $report->id);
+            return $report;
         }, 3);
     }
 
@@ -242,6 +249,7 @@ class MonitoringService
             $report->update($this->visitReportPayload($data, true) + [
                 'updated_by' => $currentUser->id,
             ]);
+            app(AuditLogService::class)->recordActor($currentUser, 'UPDATE VISIT REPORT', 'Monitoring', 'monitoring_visit_report', (string) $report->id);
 
             return $report->refresh();
         }, 3);
@@ -487,6 +495,7 @@ class MonitoringService
                     $record->increment('materials_version');
                 }
 
+                app(AuditLogService::class)->recordActor($currentUser, 'UPDATE MONITORING RECORD', 'Monitoring', 'monitoring_record', (string) $record->id);
                 return $this->loadMonitoringRecord(
                     $record
                 );

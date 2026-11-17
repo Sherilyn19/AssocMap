@@ -82,6 +82,23 @@
 .user-management .user-details-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin: 24px 0; }
 .user-management .user-details-grid dt { color: var(--text-secondary); font-size: 12px; margin-bottom: 7px; }
 .user-management .user-details-grid dd { margin: 0; overflow-wrap: anywhere; font-size: 13px; }
+/* Account details follow the same simple, labelled layout as association pages. */
+.user-management[data-workspace-title="Account Details"] .workflow-navigation { margin: 0; }
+.user-management[data-workspace-title="Account Details"] .workflow-navigation .back-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
+.user-management[data-workspace-title="Account Details"] .workflow-navigation .back-link:hover { border-color: #9bbad8; background: #edf4fb; }
+.user-management[data-workspace-title="Account Details"] .workflow-navigation nav a { font-weight: 600; text-decoration: none; }
+.user-management[data-workspace-title="Account Details"] .workflow-navigation nav a:hover { text-decoration: underline; }
+.user-management[data-workspace-title="Account Details"] .user-details-grid > div { min-width: 0; padding-bottom: 13px; border-bottom: 1px solid var(--border-color); }
+.user-management[data-workspace-title="Account Details"] .user-details-grid dt { display: flex; align-items: center; gap: 7px; font-weight: 700; text-transform: uppercase; }
+.user-management[data-workspace-title="Account Details"] .user-details-grid dt .icon { flex: none; width: 16px; height: 16px; color: var(--primary); }
+.user-management[data-workspace-title="Account Details"] :is(.user-access-card h2, .user-register-heading h2) { display: flex; align-items: center; gap: 9px; font-weight: 700; text-transform: uppercase; }
+.user-management[data-workspace-title="Account Details"] :is(.user-access-card h2, .user-register-heading h2) .icon { width: 19px; height: 19px; color: var(--primary); flex: none; }
+.user-management[data-workspace-title="Account Details"] .user-access-card > h2 { margin-bottom: 14px; }
+/* Place the access explanation beside the message. */
+.user-management[data-workspace-title="Account Details"] .user-self-access-note { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.user-management[data-workspace-title="Account Details"] .user-access-card form { margin-top: 14px; }
+.user-management[data-workspace-title="Account Details"] .user-access-card form .button { margin-top: 12px; }
+.user-management[data-workspace-title="Account Details"] .user-details-heading > div:nth-child(2) { min-width: 0; overflow-wrap: anywhere; }
 .user-management :is(a, summary, button, input, select, [tabindex]):focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
 @media (max-width: 1200px) { .user-management .user-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 760px) {
@@ -98,6 +115,7 @@
 }
 @media (prefers-reduced-motion: reduce) { .user-management .user-summary-card .stat-card { transition: none; } }
 @media (prefers-reduced-motion: no-preference) {
+    .user-management[data-workspace-title="Account Details"] .workflow-navigation a { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; }
     .user-management[data-workspace-title="User Management"] .user-page-heading { animation: user-register-arrive 400ms ease-out both; }
     .user-management :is(.user-summary-card .stat-card, .user-table tbody tr, .user-table-footer a) { transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease; }
     .user-management .user-summary-card:hover .stat-card { box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }

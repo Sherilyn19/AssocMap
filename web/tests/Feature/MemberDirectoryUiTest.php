@@ -149,7 +149,7 @@ class MemberDirectoryUiTest extends TestCase
     public function test_admin_register_is_paginated_view_only_and_preserves_details(): void
     {
         foreach (range(101, 130) as $id) $this->member($id);
-        $first = $this->get('/admin/members')->assertOk()->assertSee('Member Management')->assertSee('View only')
+        $first = $this->get('/admin/members')->assertOk()->assertSee('Registered Members')->assertSee('View only')
             ->assertSee('Test Classification')->assertSee('Test Municipality')->assertDontSee('Save Changes')->assertDontSee('Add Member');
         $members = $first->viewData('members');
         $this->assertCount(25, $members);
@@ -376,11 +376,16 @@ class MemberDirectoryUiTest extends TestCase
         $this->assertDatabaseHas('audit_logs', [
             'action_type' => 'APPOINT ASSOCIATION OFFICER', 'entity_id' => $member->id, 'actor_user_id' => $this->id(2),
         ]);
+        // Record the decision separately from an officer appointment.
+        $this->assertDatabaseHas('audit_logs', ['action_type' => 'APPROVE MEMBER APPLICATION',
+            'entity_id' => $this->id(201), 'actor_user_id' => $this->id(2)]);
         $this->patchJson(route('field-officer.member-applications.reject', $this->id(203)), ['rejection_reason' => 'Synthetic reason'])
             ->assertRedirect()->assertSessionHasNoErrors();
         $this->assertDatabaseHas('member_applications', [
             'id' => $this->id(203), 'status' => 'rejected', 'reviewed_by' => $this->id(2), 'rejection_reason' => 'Synthetic reason',
         ]);
+        $this->assertDatabaseHas('audit_logs', ['action_type' => 'REJECT MEMBER APPLICATION',
+            'entity_id' => $this->id(203), 'actor_user_id' => $this->id(2)]);
         $before = $this->applicationSnapshot();
         foreach ([201, 203] as $application) {
             foreach (['approve', 'reject'] as $decision) {
@@ -423,12 +428,16 @@ class MemberDirectoryUiTest extends TestCase
     public function test_http_submission_derives_ownership_and_rejects_registered_fishr_duplicates_and_inactive_links(): void
     {
         $this->applicationAuditFixture();
+        // Applications now require a photo, stored in an isolated test folder.
+        config(['services.supabase_storage.photo_transport' => 'local']);
+        Storage::fake('member_application_photos');
         $this->identity = $this->id(4);
         $data = [
             'first_name' => 'Synthetic', 'last_name' => 'Applicant', 'birth_date' => '2000-01-01',
             'sex_id' => 1, 'position_id' => 1, 'classification_ids' => [1],
             'endorsement_letter' => 'Private synthetic letter', 'fishr_registration_number' => 'SYNTHETIC-FISHR-15',
             'association_id' => $this->id(12), 'submitted_by_user_id' => $this->id(5),
+            'applicant_photo' => UploadedFile::fake()->image('applicant.jpg', 8, 8),
         ];
         $url = route('association.member-applications.store');
         $this->from(route('association.member-applications.index'))->post($url, $data)->assertRedirect()->assertSessionHasNoErrors();
@@ -437,7 +446,7 @@ class MemberDirectoryUiTest extends TestCase
         $this->assertSame($this->id(4), $application->submitted_by_user_id);
         $this->assertSame('pending', $application->status);
         $this->assertDatabaseCount('members', 0);
-        $this->assertDatabaseCount('audit_logs', 0);
+        $this->assertDatabaseHas('audit_logs', ['action_type' => 'SUBMIT MEMBER APPLICATION', 'entity_id' => $application->id, 'actor_user_id' => $this->id(4)]);
         foreach (['pending', 'approved'] as $status) {
             DB::table('member_applications')->where('id', $application->id)->update(['status' => $status]);
             $before = $this->applicationSnapshot();

@@ -19,6 +19,8 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing" force="true"/>
+        <!-- A test-only key keeps tests independent of the local application settings. -->
+        <env name="APP_KEY" value="base64:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" force="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file" force="true"/>
         <env name="BCRYPT_ROUNDS" value="4" force="true"/>
         <env name="BROADCAST_CONNECTION" value="null" force="true"/>

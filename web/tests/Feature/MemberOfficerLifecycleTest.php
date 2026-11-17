@@ -228,7 +228,7 @@ class MemberOfficerLifecycleTest extends TestCase
     }
 
     #[DataProvider('approvalPositions')]
-    public function test_approval_preserves_requested_position_and_records_only_officer_appointments(int $position): void
+    public function test_approval_records_the_decision_and_any_officer_appointment(int $position): void
     {
         $application = $this->application($position);
         $member = app(MemberApplicationService::class)->approve($application, $this->actor());
@@ -236,9 +236,11 @@ class MemberOfficerLifecycleTest extends TestCase
         $this->assertSame($application->id, $member->source_application_id);
         $this->assertSame('approved', $application->fresh()->status);
         $this->assertSame([1], $member->classifications()->pluck('member_classifications.id')->all());
-        $this->assertSame($position === 1 ? 0 : 1, DB::table('audit_logs')->count());
+        $this->assertSame($position === 1 ? 1 : 2, DB::table('audit_logs')->count());
+        $this->assertDatabaseHas('audit_logs', ['action_type' => 'APPROVE MEMBER APPLICATION',
+            'actor_user_id' => self::OFFICER, 'entity_id' => $application->id]);
         if ($position !== 1) {
-            $event = DB::table('audit_logs')->first();
+            $event = DB::table('audit_logs')->where('action_type', 'APPOINT ASSOCIATION OFFICER')->first();
             $this->assertSame('APPOINT ASSOCIATION OFFICER', $event->action_type);
             $this->assertSame(self::OFFICER, $event->actor_user_id);
             $this->assertSame($member->id, $event->entity_id);
@@ -411,7 +413,9 @@ class MemberOfficerLifecycleTest extends TestCase
         $this->assertRejected(fn () => $service->approve($application, $this->actor()), 'application', 409);
         $this->assertSame('rejected', $application->fresh()->status);
         $this->assertSame(0, Member::count());
-        $this->assertSame(0, DB::table('audit_logs')->count());
+        // A rejected application has one decision record and no officer record.
+        $this->assertDatabaseHas('audit_logs', ['action_type' => 'REJECT MEMBER APPLICATION', 'entity_id' => $application->id]);
+        $this->assertSame(1, DB::table('audit_logs')->count());
     }
 
     #[DataProvider('decisions')]
@@ -425,7 +429,7 @@ class MemberOfficerLifecycleTest extends TestCase
             : $service->reject($application, $this->actor(), 'Synthetic reason'), 'application', 409);
         $this->assertSame('approved', $application->fresh()->status);
         $this->assertSame(1, Member::count());
-        $this->assertSame(1, DB::table('audit_logs')->count());
+        $this->assertSame(2, DB::table('audit_logs')->count());
     }
 
     #[DataProvider('executivePositions')]
@@ -438,7 +442,7 @@ class MemberOfficerLifecycleTest extends TestCase
         $this->assertRejected(fn () => $service->approve($second, $this->actor()), 'position_id', 409);
         $this->assertSame(1, Member::count());
         $this->assertSame('pending', $second->fresh()->status);
-        $this->assertSame(1, DB::table('audit_logs')->count());
+        $this->assertSame(2, DB::table('audit_logs')->count());
     }
 
     public static function executivePositions(): array
@@ -678,10 +682,10 @@ class MemberOfficerLifecycleTest extends TestCase
         $this->assertSame(now()->toDateString(), $member->date_registered->toDateString());
         $this->assertSame([1], $member->classifications()->pluck('member_classifications.id')->all());
         $this->assertDatabaseCount('members', 1);
-        $this->assertDatabaseCount('audit_logs', 1);
+        $this->assertDatabaseCount('audit_logs', 2);
         $memberBefore = $member->getRawOriginal();
         $applicationBefore = $application->getRawOriginal();
-        $appointmentBefore = (array) DB::table('audit_logs')->sole();
+        $appointmentBefore = (array) DB::table('audit_logs')->where('action_type', 'APPOINT ASSOCIATION OFFICER')->sole();
         $this->travel(1)->seconds();
         app(MemberService::class)->update($member, $this->memberData($member, 'profile'), $this->actor());
         $after = $member->fresh()->getRawOriginal();
@@ -690,7 +694,7 @@ class MemberOfficerLifecycleTest extends TestCase
         $this->assertSame([1], $application->classifications()->pluck('member_classifications.id')->all());
         $this->assertSame([1], $member->classifications()->pluck('member_classifications.id')->all());
         $this->assertSame($appointmentBefore, (array) DB::table('audit_logs')->where('action_type', 'APPOINT ASSOCIATION OFFICER')->sole());
-        $this->assertSame(['APPOINT ASSOCIATION OFFICER', 'UPDATE MEMBER PROFILE'],
+        $this->assertSame(['APPROVE MEMBER APPLICATION', 'APPOINT ASSOCIATION OFFICER', 'UPDATE MEMBER PROFILE'],
             DB::table('audit_logs')->orderBy('performed_at')->pluck('action_type')->all());
         $event = DB::table('audit_logs')->where('action_type', 'UPDATE MEMBER PROFILE')->sole();
         $this->assertSame(self::OFFICER, $event->actor_user_id);

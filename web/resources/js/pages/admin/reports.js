@@ -25,7 +25,8 @@ function initReportControls(root, form, readFilters, defaultYear) {
     }
 
     toggle.hidden = false;
-    const associationReport = Boolean(root.closest?.('.association-workspace'));
+    // Use the compact association report controls in the desktop admin workspace too.
+    const associationReport = Boolean(root.closest?.('.association-workspace') || (root.closest?.('.admin-workspace') && window.matchMedia('(min-width: 768px)').matches));
     setOpen(!associationReport);
     toggle.addEventListener('click', () => setOpen(panel.hidden));
     if (associationReport) toggle.closest('.section-heading')?.addEventListener('click', event => {
@@ -60,9 +61,14 @@ export function initReports() {
     const form = root.querySelector('[data-report-form]');
     const preview = root.querySelector('[data-report-result]');
     const status = root.querySelector('[data-report-status]');
-    const associationReport = Boolean(root.closest?.('.association-workspace'));
+    // Share the presentation without changing admin filters or report data.
+    const associationReport = Boolean(root.closest?.('.association-workspace') || (root.closest?.('.admin-workspace') && window.matchMedia('(min-width: 768px)').matches));
     const plain = value => {
         if (!associationReport || typeof value !== 'string') return value;
+        // Admin reports may cover several associations, not only one.
+        if (root.closest?.('.admin-workspace') && value === 'Archived records are retained within the current authorized association scope. Counts describe recorded data only.') {
+            return 'Archived records are included for associations covered by this report. Counts reflect only information recorded in the system.';
+        }
         const incomeNote = value.match(/^(\d+) quarterly entries excluded: quarterly income cannot be allocated to the selected month\.$/);
         if (incomeNote) return `${incomeNote[1]} quarterly income entries are excluded because they cannot be assigned to the selected month.`;
         return initial.plainLanguage?.[value] || value;
@@ -124,6 +130,8 @@ export function initReports() {
 
     function syncBusy() {
         form.querySelector('[data-report-submit]').disabled = Boolean(request || optionsRequest);
+        const refresh = root.querySelector('[data-report-refresh]');
+        if (refresh) refresh.disabled = Boolean(request || optionsRequest);
         preview.setAttribute('aria-busy', String(Boolean(request)));
     }
 
@@ -330,7 +338,7 @@ export function initReports() {
             const card = element('div'), definition = element('dd'), value = element('span', plain(measureValue(measure.value)));
             if (associationReport && /^\d+$/.test(String(measure.value))) value.setAttribute('data-summary-counter', '');
             const labelNode = element('dt', plain(measure.label));
-            if (root.closest?.('.association-workspace')) {
+            if (associationReport) {
                 const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 icon.setAttribute('viewBox', '0 0 24 24'); icon.setAttribute('fill', 'none'); icon.setAttribute('stroke', 'currentColor'); icon.setAttribute('stroke-width', '1.5'); icon.setAttribute('aria-hidden', 'true'); icon.classList.add('icon');
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');

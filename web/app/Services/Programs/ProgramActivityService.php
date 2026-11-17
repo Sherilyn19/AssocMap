@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\SaadActivity;
 use App\Models\UserProfile;
 use App\Services\Associations\AssociationLifecycleService;
+use App\Services\Audit\AuditLogService;
 use App\Services\Projects\ProjectLifecycleService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -103,6 +104,8 @@ class ProgramActivityService
                     $currentUser->id,
             ]);
 
+            // Keep the activity history with the saved record.
+            app(AuditLogService::class)->recordActor($currentUser, 'CREATE PROGRAM ACTIVITY', 'Program Activities', 'program_activity', (string) $record->id);
             return $record->load([
                 'saadActivity',
                 'association',
@@ -199,6 +202,7 @@ class ProgramActivityService
                     $currentUser->id,
             ]);
 
+            app(AuditLogService::class)->recordActor($currentUser, 'UPDATE PROGRAM ACTIVITY', 'Program Activities', 'program_activity', (string) $record->id);
             return $record->load([
                 'saadActivity',
                 'association',
@@ -221,6 +225,7 @@ class ProgramActivityService
                 'archived_by' => $currentUser->id,
                 'updated_by' => $currentUser->id,
             ]);
+            app(AuditLogService::class)->recordActor($currentUser, 'ARCHIVE PROGRAM ACTIVITY', 'Program Activities', 'program_activity', (string) $record->id);
         }, 3);
     }
 
@@ -237,6 +242,7 @@ class ProgramActivityService
                 'archived_by' => null,
                 'updated_by' => $currentUser->id,
             ]);
+            app(AuditLogService::class)->recordActor($currentUser, 'RESTORE PROGRAM ACTIVITY', 'Program Activities', 'program_activity', (string) $record->id);
         }, 3);
     }
 

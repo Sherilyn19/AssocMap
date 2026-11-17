@@ -9,6 +9,7 @@ use App\Models\SaadActivity;
 use App\Models\Training;
 use App\Models\UserProfile;
 use App\Services\Associations\AssociationLifecycleService;
+use App\Services\Audit\AuditLogService;
 use App\Services\Projects\ProjectLifecycleService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -120,6 +121,8 @@ class TrainingService
                 $participants
             );
 
+            // Keep training history with the saved training and attendance.
+            app(AuditLogService::class)->recordActor($currentUser, 'CREATE TRAINING', 'Trainings', 'training', (string) $training->id);
             return $training->load([
                 'association',
                 'relatedProject',
@@ -173,6 +176,7 @@ class TrainingService
             $this->syncParticipants($locked, $data['participants'] ?? [], $data['removed_participant_ids'] ?? [],
                 $association, $originalAssociationId);
 
+            app(AuditLogService::class)->recordActor($actor, 'UPDATE TRAINING', 'Trainings', 'training', (string) $locked->id);
             return $locked->load(['association', 'relatedProject', 'saadActivity', 'participants.member']);
         });
     }
@@ -235,6 +239,7 @@ class TrainingService
                 'archived_by' => $currentUser->id,
                 'updated_by' => $currentUser->id,
             ]);
+            app(AuditLogService::class)->recordActor($currentUser, 'ARCHIVE TRAINING', 'Trainings', 'training', (string) $training->id);
         }, 3);
     }
 
@@ -251,6 +256,7 @@ class TrainingService
                 'archived_by' => null,
                 'updated_by' => $currentUser->id,
             ]);
+            app(AuditLogService::class)->recordActor($currentUser, 'RESTORE TRAINING', 'Trainings', 'training', (string) $training->id);
         }, 3);
     }
 

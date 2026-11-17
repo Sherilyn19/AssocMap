@@ -82,6 +82,11 @@
 .admin-workspace .admin-account-details summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
 .admin-workspace .admin-account-popover { position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; width: min(320px, 85vw); padding: 16px; border: 1px solid #dbe6ee; border-radius: 9px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 14%); overflow-wrap: anywhere; }
 .admin-workspace .admin-account-title { display: flex; align-items: flex-start; gap: 10px; }
+/* Keep the account shortcut clear and easy to select. */
+.admin-workspace .admin-account-profile-link { display: inline-flex; align-items: center; gap: 7px; color: var(--primary); text-decoration: none; }
+.admin-workspace .admin-account-profile-link .icon { width: 16px; height: 16px; flex: none; }
+.admin-workspace .admin-account-profile-link:hover strong { text-decoration: underline; }
+.admin-workspace .admin-account-profile-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 2px; }
 .admin-workspace .admin-account-title > .icon, .admin-workspace .admin-account-popover dt .icon { width: 17px; height: 17px; flex: none; color: var(--primary); }
 .admin-workspace .admin-account-popover strong { color: #193650; line-height: 1.45; }
 .admin-workspace .workspace-header--compact .admin-account-popover strong { white-space: normal; overflow: visible; }

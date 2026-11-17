@@ -14,6 +14,8 @@ export function createGisPhotos(root, { base, manager, csrf }) {
     let photoRequest = 0;
     // The public viewer receives its new presentation only on desktop.
     const desktopPublic = () => root.closest('[data-gis-public="true"]') && window.matchMedia('(min-width: 768px)').matches;
+    // Use the same photo loading experience for the desktop administrator gallery.
+    const enhancedViewer = () => (desktopPublic() || root.closest('[data-gis-administrator="true"]')) && window.matchMedia('(min-width: 768px)').matches;
     const message = text => { status.textContent = text; };
     const resetFile = (clearInput = true) => {
         if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -65,7 +67,7 @@ export function createGisPhotos(root, { base, manager, csrf }) {
         display.alt = `Location photo ${index + 1} of ${photos.length}`;
         const imageStatus = find('[data-photo-image-status]');
         const activeRequest = ++photoRequest;
-        if (!desktopPublic()) {
+        if (!enhancedViewer()) {
             display.hidden = false;
             imageStatus.classList.remove('is-loading');
             imageStatus.textContent = 'Loading photo...';
@@ -112,10 +114,28 @@ export function createGisPhotos(root, { base, manager, csrf }) {
             const caption = document.createElement('span'); caption.textContent = 'View photo ' + (index + 1);
             open.replaceChildren(caption);
             const image = previous?.querySelector('img') || document.createElement('img');
-            if (!image.getAttribute('src')) image.src = photo.thumbnail_url;
             image.alt = 'Location photo ' + (index + 1); image.loading = 'lazy'; image.decoding = 'async';
             image.width = photo.thumbnail_width; image.height = photo.thumbnail_height;
-            image.onerror = () => { image.remove(); open.textContent = 'Photo unavailable. Refresh to retry'; };
+            // Show a loading state in the public desktop gallery and retry with the display image if needed.
+            if (enhancedViewer()) {
+                const loading = document.createElement('span');
+                loading.className = 'gis-thumbnail-loading'; loading.textContent = 'Loading photo…';
+                loading.setAttribute('role', 'status');
+                open.classList.add('is-loading'); open.append(loading);
+                image.onload = () => { open.classList.remove('is-loading'); loading.remove(); };
+                let fallbackTried = false;
+                image.onerror = () => {
+                    if (!fallbackTried && photo.display_url && photo.display_url !== photo.thumbnail_url) {
+                        fallbackTried = true; image.src = photo.display_url; return;
+                    }
+                    open.classList.remove('is-loading'); loading.remove(); image.remove();
+                    open.textContent = 'Photo unavailable. Refresh to retry';
+                };
+                if (image.complete && image.naturalWidth > 0) { open.classList.remove('is-loading'); loading.remove(); }
+            } else {
+                image.onerror = () => { image.remove(); open.textContent = 'Photo unavailable. Refresh to retry'; };
+            }
+            if (!image.getAttribute('src')) image.src = photo.thumbnail_url;
             open.prepend(image); figure.append(open);
             if (manager) {
                 const label = document.createElement('figcaption'); label.textContent = photo.approved ? 'Approved for eligible public display' : 'Private'; figure.append(label);

@@ -69,6 +69,14 @@ class MemberApplicationSubmissionTest extends TestCase
 
     private function schema(): void
     {
+        // Keep audit entries in the same test database as applications.
+        Schema::create('audit_logs', function (Blueprint $table) {
+            $table->uuid('id')->primary(); $table->uuid('actor_user_id');
+            $table->string('action_type'); $table->string('module');
+            $table->string('entity_type')->nullable(); $table->string('entity_id')->nullable();
+            $table->text('old_values')->nullable(); $table->text('new_values')->nullable();
+            $table->timestamp('performed_at');
+        });
         Schema::create('roles', function (Blueprint $table) {
             $table->id(); $table->string('code'); $table->boolean('is_active'); $table->timestamps();
             $table->string('name')->nullable(); $table->text('description')->nullable();
@@ -309,11 +317,13 @@ class MemberApplicationSubmissionTest extends TestCase
         $this->assertDatabaseCount('member_applications', 0);
     }
 
-    public function test_other_position_still_requires_its_details_without_a_photo(): void
+    public function test_other_position_still_requires_its_details(): void
     {
         DB::table('association_positions')->insert(['id' => 7, 'code' => 'OTHER', 'name' => 'Other',
             'is_officer' => true, 'is_active' => true]);
-        $this->postJson(self::URL, array_replace($this->applicationData(), ['position_id' => 7]))
+        // Supply the required photo so this test checks the position itself.
+        $this->postJson(self::URL, array_replace($this->applicationData(), ['position_id' => 7,
+            'applicant_photo' => UploadedFile::fake()->image('portrait.png', 8, 8)]))
             ->assertUnprocessable()->assertJsonValidationErrors('position_other_text');
         $this->assertDatabaseCount('member_applications', 0);
     }
@@ -451,6 +461,11 @@ class MemberApplicationSubmissionTest extends TestCase
     {
         $application = $this->app->make(MemberApplicationService::class)->submit($this->applicationData(),
             UserProfile::with('role')->findOrFail(self::ACCOUNT));
+        // The audit entry identifies the application without storing applicant details.
+        $event = DB::table('audit_logs')->where('action_type', 'SUBMIT MEMBER APPLICATION')->sole();
+        $this->assertSame(self::ACCOUNT, $event->actor_user_id);
+        $this->assertSame($application->id, $event->entity_id);
+        $this->assertSame(['association_id' => self::ASSOCIATION, 'status' => 'pending'], json_decode($event->new_values, true));
         $photos = Mockery::mock(MemberApplicationPhotoService::class);
         $photos->shouldNotReceive('open');
         $this->app->instance(MemberApplicationPhotoService::class, $photos);

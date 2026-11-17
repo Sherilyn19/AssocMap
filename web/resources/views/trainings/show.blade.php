@@ -11,8 +11,10 @@
 @endphp
 @section('content')
 <section class="program-management" data-workspace-module="trainings" data-workspace-title="Training Details">
-    <x-workflow-navigation :back="$workflowBack" :parents="$breadcrumbs" :current="$training->title" />
+    {{-- Place admin navigation below the heading, like the association workspace. --}}
+    @if($prefix !== 'admin')<x-workflow-navigation :back="$workflowBack" :parents="$breadcrumbs" :current="$training->title" />@endif
     <header class="card program-heading"><div><p class="eyebrow">Training Management</p><h1 tabindex="-1">Training Details</h1><p>{{ $training->title }}</p></div><div class="program-heading-actions"><x-status-badge :value="ucfirst($training->status)" />@if($training->archived_at)<span class="badge badge-neutral">Archived</span>@endif @if($canEdit)<a class="button button-primary" href="{{ route($trainingPrefix.'.edit', $training) }}"><x-icon name="pencil" />Edit Training</a>@endif</div></header>
+    @if($prefix === 'admin')<x-workflow-navigation :back="$workflowBack" :parents="$breadcrumbs" :current="$training->title" />@endif
     @if($row['association_archived'])<p class="notice">Association Archived - Read Only. Historical details remain available.</p>@elseif(!$canEdit)<p class="notice">This record is currently read-only.</p>@endif
     @if($row['project_finalized'])<p class="notice">The linked project is completed or terminated. This training and its participants are permanently read-only.</p>@endif
     @if(!$row['project_finalized'] && $row['archived'])<p class="notice">This training is archived and read-only. @if($row['parents_operational'])Unarchive it before editing.@endif</p>@endif

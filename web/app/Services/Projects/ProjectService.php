@@ -11,6 +11,7 @@ use App\Models\ProjectProduct;
 use App\Models\SaadActivity;
 use App\Models\UserProfile;
 use App\Services\Associations\AssociationLifecycleService;
+use App\Services\Audit\AuditLogService;
 use App\Services\Programs\ProgramActorService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -105,6 +106,8 @@ class ProjectService
                 $data['products'] ?? []
             );
 
+            // Record the action with the project in the same transaction.
+            app(AuditLogService::class)->recordActor($currentUser, 'CREATE PROJECT', 'Projects', 'project', (string) $project->id);
             return $project->load([
                 'association',
                 'saadActivity',
@@ -222,6 +225,7 @@ class ProjectService
                 );
             }
 
+            app(AuditLogService::class)->recordActor($currentUser, 'UPDATE PROJECT', 'Projects', 'project', (string) $project->id);
             return $project->load([
                 'association',
                 'saadActivity',
@@ -308,6 +312,7 @@ class ProjectService
                 'archived_by' => $currentUser->id,
                 'updated_by' => $currentUser->id,
             ]);
+            app(AuditLogService::class)->recordActor($currentUser, 'ARCHIVE PROJECT', 'Projects', 'project', (string) $project->id);
         }, 3);
     }
 
@@ -324,6 +329,7 @@ class ProjectService
                 'archived_by' => null,
                 'updated_by' => $currentUser->id,
             ]);
+            app(AuditLogService::class)->recordActor($currentUser, 'RESTORE PROJECT', 'Projects', 'project', (string) $project->id);
         }, 3);
     }
 
