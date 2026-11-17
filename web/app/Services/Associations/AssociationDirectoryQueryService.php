@@ -195,7 +195,7 @@ class AssociationDirectoryQueryService
                 ->select(['id', 'association_id', 'title', 'activity_date', 'status', 'archived_at']),
             'registrations' => AssociationRegistration::query()->where('association_id', $association->id)->with('agency:id,name,registration_kind,is_active')
                 ->orderByDesc('is_primary')->orderByDesc('registration_date')->orderBy('id')
-                ->select(['id', 'association_id', 'agency_id', 'registration_number', 'registration_date', 'expiration_date', 'is_primary',
+                ->select(['id', 'association_id', 'agency_id', 'registration_number', 'registration_date', 'expiration_date', 'renewal_count', 'latest_renewal_date', 'is_primary',
                     ...($actor->role->code === 'system_admin' ? ['remarks'] : [])]),
         };
         $related = $query->paginate(25, ['*'], 'related_page')->appends(array_replace($parameters, ['section' => $section]));
@@ -236,13 +236,14 @@ class AssociationDirectoryQueryService
                     'municipality_id' => $record->barangay?->municipality_id, 'specific_address' => $record->specific_address,
                     'expected_updated_at' => $record->updated_at?->format('Y-m-d\TH:i:s.uP')];
             }
+            // Include registrations as well as accreditations in the editor.
             $accreditations = AssociationRegistration::query()->where('association_id', $record->id)
-                ->whereHas('agency', fn ($query) => $query->where('registration_kind', 'accreditation'))
                 ->with('agency:id,name,is_active')->orderByDesc('registration_date')->orderBy('id')->get();
             $associationEditorRecord['accreditations'] = $accreditations->map(fn ($item) => [
                 'id' => $item->id, 'agency' => $item->agency->name, 'agency_active' => $item->agency->is_active,
                 'registration_number' => $item->registration_number, 'registration_date' => $item->registration_date->format('Y-m-d'),
                 'expiration_date' => $item->expiration_date?->format('Y-m-d'), 'is_primary' => $item->is_primary,
+                'renewal_count' => $item->renewal_count, 'latest_renewal_date' => $item->latest_renewal_date?->format('Y-m-d'),
                 'remarks' => $item->remarks, 'expected_updated_at' => $item->updated_at?->format('Y-m-d\TH:i:s.uP'),
                 'update_url' => route('admin.associations.index', ['editor' => $record->id, 'accreditation' => $item->id]),
             ])->all();

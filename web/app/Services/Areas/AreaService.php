@@ -24,6 +24,7 @@ class AreaService
             'municipality_id' => ['required', 'uuid'],
             'barangay_id' => ['required', 'uuid'],
             'address' => ['required', 'string'],
+            'zip_code' => ['required', 'string', 'regex:/\A[0-9]{4}\z/'],
         ])->validate();
 
         return DB::transaction(function () use ($data, $currentUser): Area {
@@ -53,6 +54,7 @@ class AreaService
             $area = new Area([
                 'barangay_id' => $barangay->id,
                 'address' => $data['address'],
+                'zip_code' => $data['zip_code'],
                 'source' => 'manual',
                 'is_active' => true,
             ]);

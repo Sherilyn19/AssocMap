@@ -9,7 +9,7 @@
             ['key' => 'municipalities', 'label' => 'Total Cities / Municipalities', 'icon' => 'pin', 'tab' => 'municipalities', 'status' => ''],
             ['key' => 'associations', 'label' => 'Current Associations', 'icon' => 'building'],
             ['key' => 'current_barangays', 'label' => 'Current Barangays', 'icon' => 'map-pinned', 'tab' => 'barangays', 'status' => 'active'],
-            ['key' => 'inactive_barangays', 'label' => 'Inactive Barangays', 'icon' => 'archive', 'tab' => 'barangays', 'status' => 'inactive'],
+            ['key' => 'inactive_municipalities', 'label' => 'Inactive Municipalities', 'icon' => 'archive', 'tab' => 'municipalities', 'status' => 'inactive', 'type' => 'municipality'],
         ];
     @endphp
     <nav class="area-summary-grid summary-cards" aria-label="Geographic record groups">
@@ -17,9 +17,9 @@
             @php
                 $navigation = $card['key'] === 'associations';
                 $selected = !$navigation && $filters['tab'] === $card['tab'] && $filters['status'] === $card['status']
-                    && !$filters['municipality_id'] && !$filters['source'] && !$filters['type'];
+                    && !$filters['municipality_id'] && !$filters['source'] && $filters['type'] === ($card['type'] ?? '');
                 $href = $navigation ? route('admin.associations.index').'#associations'
-                    : route('admin.areas.index', ['tab' => $card['tab'], 'status' => $card['status'], 'q' => $filters['q'], 'sort' => $filters['sort']]);
+                    : route('admin.areas.index', ['tab' => $card['tab'], 'status' => $card['status'], 'type' => $card['type'] ?? '', 'q' => $filters['q'], 'sort' => $filters['sort']]);
             @endphp
             <a class="area-summary-card" href="{{ $href }}" data-area-summary="{{ $card['key'] }}" @if($selected) aria-current="page" @endif>
                 <x-stat-card :label="$card['label']" :value="number_format($summary[$card['key']])" :icon="$card['icon']" />

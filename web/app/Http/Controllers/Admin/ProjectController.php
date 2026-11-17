@@ -224,6 +224,7 @@ class ProjectController extends Controller
                     )->format('Y-m-d')
                     : null,
 
+
             'status' =>
                 ucfirst($project->status),
 

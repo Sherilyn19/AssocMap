@@ -21,7 +21,7 @@
         ['name' => 'fisheries_category_id', 'label' => 'Fisheries Category', 'type' => 'select', 'choices' => $catalog['options']['fisheries_category_records'], 'required' => true],
         ['name' => 'program_year', 'label' => 'Program Year', 'type' => 'number', 'required' => true],
         ['name' => 'implementation_start_date', 'label' => 'Implementation Start Date', 'type' => 'date', 'required' => true],
-        ['name' => 'implementation_end_date', 'label' => 'Implementation End Date', 'type' => 'date'],
+        ['name' => 'implementation_end_date', 'label' => 'Implementation End Date', 'type' => 'date', 'required' => true],
         ['name' => 'status', 'label' => 'Status', 'type' => 'select', 'choices' => collect($statuses)->except(['completed', 'terminated'])->map(fn ($label, $value) => compact('value', 'label'))->values()->all(), 'required' => true],
         ['name' => 'remarks', 'label' => 'Remarks', 'type' => 'textarea'],
     ];

@@ -30,7 +30,8 @@
             </article>
             @if($canManage)
                 <article class="monitoring-card">
-                    <h3>{{ $editing ? 'Edit Harvest' : 'Add Daily Harvest' }}</h3>
+                    {{-- A record is entered for a harvest date, not necessarily every day. --}}
+                    <h3>{{ $editing ? 'Edit Harvest' : 'Record a Harvest' }}</h3>
                     <p class="notice">Only one active entry is allowed per product and date. Combine all harvests of this product on that date into one quantity.</p>
                     <form method="POST" action="{{ $editing ? route($monitoringPrefix.'.harvest.update', [$record, $production, $editing]) : route($monitoringPrefix.'.harvest.store', [$record, $production]) }}">
                         @csrf @if($editing) @method('PATCH') @endif
@@ -48,15 +49,21 @@
                 </article>
                 <article class="monitoring-card">
                     <h3>Quarterly Goal</h3>
+                    {{-- Once saved, the goal is displayed without an edit form. --}}
+                    @if($production->target_output !== null)
+                        <p>{{ $production->target_output }} {{ $production->unit }}</p>
+                        <p class="field-hint">This goal has been saved and cannot be changed.</p>
+                    @else
                     <form method="POST" action="{{ route($monitoringPrefix.'.harvest.goal', [$record, $production]) }}">
                         @csrf @method('PATCH')
                         <input type="hidden" name="production_revision" value="{{ $productionRevision }}">
                         <div class="form-grid">
                             <div class="field"><label for="harvest-goal">Target ({{ $production->unit }})</label><input id="harvest-goal" type="number" name="target_output" min="0" step="0.01" max="999999999999.99" value="{{ old('target_output', $production->target_output) }}" required></div>
-                            <div class="field"><label for="goal-reason">Reason for setting or revising the goal</label><textarea id="goal-reason" name="reason" maxlength="2000" required>{{ old('reason') }}</textarea></div>
+                            <div class="field"><label for="goal-reason">Reason for setting the goal</label><textarea id="goal-reason" name="reason" maxlength="2000" required>{{ old('reason') }}</textarea></div>
                         </div>
                         <div class="monitoring-actions"><button class="button button-primary" type="submit">Save Quarterly Goal</button></div>
                     </form>
+                    @endif
                 </article>
             @endif
             <article class="monitoring-card">

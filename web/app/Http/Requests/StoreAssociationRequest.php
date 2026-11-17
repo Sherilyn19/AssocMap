@@ -98,11 +98,11 @@ class StoreAssociationRequest extends FormRequest
             $id = $this->input('registration.id');
             $record = $association instanceof Association && Str::isUuid($id)
                 ? AssociationRegistration::query()->whereKey($id)->where('association_id', $association->id)
-                    ->whereHas('agency', fn ($query) => $query->where('registration_kind', 'accreditation')->where('is_active', true))->first()
+                    ->whereHas('agency', fn ($query) => $query->where('is_active', true))->first()
                 : null;
 
             return [
-                'registration' => ['sometimes', 'array:id,expected_updated_at,registration_number,registration_date,expiration_date,remarks',
+                'registration' => ['sometimes', 'array:id,expected_updated_at,registration_number,registration_date,expiration_date,remarks,renewal_count,latest_renewal_date',
                     'required_array_keys:id,expected_updated_at,registration_number,registration_date'],
                 'registration.id' => ['bail', 'required_with:registration', 'uuid', function ($attribute, $value, $fail) use ($record) {
                     if (! $record) {
@@ -118,6 +118,9 @@ class StoreAssociationRequest extends FormRequest
                     Rule::when($record?->is_primary === true && is_string($this->input('saad_phase2_join_date')), ['before_or_equal:saad_phase2_join_date'])],
                 'registration.expiration_date' => ['bail', 'sometimes', 'nullable', 'string', 'date_format:Y-m-d',
                     Rule::when(is_string($this->input('registration.registration_date')), ['after_or_equal:registration.registration_date'])],
+                // Accept only verified renewal details entered by the user.
+                'registration.renewal_count' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1000'],
+                'registration.latest_renewal_date' => ['sometimes', 'nullable', 'date_format:Y-m-d', 'after_or_equal:registration.registration_date', 'before_or_equal:'.now('Asia/Manila')->toDateString()],
                 'registration.remarks' => ['sometimes', 'nullable', 'string', 'max:4000'],
             ];
         }

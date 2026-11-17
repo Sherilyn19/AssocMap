@@ -7,6 +7,7 @@ function syncForm(form) {
         const barangay = $('[data-association-barangay]', form);
         const area = $('[name=area_id]', form);
         const directGeography = form.dataset.directGeography === 'true';
+        const editingAssociation = !$('[data-association-method]', form).disabled;
         const populate = (select, choices, label) => {
             const selected = select.value;
             select.replaceChildren(new Option(choices.length || (directGeography && select === area) ? label : 'No choices available', ''));
@@ -22,6 +23,20 @@ function syncForm(form) {
         populate(barangay, Array.from(barangays.values()), 'Select barangay');
         const previousArea = area.value;
         populate(area, matching.filter(record => barangay.value && record.barangay_id === barangay.value), directGeography ? 'No Specific Area' : 'Select specific area');
+        // Show the saved municipality and barangay without allowing changes during editing.
+        [municipality, barangay].forEach(select => {
+            select.disabled = editingAssociation;
+            if (!directGeography) return;
+            const name = select === municipality ? 'municipality_id' : 'barangay_id';
+            let saved = form.querySelector(`[data-saved-geography="${name}"]`);
+            if (!saved) {
+                saved = document.createElement('input');
+                saved.type = 'hidden'; saved.name = name; saved.dataset.savedGeography = name;
+                form.append(saved);
+            }
+            saved.disabled = !editingAssociation;
+            saved.value = select.value;
+        });
         // Explain when a barangay has no available saved areas.
         const noAreas = $('[data-association-no-areas]', form);
         if (noAreas) noAreas.hidden = !barangay.value || area.options.length > 1;
@@ -52,6 +67,9 @@ function syncForm(form) {
         $('[data-area-method]', form).disabled = !editing;
         $('[name=area_record_id]', form).disabled = !editing;
         $$('[data-area-fields]', form).forEach(group => setFieldVisibility(group, group.dataset.areaFields === type));
+        // Keep existing municipality and barangay names unchanged when editing.
+        $$('[data-area-fields="Municipality"] input[name="name"], [data-area-fields="Barangay"] input[name="name"]', form)
+            .forEach(input => { input.readOnly = editing; });
         setFieldVisibility($('[data-area-reference-fields]', form), type !== 'Specific Area');
         if (type === 'Specific Area') {
             const municipality = $('[data-specific-municipality]', form);

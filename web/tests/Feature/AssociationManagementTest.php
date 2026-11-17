@@ -257,6 +257,9 @@ class AssociationManagementTest extends TestCase
             $t->string('registration_number');
             $t->date('registration_date');
             $t->date('expiration_date')->nullable();
+            // Keep the latest verified renewal details in the test records.
+            $t->unsignedInteger('renewal_count')->nullable();
+            $t->date('latest_renewal_date')->nullable();
             $t->boolean('is_primary');
             $t->text('remarks')->nullable();
             $t->timestamps();

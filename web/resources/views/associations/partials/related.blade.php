@@ -2,7 +2,7 @@
     <table class="data-table association-table"><caption class="sr-only">{{ ucfirst($section) }} connected to {{ $association->name }}.</caption>
         <thead><tr>
         @if($section === 'members')<th scope="col">Member</th><th scope="col">Position</th><th scope="col">Status</th><th scope="col">Open</th>
-        @elseif($section === 'registrations')<th scope="col">Agency</th><th scope="col">Registration number</th><th scope="col">Registration date</th><th scope="col">Expiration</th><th scope="col">Primary</th>
+        @elseif($section === 'registrations')<th scope="col">Agency</th><th scope="col">Registration number</th><th scope="col">Latest date</th><th scope="col">Expiration</th><th scope="col">Primary</th>
         @else @if($prefix === 'field-officer')<th scope="col">{{ $section === 'projects' ? 'Implementation dates' : ($section === 'trainings' ? 'Training dates' : 'Activity date') }}</th>@endif<th scope="col">{{ $section === 'activities' ? 'Program Activity' : ucfirst(rtrim($section, 's')) }}</th><th scope="col">Status</th>@if($prefix !== 'field-officer' && $section !== 'projects')<th scope="col">Date</th>@endif<th scope="col">Open</th>@endif
         </tr></thead><tbody>
         @forelse($related as $item)
@@ -15,7 +15,7 @@
                     @if($prefix === 'admin' && $item->agency?->registration_kind === 'accreditation' && $item->agency?->is_active && $association->status === 'active' && !$association->archived_at)
                         <a class="text-button" href="{{ route('admin.associations.index', ['editor' => $association->id, 'accreditation' => $item->id]) }}">Update Accreditation</a>
                     @endif
-                </th><td>{{ $item->registration_number }}@if($prefix === 'admin' && filled($item->remarks))<small>{{ $item->remarks }}</small>@endif</td><td>{{ $item->registration_date?->format('M d, Y') ?? 'Not recorded' }}</td><td>{{ $item->expiration_date?->format('M d, Y') ?? 'Not recorded' }}</td><td>{{ $item->is_primary ? 'Yes' : 'No' }}</td>
+                </th><td>{{ $item->registration_number }}@if($prefix === 'admin' && filled($item->remarks))<small>{{ $item->remarks }}</small>@endif</td><td>{{ $item->latest_renewal_date?->format('M d, Y') ?? $item->registration_date?->format('M d, Y') ?? 'Not recorded' }}<small>{{ $item->latest_renewal_date ? 'Latest renewal' : 'Registration date' }}@if($item->renewal_count !== null) · {{ $item->renewal_count }} renewal(s)@endif</small></td><td>{{ $item->expiration_date?->format('M d, Y') ?? 'Not recorded' }}</td><td>{{ $item->is_primary ? 'Yes' : 'No' }}</td>
             @else
                 @php($recordRoute = $section === 'activities' ? 'program-activities' : $section)
                 {{-- Match the training timeline using the project's saved dates. --}}

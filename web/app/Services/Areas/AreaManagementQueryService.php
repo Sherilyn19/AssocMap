@@ -31,7 +31,8 @@ class AreaManagementQueryService
             ->selectSub(Municipality::query()->selectRaw('COUNT(*)'), 'municipalities')
             ->selectSub(Association::query()->whereNull('archived_at')->selectRaw('COUNT(*)'), 'associations')
             ->selectSub(Barangay::query()->where('is_active', true)->selectRaw('COUNT(*)'), 'current_barangays')
-            ->selectSub(Barangay::query()->where('is_active', false)->selectRaw('COUNT(*)'), 'inactive_barangays')
+            // Count inactive municipalities without including cities or barangays.
+            ->selectSub(Municipality::query()->where('is_active', false)->where('locality_type', 'municipality')->selectRaw('COUNT(*)'), 'inactive_municipalities')
             ->first();
 
         return array_map('intval', (array) $counts);
@@ -39,7 +40,7 @@ class AreaManagementQueryService
 
     public function municipalities(): Builder
     {
-        return Municipality::query()->select(['municipalities.id', 'name', 'psgc_code', 'province', 'region',
+        return Municipality::query()->select(['municipalities.id', 'name', 'psgc_code', 'zip_code', 'province', 'region',
             'locality_type', 'source', 'is_active', 'created_at'])->withCount('barangays')
             ->addSelect(['associations_count' => $this->associationGeography()
                 ->whereColumn('barangays.municipality_id', 'municipalities.id')
@@ -48,7 +49,7 @@ class AreaManagementQueryService
 
     public function barangays(): Builder
     {
-        return Barangay::query()->select(['barangays.id', 'municipality_id', 'name', 'psgc_code', 'source', 'is_active', 'created_at'])
+        return Barangay::query()->select(['barangays.id', 'municipality_id', 'name', 'psgc_code', 'zip_code', 'source', 'is_active', 'created_at'])
             ->with('municipality:id,name,province,region,is_active')
             ->addSelect(['associations_count' => $this->geography->usesDirectGeography()
                 ? Association::query()->whereColumn('associations.barangay_id', 'barangays.id')->selectRaw('COUNT(*)')
@@ -131,7 +132,7 @@ class AreaManagementQueryService
         $parent = $barangay ? $record->municipality : $record;
 
         return [
-            'id' => $record->id, 'name' => $record->name, 'psgc_code' => $record->psgc_code,
+            'id' => $record->id, 'name' => $record->name, 'psgc_code' => $record->psgc_code, 'zip_code' => $record->zip_code,
             'area_type' => $barangay ? 'Barangay' : ($record->locality_type === 'city' ? 'City' : 'Municipality'),
             'municipality_id' => $barangay ? $record->municipality_id : null,
             'municipality' => $parent?->name, 'province' => $parent?->province, 'region' => $parent?->region,

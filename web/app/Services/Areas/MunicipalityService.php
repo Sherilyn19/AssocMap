@@ -18,7 +18,8 @@ class MunicipalityService
         DB::transaction(function () use ($municipality, $data, $currentUser): void {
             $actor = $this->actors->lock($currentUser);
             abort_unless($actor->role?->code === 'system_admin', 403);
-            $name = trim($data['name']);
+            // Use the recorded name even if a different name was submitted.
+            $name = $municipality->name;
             if (Municipality::query()
                 ->where('id', '!=', $municipality->id)
                 ->whereRaw('LOWER(name) = LOWER(?)', [$name])
@@ -27,7 +28,7 @@ class MunicipalityService
                 throw ValidationException::withMessages(['name' => 'This locality already exists in the province.']);
             }
 
-            $municipality->update(['name' => $name, 'psgc_code' => $data['psgc_code'] ?? null]);
+            $municipality->update(['name' => $name, 'psgc_code' => $data['psgc_code'] ?? null, 'zip_code' => $data['zip_code']]);
             // Keep the activity history with the saved change.
             if ($municipality->wasChanged()) $this->audit->recordActor($actor, 'UPDATE MUNICIPALITY', 'Area Management', 'municipality', (string) $municipality->id);
         });
@@ -66,6 +67,7 @@ class MunicipalityService
             $municipality = new Municipality([
                 'name' => $name,
                 'psgc_code' => $data['psgc_code'] ?? null,
+                'zip_code' => $data['zip_code'],
                 'province' => 'Cebu',
                 'region' => 'Region VII',
                 'source' => 'manual',

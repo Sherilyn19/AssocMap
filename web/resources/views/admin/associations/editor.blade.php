@@ -24,7 +24,7 @@
             || !in_array($associationOld('primary_field_officer_id'), array_column($catalog['options']['field_officer_records'] ?? [], 'value'), true));
     }
 @endphp
-<x-modal id="association-editor" :title="$selectedAccreditation ? 'Update Accreditation' : ($editingAssociation ? 'Edit Association' : 'Add Association')">
+<x-modal id="association-editor" :title="$selectedAccreditation ? 'Update Registration' : ($editingAssociation ? 'Edit Association' : 'Add Association')">
     <form method="POST" action="{{ $editingAssociation['update_url'] ?? route('admin.associations.store') }}" data-form data-association-form
         data-create-action="{{ route('admin.associations.store') }}"
         data-area-records="{{ json_encode($catalog['options']['area_records']) }}"

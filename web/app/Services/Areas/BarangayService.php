@@ -18,7 +18,8 @@ class BarangayService
         DB::transaction(function () use ($barangay, $data, $currentUser): void {
             $actor = $this->actors->lock($currentUser);
             abort_unless($actor->role?->code === 'system_admin', 403);
-            $name = trim($data['name']);
+            // Use the recorded name even if a different name was submitted.
+            $name = $barangay->name;
             if (Barangay::query()
                 ->where('id', '!=', $barangay->id)
                 ->where('municipality_id', $data['municipality_id'])
@@ -31,6 +32,7 @@ class BarangayService
                 'name' => $name,
                 'municipality_id' => $data['municipality_id'],
                 'psgc_code' => $data['psgc_code'] ?? null,
+                'zip_code' => $data['zip_code'],
             ]);
             // Keep the activity history with the saved change.
             if ($barangay->wasChanged()) $this->audit->recordActor($actor, 'UPDATE BARANGAY', 'Area Management', 'barangay', (string) $barangay->id);
@@ -71,6 +73,7 @@ class BarangayService
                 'municipality_id' => $data['municipality_id'],
                 'name' => $name,
                 'psgc_code' => $data['psgc_code'] ?? null,
+                'zip_code' => $data['zip_code'],
                 'source' => 'manual',
                 'is_active' => true,
             ]);

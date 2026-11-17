@@ -376,7 +376,8 @@ class TrainingService
         Association $association
     ): ?Project {
         if (! $projectId) {
-            return null;
+            // A training must identify its related project.
+            throw ValidationException::withMessages(['related_project_id' => 'Select a related project.']);
         }
 
         $project = Project::query()
