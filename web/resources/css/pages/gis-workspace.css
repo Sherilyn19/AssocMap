@@ -238,6 +238,23 @@ html.gis-details-drawer-open { overflow: hidden; }
 .gis-photo-viewer :is(button):focus-visible { outline: 3px solid #35679d; outline-offset: 2px; }
 .gis-photo-viewer-count { margin: 12px 0 0; color: #526679; text-align: center; font-size: 12px; }
 .gis-photo-viewer-status:empty { display: none; }
+/* Preserve the original arrows on mobile and use the gallery icons on desktop. */
+.gis-public-desktop-arrow { display: none; }
+@media (min-width: 768px) {
+    [data-gis-public="true"] .gis-public-desktop-arrow { display: block; width: 20px; height: 20px; }
+    [data-gis-public="true"] .gis-public-original-arrow { display: none; }
+    [data-gis-public="true"] .gis-photo-viewer-prev .icon { transform: rotate(180deg); }
+    /* Match the association gallery while the full-size image is loading. */
+    [data-gis-public="true"] .gis-photo-viewer { width: min(800px, calc(100vw - 24px)); max-width: calc(100vw - 24px); max-height: 90dvh; margin: auto; padding: 64px 60px 30px; border-radius: 12px; }
+    [data-gis-public="true"] .gis-photo-viewer::backdrop { background: rgb(15 23 42 / 75%); }
+    [data-gis-public="true"] .gis-photo-viewer img { max-height: 70dvh; }
+    [data-gis-public="true"] .gis-photo-viewer img[hidden] { display: none; }
+    [data-gis-public="true"] .gis-photo-viewer :is(.gis-photo-viewer-close, .gis-photo-viewer-nav) { color: var(--primary); border-color: #dbe6ee; box-shadow: 0 3px 12px rgb(16 47 80 / 16%); }
+    [data-gis-public="true"] .gis-photo-viewer-status:not(:empty) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: min(50vh, 320px); padding: 24px 55px; color: var(--text-secondary); text-align: center; }
+    [data-gis-public="true"] .gis-photo-viewer-status.is-loading::before { content: ''; width: 28px; height: 28px; border: 3px solid #dbe6ee; border-top-color: var(--primary); border-radius: 50%; }
+    @media (prefers-reduced-motion: no-preference) { [data-gis-public="true"] .gis-photo-viewer-status.is-loading::before { animation: gis-photo-spin .8s linear infinite; } }
+}
+@keyframes gis-photo-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: no-preference) { .gis-photo-viewer[open] { animation: gis-photo-enter 220ms ease-out; } .gis-photo-viewer :is(button) { transition: background-color 180ms ease, color 180ms ease; } .gis-photo-viewer :is(button):hover:not(:disabled) { background: #eaf3f8; } }
 @keyframes gis-photo-enter { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
 @media (max-width: 540px) { .gis-photo-viewer { padding: 56px 48px 30px; } .gis-photo-viewer-nav { width: 38px; height: 38px; } }
