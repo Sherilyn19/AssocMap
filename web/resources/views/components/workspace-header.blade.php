@@ -1,3 +1,4 @@
+{{-- Shared header for workspace navigation and signed-in account details. --}}
 @props([
     'workspace',
     'context',
@@ -8,10 +9,12 @@
     'compact' => false,
     'scrollContext' => false,
     'associationName' => null,
+    'associationLabel' => 'Association',
     'adminAccount' => null,
 ])
 
 <header @class(['topbar', 'workspace-header', 'workspace-header--compact' => $compact, 'workspace-header--scroll-context' => $scrollContext])>
+    {{-- Keep the current workspace and page easy to find. --}}
     <div class="topbar-context">
         {{ $navigationToggle }}
         @if($scrollContext)
@@ -21,6 +24,7 @@
             <span class="workspace-header-context" @if($contextId) id="{{ $contextId }}" @endif>{{ $context }}</span>
         @endif
     </div>
+    {{-- Show the appropriate account details for each role. --}}
     <div class="topbar-account">
         <span class="account-divider" aria-hidden="true"></span>
         @if($avatar)
@@ -41,7 +45,7 @@
                     </div>
                 </details>
             @elseif($associationName)
-                <details class="account-association"><summary><strong>{{ $displayName }}</strong><x-icon name="chevron-down" /></summary><div class="account-association-popover"><x-icon name="building" /><span><small>Association</small><strong>{{ $associationName }}</strong></span></div></details>
+                <details class="account-association"><summary><strong>{{ $displayName }}</strong><x-icon name="chevron-down" /></summary><div class="account-association-popover"><x-icon :name="$associationLabel === 'Field Officer' ? 'user' : 'building'" /><span><small>{{ $associationLabel }}</small><strong>{{ $associationName }}</strong></span></div></details>
             @else
                 <strong>{{ $displayName }}</strong>
             @endif

@@ -1,3 +1,4 @@
+{{-- Choose the greeting and shortcuts for the signed-in role. --}}
 @php
     $introduction = match ($role) {
         'system_admin' => 'Your overview of associations, members, and project implementation.',
@@ -24,10 +25,11 @@
         ],
     };
 @endphp
+{{-- Welcome the user and show when the dashboard was updated. --}}
 <header class="dashboard-intro">
     <div>
-        @if($role !== 'association_account')<p class="eyebrow">{{ $role === 'system_admin' ? 'BFAR SAAD Phase II' : $roleLabel }}</p>@endif
-        <h1 tabindex="-1">{{ match ($role) { 'field_officer' => 'Field Officer Dashboard', 'association_account' => 'Welcome, '.($currentUser->display_name ?: 'Association Account').'.', default => 'Welcome, '.($currentUser->display_name ?: 'Administrator').'.' } }}</h1>
+        @if($role === 'system_admin')<p class="eyebrow">BFAR SAAD Phase II</p>@endif
+        <h1 tabindex="-1">{{ match ($role) { 'field_officer' => 'Welcome, '.($currentUser->display_name ?: 'Field Officer').'.', 'association_account' => 'Welcome, '.($currentUser->display_name ?: 'Association Account').'.', default => 'Welcome, '.($currentUser->display_name ?: 'Administrator').'.' } }}</h1>
         <p class="dashboard-introduction">{{ $introduction }}</p>
     </div>
     @if($state === 'ready')
@@ -44,6 +46,28 @@
         <a class="button button-primary" href="{{ route($prefix.'.dashboard') }}">Retry dashboard</a>
     </section>
 @else
+    @if($role === 'field_officer')
+        {{-- Show the officer's own account and published photos from assigned locations. --}}
+        <section class="card dashboard-panel dashboard-association" aria-labelledby="dashboard-officer-title">
+            <span class="stat-icon"><x-icon name="user" /></span>
+            <div class="dashboard-association-content">
+                <p class="dashboard-kicker">Your account</p>
+                <div class="dashboard-association-title-row"><h2 id="dashboard-officer-title">{{ $currentUser->display_name }}</h2><span class="badge badge-blue">{{ $currentUser->is_active ? 'Active' : 'Inactive' }}</span></div>
+                <section class="dashboard-association-group"><h3>Field Officer details</h3><dl class="dashboard-association-details">
+                    @foreach([
+                        ['Email', request()->attributes->get('current_user_email'), 'user'],
+                        ['User ID', $currentUser->id, 'receipt'],
+                        ['Assigned associations', $dashboard['scope_count'], 'building'],
+                        ['Created', $currentUser->created_at?->copy()->timezone('Asia/Manila')->format('M d, Y'), 'calendar'],
+                        ['Activated', $currentUser->activated_at?->copy()->timezone('Asia/Manila')->format('M d, Y'), 'calendar'],
+                    ] as [$label, $value, $icon])
+                        <div><dt><x-icon :name="$icon" />{{ $label }}</dt><dd>{{ filled($value) ? $value : 'Not recorded' }}</dd></div>
+                    @endforeach
+                </dl></section>
+            </div>
+            @include('dashboard.gis-gallery', ['galleryRoute' => 'field-officer.gis.index'])
+        </section>
+    @endif
     @if($role === 'association_account')
         <section class="card dashboard-panel dashboard-association" aria-labelledby="dashboard-association-title">
             <span class="stat-icon"><x-icon name="building" /></span>
@@ -68,17 +92,12 @@
                     </dl></section>
                 @endforeach
             </div>
-                <section class="dashboard-gis-gallery" data-dashboard-gis-gallery data-gis-base="{{ route('association.gis.index') }}" aria-labelledby="dashboard-gis-gallery-title">
-                    <div class="dashboard-gis-gallery-heading"><h3 id="dashboard-gis-gallery-title"><x-icon name="map-pinned" /> GIS photo gallery</h3><a href="{{ route('association.gis.index') }}">Explore GIS map <x-icon name="arrow" /></a></div>
-                    <p class="dashboard-gis-gallery-status" role="status" data-gallery-status>Loading photos…</p><div class="dashboard-gis-gallery-grid" data-gallery-grid></div>
-                    <div class="dashboard-gis-gallery-pages"><button type="button" class="button" data-gallery-previous disabled>Previous locations</button><button type="button" class="button" data-gallery-next disabled>Next locations</button><span data-gallery-page></span></div>
-                    <dialog class="dashboard-gis-gallery-viewer" data-gallery-viewer aria-label="GIS photo viewer"><button type="button" class="gallery-viewer-close" data-gallery-close aria-label="Close photo"><x-icon name="close" /></button><div class="gallery-viewer-image"><button type="button" class="gallery-viewer-nav gallery-viewer-prev" data-viewer-previous aria-label="Previous photo"><x-icon name="chevron-right" /></button><img data-gallery-image alt="" hidden><div class="gallery-viewer-status" data-viewer-status role="status" aria-live="polite" hidden></div><button type="button" class="gallery-viewer-nav gallery-viewer-next" data-viewer-next aria-label="Next photo"><x-icon name="chevron-right" /></button></div><p data-gallery-caption aria-live="polite"></p><span class="gallery-viewer-count" data-viewer-count></span></dialog>
-                    <noscript>Open the GIS map to view location photos.</noscript>
-                </section>
+                @include('dashboard.gis-gallery', ['galleryRoute' => 'association.gis.index'])
         </section>
     @elseif($role === 'field_officer' && $dashboard['scope_count'] === 0)
         <p class="notice" role="status">No active, unarchived associations are currently assigned to you. Ask the administrator to review assignments.</p>
     @endif
+    {{-- Show summary cards and shortcuts for the current role. --}}
     @php
         $primaryCards = match ($role) {
             'system_admin' => [

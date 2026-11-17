@@ -51,6 +51,7 @@
 @media (prefers-reduced-motion: no-preference) { .workspace-header--scroll-context .admin-header-page { transition: opacity 220ms ease, transform 220ms ease; } }
 .admin-workspace main h1 { font-size: clamp(24px, 2vw, 30px); line-height: 1.25; letter-spacing: -.02em; }
 @media (max-width: 540px) { .admin-header-workspace { font-size: 12px; } .admin-header-trail, .admin-header-page { gap: 6px; } .workspace-header--scroll-context .workspace-header-context { font-size: 14px; } }
+/* Keep workspace titles readable as the page scrolls. */
 .association-workspace .workspace-header--scroll-context :is(.admin-header-workspace, .workspace-header-context) { font-size: 16px; }
 @media (max-width: 540px) { .association-workspace .workspace-header--scroll-context :is(.admin-header-workspace, .workspace-header-context) { font-size: 14px; } }
 .workspace-header--compact.is-scrolled { box-shadow: 0 5px 18px rgb(16 47 80 / 10%); border-bottom-color: #cddce8; }
@@ -63,6 +64,7 @@
 .avatar-small { width: 33px; height: 33px; font-size: 10px; }
 .account-copy strong { display: block; font-size: 12px; }
 .account-copy small { display: block; color: var(--text-secondary); font-size: 10px; }
+/* Show account details beside the signed-in email. */
 .admin-workspace .admin-account-details { position: relative; }
 .admin-workspace .admin-account-details summary { display: flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; border-radius: 6px; }
 .admin-workspace .admin-account-details summary::-webkit-details-marker { display: none; }
@@ -77,17 +79,17 @@
 .admin-workspace .admin-account-popover dt { display: flex; align-items: center; gap: 7px; color: #526679; font-weight: 600; }
 .admin-workspace .admin-account-popover dd { margin: 3px 0 0 24px; color: #193650; line-height: 1.45; }
 @media (prefers-reduced-motion: no-preference) { .admin-workspace .admin-account-details summary > .icon { transition: transform 180ms ease; } .admin-workspace .admin-account-details[open] summary > .icon { transform: rotate(180deg); } .admin-workspace .admin-account-details[open] .admin-account-popover { animation: account-association-appear 180ms ease-out; } }
-.association-workspace .account-association { position: relative; }
-.association-workspace .account-association summary { display: flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; border-radius: 6px; }
-.association-workspace .account-association summary::-webkit-details-marker { display: none; }
-.association-workspace .account-association summary > .icon { width: 14px; height: 14px; flex: none; color: var(--primary); }
-.association-workspace .account-association summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
-.association-workspace .account-association-popover { position: absolute; right: 0; top: calc(100% + 4px); z-index: 40; display: none; align-items: flex-start; gap: 10px; width: max-content; max-width: min(300px, 80vw); padding: 12px; border: 1px solid #dbe6ee; border-radius: 9px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 14%); overflow-wrap: anywhere; }
-.association-workspace .account-association-popover > .icon { width: 18px; height: 18px; flex: none; color: var(--primary); }
-.association-workspace .account-association-popover strong { color: #193650; line-height: 1.45; }
-.association-workspace .account-association[open] .account-association-popover { display: flex; }
-@media (hover: hover) { .association-workspace .account-association:hover .account-association-popover { display: flex; } }
-@media (prefers-reduced-motion: no-preference) { .association-workspace .account-association summary > .icon { transition: transform 180ms ease; } .association-workspace .account-association[open] summary > .icon { transform: rotate(180deg); } .association-workspace .account-association-popover { animation: account-association-appear 180ms ease-out; } }
+:is(.association-workspace, .field-officer-workspace) .account-association { position: relative; }
+:is(.association-workspace, .field-officer-workspace) .account-association summary { display: flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; border-radius: 6px; }
+:is(.association-workspace, .field-officer-workspace) .account-association summary::-webkit-details-marker { display: none; }
+:is(.association-workspace, .field-officer-workspace) .account-association summary > .icon { width: 14px; height: 14px; flex: none; color: var(--primary); }
+:is(.association-workspace, .field-officer-workspace) .account-association summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
+:is(.association-workspace, .field-officer-workspace) .account-association-popover { position: absolute; right: 0; top: calc(100% + 4px); z-index: 40; display: none; align-items: flex-start; gap: 10px; width: max-content; max-width: min(300px, 80vw); padding: 12px; border: 1px solid #dbe6ee; border-radius: 9px; background: #fff; box-shadow: 0 8px 24px rgb(16 47 80 / 14%); overflow-wrap: anywhere; }
+:is(.association-workspace, .field-officer-workspace) .account-association-popover > .icon { width: 18px; height: 18px; flex: none; color: var(--primary); }
+:is(.association-workspace, .field-officer-workspace) .account-association-popover strong { color: #193650; line-height: 1.45; }
+:is(.association-workspace, .field-officer-workspace) .account-association[open] .account-association-popover { display: flex; }
+@media (hover: hover) { :is(.association-workspace, .field-officer-workspace) .account-association:hover .account-association-popover { display: flex; } }
+@media (prefers-reduced-motion: no-preference) { :is(.association-workspace, .field-officer-workspace) .account-association summary > .icon { transition: transform 180ms ease; } :is(.association-workspace, .field-officer-workspace) .account-association[open] summary > .icon { transform: rotate(180deg); } :is(.association-workspace, .field-officer-workspace) .account-association-popover { animation: account-association-appear 180ms ease-out; } }
 @keyframes account-association-appear { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 .icon-button { background: transparent; border: 0; width: 36px; height: 36px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-secondary); }
 .icon-button:hover { background: #edf3f9; color: var(--primary); }
