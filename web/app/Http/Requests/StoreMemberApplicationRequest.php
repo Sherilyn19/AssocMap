@@ -6,11 +6,19 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreMemberApplicationRequest extends FormRequest
 {
+    // Send invalid entries back to the application list, never to a photo.
+    protected function getRedirectUrl()
+    {
+        return \App\Support\MemberApplicationReturn::url($this, 'association.member-applications.index');
+    }
+
+    // Allow the usual account checks to decide who can submit.
     public function authorize(): bool
     {
         return true;
     }
 
+    // Clean extra spaces before checking the entered details.
     protected function prepareForValidation(): void
     {
         $normalized = [];
@@ -22,6 +30,7 @@ class StoreMemberApplicationRequest extends FormRequest
         $this->merge($normalized);
     }
 
+    // Check the application details and optional photo.
     public function rules(): array
     {
         return [
@@ -112,6 +121,7 @@ class StoreMemberApplicationRequest extends FormRequest
         ];
     }
 
+    // Explain validation problems in clear language.
     public function messages(): array
     {
         return [

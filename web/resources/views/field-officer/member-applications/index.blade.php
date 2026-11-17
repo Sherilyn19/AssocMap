@@ -75,7 +75,8 @@
                             @if($application->status === 'pending' && $reviewable)
                                 <x-modal :id="'approve-'.$application->id" title="Approve Application">
                                     <p>Approve the application for <strong>{{ $fullName }}</strong>? Approval will create an active member record for this association.</p>
-                                    <form method="POST" action="{{ route('field-officer.member-applications.approve', $application) }}">
+                                    {{-- Keep the selected list filters after review. --}}
+                                    <form method="POST" action="{{ route('field-officer.member-applications.approve', array_merge(request()->query->all(), ['memberApplication' => $application])) }}">
                                         @csrf
                                         @method('PATCH')
                                         <div class="modal-actions"><button type="button" class="button" data-close-dialog>Cancel</button><button type="submit" class="button button-primary">Approve Application</button></div>
@@ -83,7 +84,7 @@
                                 </x-modal>
                                 <x-modal :id="'reject-'.$application->id" title="Reject Application">
                                     <p>Reject the application for <strong>{{ $fullName }}</strong>? Provide a reason for this decision.</p>
-                                    <form method="POST" action="{{ route('field-officer.member-applications.reject', $application) }}" @if($restoreRejection) data-feedback-error-bag="default" @endif onsubmit="this.elements.rejection_reason.value = this.elements.rejection_reason.value.trim(); return this.reportValidity();">
+                                    <form method="POST" action="{{ route('field-officer.member-applications.reject', array_merge(request()->query->all(), ['memberApplication' => $application])) }}" @if($restoreRejection) data-feedback-error-bag="default" @endif onsubmit="this.elements.rejection_reason.value = this.elements.rejection_reason.value.trim(); return this.reportValidity();">
                                         @csrf
                                         @method('PATCH')
                                         <input type="hidden" name="review_application_id" value="{{ $application->id }}">
