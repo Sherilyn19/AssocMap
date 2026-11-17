@@ -11,8 +11,18 @@
     <div class="field">
         <h3>Applicant Photo</h3>
         @if(filled($application->applicant_photo_path))
-            <img src="{{ route($photoRoute, $application) }}" alt="Applicant photo" loading="lazy" decoding="async" width="256" height="256" style="max-width: 100%; height: auto;" onerror="this.hidden = true; this.nextElementSibling.hidden = false;">
-            <p hidden role="status">Photo unavailable. Refresh the page to check your current access or retry.</p>
+            {{-- The photo link also works when the larger viewer is unavailable. --}}
+            <div class="member-evidence-photo" data-member-evidence-photo>
+                <p class="member-evidence-status" data-evidence-status role="status" aria-live="polite" hidden>Loading photo…</p>
+                <a class="member-evidence-link" data-evidence-open href="{{ route($photoRoute, $application) }}" aria-label="Open applicant photo in a larger view">
+                    <img src="{{ route($photoRoute, $application) }}" alt="Applicant photo" loading="lazy" decoding="async" width="256" height="256">
+                </a>
+                <dialog class="member-evidence-viewer" data-evidence-viewer aria-label="Applicant photo">
+                    <button type="button" class="member-evidence-close" data-evidence-close aria-label="Close photo"><x-icon name="close" /></button>
+                    <p class="member-evidence-status" data-evidence-viewer-status role="status" aria-live="polite">Loading photo…</p>
+                    <img data-evidence-image alt="Applicant photo" hidden>
+                </dialog>
+            </div>
         @else
             <p>Not recorded</p>
         @endif

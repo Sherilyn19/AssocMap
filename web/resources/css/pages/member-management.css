@@ -124,6 +124,22 @@
 #submit-member-application .member-photo-field input[type="file"]::file-selector-button { margin-right: 12px; padding: 9px 14px; border: 1px solid #bfd1e1; border-radius: 7px; background: #fff; color: var(--primary); font: inherit; font-weight: 600; cursor: pointer; }
 #submit-member-application .member-photo-field input[type="file"]:hover { border-color: var(--primary); }
 #submit-member-application .member-photo-field .field-help { display: block; margin-top: 8px; line-height: 1.5; }
+
+/* Applicant photo loading message and larger view. */
+.member-evidence-photo [hidden] { display: none !important; }
+.member-evidence-link { display: inline-block; max-width: 100%; border-radius: 8px; }
+.member-evidence-link img { display: block; max-width: 100%; height: auto; border-radius: 8px; }
+.member-evidence-link:focus-visible, .member-evidence-close:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+.member-evidence-status { display: flex; align-items: center; gap: 10px; color: var(--text-secondary); line-height: 1.5; }
+.member-evidence-status.is-loading::before { content: ''; width: 22px; height: 22px; flex: none; border: 3px solid #dbe6ee; border-top-color: var(--primary); border-radius: 50%; }
+.member-evidence-viewer { position: fixed; inset: 0; width: min(800px, calc(100vw - 24px)); max-width: calc(100vw - 24px); max-height: 90dvh; margin: auto; padding: 16px; border: 1px solid #dbe6ee; border-radius: 12px; background: #fff; overflow: auto; }
+.member-evidence-viewer::backdrop { background: rgb(15 23 42 / 75%); }
+.member-evidence-viewer > img { display: block; max-width: 100%; max-height: 70dvh; margin: 8px auto 0; object-fit: contain; }
+.member-evidence-viewer .member-evidence-status { min-height: 160px; justify-content: center; text-align: center; }
+.member-evidence-close { display: grid; place-items: center; width: 44px; height: 44px; margin-left: auto; border: 1px solid #dbe6ee; border-radius: 50%; background: #fff; color: var(--primary); cursor: pointer; }
+.member-evidence-close .icon { width: 20px; height: 20px; }
+@media (prefers-reduced-motion: no-preference) { .member-evidence-status.is-loading::before { animation: member-evidence-spin .8s linear infinite; } }
+@keyframes member-evidence-spin { to { transform: rotate(360deg); } }
 #submit-member-application .member-classification-field { padding-top: 6px; }
 #submit-member-application .member-classification-field .checkbox-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 8px; margin-top: 12px; }
 #submit-member-application .member-classification-field .checkbox-options label { min-height: 44px; padding: 10px 12px; border: 1px solid #dce7f1; border-radius: 8px; background: #f8fbfe; cursor: pointer; }
