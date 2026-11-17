@@ -56,7 +56,12 @@
     @include('monitoring.partials.project-shortcuts')
 @else
     <header class="card monitoring-heading"><div><p class="eyebrow">Quarterly Monitoring</p><h1 tabindex="-1">Add Monitoring Record</h1><p>Select an eligible project and record its quarterly progress.</p></div></header>
-    <a class="button" href="{{ route($monitoringPrefix.'.index') }}">Dashboard</a>
+    {{-- Keep the back link and path together, as on the other admin pages. --}}
+    @if($monitoringPrefix === 'admin.monitoring')
+        <x-workflow-navigation :back="['label' => 'Monitoring', 'url' => route($monitoringPrefix.'.index')]" :parents="[['label' => 'Monitoring', 'url' => route($monitoringPrefix.'.index')]]" current="Add Monitoring Record" />
+    @else
+        <a class="button" href="{{ route($monitoringPrefix.'.index') }}">Dashboard</a>
+    @endif
 @endif
 <section class="card monitoring-form-card" id="monitoring-editor"><h2 id="monitoring-editor-title" tabindex="-1">Monitoring</h2>
     <form method="POST" action="{{ route($monitoringPrefix.'.store') }}" id="monitoring-form" class="monitoring-workspace" data-monitoring-workspace @if($restore) data-feedback-error-bag="default" @endif novalidate>

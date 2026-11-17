@@ -53,6 +53,8 @@ class StoreAssociationRequest extends FormRequest
         $agencyId = is_scalar($agencyId) ? filter_var($agencyId, FILTER_VALIDATE_INT) : false;
 
         return [
+            // Require confirmation of the record-keeping notice for new associations.
+            'registration_notice_accepted' => [$this->isMethod('POST') ? 'accepted' : 'sometimes'],
             'name' => [
                 'required',
                 'string',
@@ -70,6 +72,8 @@ class StoreAssociationRequest extends FormRequest
             'saad_phase2_join_date' => [
                 'required',
                 'date',
+                // A joining date must not be later than today in the Philippines.
+                'before_or_equal:'.now('Asia/Manila')->toDateString(),
             ],
 
             'primary_field_officer_id' => [
@@ -119,7 +123,8 @@ class StoreAssociationRequest extends FormRequest
         }
 
         return [
-            'registration' => ['sometimes', 'array:agency_id,registration_number,registration_date,expiration_date,is_primary,remarks'],
+            // New associations must include an existing registration record.
+            'registration' => [$this->isMethod('POST') ? 'required' : 'sometimes', 'array:agency_id,registration_number,registration_date,expiration_date,is_primary,remarks'],
             'registration.agency_id' => ['bail', 'required_with:registration', 'integer',
                 Rule::exists('registration_agencies', 'id')->where('is_active', true)],
             'registration.registration_number' => ['bail', 'required_with:registration', 'string', 'max:150',

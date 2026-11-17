@@ -2,6 +2,10 @@
 .user-management { display: grid; gap: 22px; min-width: 0; }
 .user-management .user-page-heading { padding: 24px; border-top: 3px solid var(--primary); }
 .user-management .user-page-heading .page-header { margin: 0; }
+/* Use the detail-page navigation style on the invitation page. */
+.user-management[data-workspace-title="Invite User"] .workflow-navigation { margin: 0; }
+.user-management[data-workspace-title="Invite User"] .workflow-navigation .back-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
+.user-management[data-workspace-title="Invite User"] .workflow-navigation nav a { font-weight: 600; text-decoration: none; }
 .user-management[data-workspace-title="User Management"] :is(.user-page-heading h1, .user-section-heading h2, .user-register-heading h2, .user-table thead th) { text-transform: uppercase; }
 .user-management .user-summary-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
 .user-management .user-summary-card { color: inherit; min-width: 0; border-radius: var(--radius-md); }

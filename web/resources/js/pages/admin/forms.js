@@ -22,6 +22,9 @@ function syncForm(form) {
         populate(barangay, Array.from(barangays.values()), 'Select barangay');
         const previousArea = area.value;
         populate(area, matching.filter(record => barangay.value && record.barangay_id === barangay.value), directGeography ? 'No Specific Area' : 'Select specific area');
+        // Explain when a barangay has no available saved areas.
+        const noAreas = $('[data-association-no-areas]', form);
+        if (noAreas) noAreas.hidden = !barangay.value || area.options.length > 1;
         if (directGeography && previousArea && !area.value) $('[data-association-area-cleared]', form).hidden = false;
         const registration = $('[data-association-registration]', form);
         if (registration) {
@@ -233,7 +236,9 @@ function initRecordList(moduleKey) {
                 ? records.get(editorButton.closest('tr')) : null;
             if (record?.archived_at) return;
             form.reset();
-            $('[data-registration-toggle]', form).checked = false;
+            // A new association must include an existing registration.
+            const registrationToggle = $('[data-registration-toggle]', form);
+            if (registrationToggle) registrationToggle.checked = true;
             $$('[data-registration-fields] input, [data-registration-fields] textarea, [data-registration-fields] select', form)
                 .forEach(input => { input.value = input.name === 'registration[is_primary]' ? '0' : ''; });
             form.action = record ? record.update_url : form.dataset.createAction;
@@ -304,7 +309,31 @@ export function initForms() {
         if (form.dataset.formInitialized === 'true') return;
         form.dataset.formInitialized = 'true';
         syncForm(form);
+        // Ask for acknowledgement before adding an association; keep the form open.
+        if (form.matches('[data-association-form]')) {
+            const notice = document.querySelector('#association-registration-notice');
+            const check = notice?.querySelector('[data-registration-notice-check]');
+            const accept = notice?.querySelector('[data-registration-notice-accept]');
+            let confirmed = false;
+            form.addEventListener('reset', () => { confirmed = false; if (check) check.checked = false; if (accept) accept.disabled = true; const value = form.querySelector('[data-registration-notice-value]'); if (value) value.value = ''; form.querySelector('[data-registration-confirmed]')?.setAttribute('hidden', ''); });
+            form.addEventListener('submit', event => {
+                if (notice && form.querySelector('[data-association-method]').disabled && !confirmed) {
+                    event.preventDefault(); notice.showModal(); check.focus();
+                }
+            });
+            check?.addEventListener('change', () => { accept.disabled = !check.checked; });
+            notice?.querySelector('[data-registration-notice-cancel]')?.addEventListener('click', () => notice.close());
+            accept?.addEventListener('click', () => { if (!check.checked) return; confirmed = true; const value = form.querySelector('[data-registration-notice-value]'); if (value) value.value = '1'; notice.close(); form.querySelector('[data-registration-confirmed]')?.removeAttribute('hidden'); form.querySelector('[data-association-submit]')?.focus(); });
+        }
         form.addEventListener('submit', event => {
+            // Do not show saving while the confirmation notice is open.
+            if (form.matches('[data-association-form]') && !event.defaultPrevented) {
+                const saving = form.querySelector('[data-association-saving]');
+                if (saving) saving.hidden = false;
+                form.setAttribute('aria-busy', 'true');
+                const submit = form.querySelector('[data-association-submit]');
+                if (submit) submit.disabled = true;
+            }
             if (form.matches('[data-area-form]')) {
                 syncForm(form);
             }

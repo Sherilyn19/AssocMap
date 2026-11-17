@@ -84,6 +84,17 @@
 .area-management .area-information-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 0 22px; margin: 0 0 24px; }
 .area-management .area-information-grid dt { color: var(--text-secondary); font-size: 12px; margin-bottom: 7px; }
 .area-management .area-information-grid dd { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+/* Match the association detail pages while keeping the area data readable. */
+.area-management .workflow-navigation { margin: 0; }
+.area-management .workflow-navigation .back-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
+.area-management .workflow-navigation .back-link:hover { border-color: #9bbad8; background: #edf4fb; }
+.area-management .workflow-navigation nav a { font-weight: 600; text-decoration: none; }
+.area-management .workflow-navigation nav a:hover { text-decoration: underline; }
+.area-management .area-section-heading h2 { display: flex; align-items: center; gap: 8px; }
+.area-management .area-section-heading h2 .icon { width: 18px; height: 18px; color: var(--primary); }
+.area-management .area-information-grid > div { min-width: 0; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+.area-management .area-information-grid dt { font-weight: 700; text-transform: uppercase; }
+@media (prefers-reduced-motion: no-preference) { .area-management .workflow-navigation a { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; } }
 .area-management .area-information > .area-help { padding: 0 22px; margin: 0; }
 .area-management :is(a, button, select, input, [tabindex]):focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
 @media (max-width: 760px) {

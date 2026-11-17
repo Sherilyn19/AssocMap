@@ -350,7 +350,7 @@ export async function initGis(root) {
                 const fresh = data.features.find(feature => feature.id === selected.id);
                 fresh ? selectFeature(fresh, false) : clearSelection();
             }
-            const message = data.features.length ? `${data.features.length} locations loaded.` : emptyMessage(data.meta.empty_reason);
+            const message = data.features.length ? `${data.features.length} ${data.features.length === 1 ? 'location is' : 'locations are'} shown for the current filters.` : emptyMessage(data.meta.empty_reason);
             showStatus(status, message + (data.meta.truncated ? ` The map limit was reached. Zoom, filter, or use the ${publicView ? 'location list' : 'register'} for additional records.` : ''));
             return true;
         } catch (error) {
