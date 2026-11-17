@@ -8,15 +8,35 @@ export function initDashboardGisGallery() {
         const pageLabel = root.querySelector('[data-gallery-page]');
         const viewer = root.querySelector('[data-gallery-viewer]');
         const image = root.querySelector('[data-gallery-image]');
+        const viewerStatus = root.querySelector('[data-viewer-status]');
         const viewerPrevious = root.querySelector('[data-viewer-previous]');
         const viewerNext = root.querySelector('[data-viewer-next]');
-        let page = 1, lastPage = 1, opener = null, photos = [], photoIndex = 0, touchStart = null;
+        let page = 1, lastPage = 1, opener = null, photos = [], photoIndex = 0, touchStart = null, photoRequest = 0;
 
         const showPhoto = index => {
             if (index < 0 || index >= photos.length) return;
             photoIndex = index;
             const photo = photos[index];
-            image.alt = `Photo of ${photo.title}`; image.src = photo.display;
+            const request = ++photoRequest;
+            image.hidden = true;
+            image.removeAttribute('src');
+            image.alt = `Photo of ${photo.title}`;
+            viewerStatus.hidden = false;
+            viewerStatus.classList.add('is-loading');
+            viewerStatus.textContent = 'Loading photo…';
+            image.onload = () => {
+                if (request !== photoRequest) return;
+                image.hidden = false;
+                viewerStatus.hidden = true;
+                viewerStatus.classList.remove('is-loading');
+                viewerStatus.textContent = '';
+            };
+            image.onerror = () => {
+                if (request !== photoRequest) return;
+                viewerStatus.classList.remove('is-loading');
+                viewerStatus.textContent = 'Photo unavailable. Please try again later.';
+            };
+            image.src = photo.display;
             root.querySelector('[data-gallery-caption]').textContent = photo.title;
             root.querySelector('[data-viewer-count]').textContent = `${index + 1} / ${photos.length}`;
             viewerPrevious.disabled = index === 0; viewerNext.disabled = index === photos.length - 1;
@@ -86,8 +106,7 @@ export function initDashboardGisGallery() {
         });
         image.addEventListener('touchstart', event => { touchStart = event.changedTouches[0].clientX; }, { passive: true });
         image.addEventListener('touchend', event => { if (touchStart === null) return; const distance = event.changedTouches[0].clientX - touchStart; if (Math.abs(distance) > 50) showPhoto(photoIndex + (distance < 0 ? 1 : -1)); touchStart = null; }, { passive: true });
-        viewer.addEventListener('close', () => { image.removeAttribute('src'); opener?.focus(); });
-        image.addEventListener('error', () => { root.querySelector('[data-gallery-caption]').textContent = 'Photo unavailable.'; });
+        viewer.addEventListener('close', () => { photoRequest++; image.removeAttribute('src'); image.hidden = true; viewerStatus.hidden = true; opener?.focus(); });
         void load();
     });
 }
