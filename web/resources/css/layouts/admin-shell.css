@@ -48,6 +48,9 @@
 .admin-workspace .workspace-header--scroll-context .admin-header-page .workspace-header-context { text-transform: uppercase; }
 .admin-header-page .icon { width: 13px; flex-shrink: 0; }
 .workspace-header--scroll-context.has-scroll-context .admin-header-page.is-concealed { opacity: 0; transform: translateY(-8px); pointer-events: none; }
+/* Keep the current dashboard name visible for field officers. */
+.field-officer-workspace .workspace-header--scroll-context .admin-header-page.is-concealed { opacity: 1; transform: none; pointer-events: auto; }
+.field-officer-workspace .workspace-header--scroll-context { min-height: 60px; padding-block: 10px; }
 @media (prefers-reduced-motion: no-preference) { .workspace-header--scroll-context .admin-header-page { transition: opacity 220ms ease, transform 220ms ease; } }
 .admin-workspace main h1 { font-size: clamp(24px, 2vw, 30px); line-height: 1.25; letter-spacing: -.02em; }
 @media (max-width: 540px) { .admin-header-workspace { font-size: 12px; } .admin-header-trail, .admin-header-page { gap: 6px; } .workspace-header--scroll-context .workspace-header-context { font-size: 14px; } }

@@ -185,10 +185,12 @@ class AssociationDirectoryQueryService
             'members' => Member::query()->where('association_id', $association->id)->with('position:id,name')
                 ->orderBy('last_name')->orderBy('first_name')->orderBy('id')
                 ->select(['id', 'association_id', 'first_name', 'middle_name', 'last_name', 'suffix', 'position_id', 'member_status', 'archived_at']),
+            // Include the saved project dates for the related records list.
             'projects' => Project::query()->where('association_id', $association->id)->orderBy('title')->orderBy('id')
-                ->select(['id', 'association_id', 'title', 'status', 'archived_at']),
+                ->select(['id', 'association_id', 'title', 'status', 'archived_at', 'implementation_start_date', 'implementation_end_date', 'program_year']),
+            // Include the saved end date for the training timeline.
             'trainings' => Training::query()->where('association_id', $association->id)->orderByDesc('start_date')->orderBy('id')
-                ->select(['id', 'association_id', 'title', 'start_date', 'status', 'archived_at']),
+                ->select(['id', 'association_id', 'title', 'start_date', 'end_date', 'status', 'archived_at']),
             'activities' => ProgramActivityRecord::query()->where('association_id', $association->id)->orderByDesc('activity_date')->orderBy('id')
                 ->select(['id', 'association_id', 'title', 'activity_date', 'status', 'archived_at']),
             'registrations' => AssociationRegistration::query()->where('association_id', $association->id)->with('agency:id,name,registration_kind,is_active')

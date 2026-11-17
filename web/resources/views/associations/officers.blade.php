@@ -9,18 +9,29 @@
 @endphp
 
 @section('content')
-<section class="association-management association-officers" data-association-ui data-workspace-module="associations" data-workspace-title="Association Officers">
-    <x-workflow-navigation :back="$workflowBack" :parents="[['label' => $association->name, 'url' => $associationUrl]]" current="Association Officers" />
-    <header class="card association-heading"><div><p class="eyebrow">Association Management</p><h1 tabindex="-1">Association Officers</h1><p>{{ $association->name }}</p></div><a class="button" href="{{ $associationUrl }}">View Association Details</a></header>
-    <p>President: {{ $association->currentPresident ? collect([$association->currentPresident->first_name, $association->currentPresident->middle_name, $association->currentPresident->last_name, $association->currentPresident->suffix])->filter(fn ($part) => filled($part))->implode(' ') : 'No active President assigned' }}</p>
+{{-- The officer view keeps the same navigation and record layout as association details. --}}
+<section @class(['association-management', 'association-officers', 'officer-association-detail' => $prefix === 'field-officer']) data-association-ui data-workspace-module="associations" data-workspace-title="Association Officers">
+    @if($prefix === 'admin')<x-workflow-navigation :back="$workflowBack" :parents="[['label' => $association->name, 'url' => $associationUrl]]" current="Association Officers" />@endif
+    <header class="card association-heading"><div>@if($prefix === 'admin')<p class="eyebrow">Association Management</p>@endif<h1 tabindex="-1">Association Officers</h1><p>{{ $association->name }}</p></div><a class="button" href="{{ $associationUrl }}">View Association Details</a></header>
+    @if($prefix === 'field-officer')<x-workflow-navigation :back="$workflowBack" :parents="[['label' => $association->name, 'url' => $associationUrl]]" current="Association Officers" />@endif
+    {{-- Show the current president using the same information style as the association page. --}}
+    @if($prefix === 'field-officer')
+        <section class="card association-information" aria-labelledby="officer-association-title">
+            <div class="association-section-heading"><h2 id="officer-association-title"><x-icon name="building" /> Association information</h2></div>
+            <dl class="association-info-grid"><div><dt>Association name</dt><dd>{{ $association->name }}</dd></div><div><dt>President</dt><dd>{{ $association->currentPresident ? collect([$association->currentPresident->first_name, $association->currentPresident->middle_name, $association->currentPresident->last_name, $association->currentPresident->suffix])->filter(fn ($part) => filled($part))->implode(' ') : 'No active President assigned' }}</dd></div></dl>
+        </section>
+    @else
+        <p>President: {{ $association->currentPresident ? collect([$association->currentPresident->first_name, $association->currentPresident->middle_name, $association->currentPresident->last_name, $association->currentPresident->suffix])->filter(fn ($part) => filled($part))->implode(' ') : 'No active President assigned' }}</p>
+    @endif
     @php($officerErrors = $errors->getBag('officerPosition'))
     @if($officerErrors->any())<div class="notice notice-error" role="alert"><ul>@foreach($officerErrors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
     <div class="notice"><p>Each member has one current organizational position. Only one active, nonarchived President and Vice President may hold office; vacancies are allowed. Other officer positions may have multiple holders. Changing positions preserves membership and account access.</p></div>
     @if($association->archived_at || $association->status !== 'active')<p class="notice">This association is archived or inactive. Officer records are read-only.</p>@endif
-    <section class="card form-section">
-        <h2>Current active officers ({{ $officers->total() }})</h2>
-        <div class="table-scroll"><table class="data-table">
-            <caption>Active, nonarchived officeholders</caption>
+    {{-- Current officers and their existing position actions. --}}
+    <section @class(['card', 'form-section', 'officer-record-section' => $prefix === 'field-officer'])>
+        <h2>@if($prefix === 'field-officer')<x-icon name="users" /> @endif Current active officers ({{ $officers->total() }})</h2>
+        <div class="table-scroll" role="region" aria-label="Current active officers" tabindex="0"><table @class(['data-table', 'association-table' => $prefix === 'field-officer'])>
+            <caption @class(['sr-only' => $prefix === 'field-officer'])>Active, nonarchived officeholders</caption>
             <thead><tr><th scope="col">Member</th><th scope="col">Position</th><th scope="col">Actions</th></tr></thead>
             <tbody>@forelse($officers as $officer)
                 <tr><td>{{ $officer->first_name }} {{ $officer->last_name }}</td><td><span class="badge badge-blue">{{ $officer->position?->name ?? 'Position unavailable' }}</span>{{ $officer->position?->is_active ? '' : ' (inactive position)' }}</td>
@@ -39,17 +50,18 @@
                     @else Read-only @endif</td></tr>
             @empty<tr><td colspan="3">No active officers are recorded.</td></tr>@endforelse</tbody>
         </table></div>
-        <nav aria-label="Officer pages">@if($officers->previousPageUrl())<a class="button" href="{{ $officers->previousPageUrl() }}">Previous</a>@endif @if($officers->nextPageUrl())<a class="button" href="{{ $officers->nextPageUrl() }}">Next</a>@endif</nav>
+        @if($prefix === 'field-officer')@include('associations.partials.pagination', ['paginator' => $officers, 'label' => 'Officer pages'])@else<nav aria-label="Officer pages">@if($officers->previousPageUrl())<a class="button" href="{{ $officers->previousPageUrl() }}">Previous</a>@endif @if($officers->nextPageUrl())<a class="button" href="{{ $officers->nextPageUrl() }}">Next</a>@endif</nav>@endif
     </section>
     @if(!$association->archived_at && $association->status === 'active')
         @if($former)
             <div class="notice"><p>Replace {{ $former->first_name }} {{ $former->last_name }} as {{ $former->position?->name }}. The former holder will become Member when the new appointment succeeds.</p><a href="{{ route($prefix.'.association-officers.show', ['association' => $association] + $workflow->carry(request())) }}">Cancel replacement</a></div>
         @endif
-        <section class="card form-section">
-            <h2>{{ $former ? 'Choose a replacement' : 'Choose a member to appoint' }}</h2>
+        {{-- Eligible members keep their existing selection and appointment workflow. --}}
+        <section @class(['card', 'form-section', 'officer-record-section' => $prefix === 'field-officer'])>
+            <h2>@if($prefix === 'field-officer')<x-icon name="users" /> @endif {{ $former ? 'Choose a replacement' : 'Choose a member to appoint' }}</h2>
             <p>Only active, nonarchived members are available. A linked application must be approved. Existing directly registered members remain eligible.</p>
-            <div class="table-scroll"><table class="data-table">
-                <caption>Eligible members</caption>
+            <div class="table-scroll" role="region" aria-label="Eligible members" tabindex="0"><table @class(['data-table', 'association-table' => $prefix === 'field-officer'])>
+                <caption @class(['sr-only' => $prefix === 'field-officer'])>Eligible members</caption>
                 <thead><tr><th scope="col">Member</th><th scope="col">Current position</th><th scope="col">Select</th></tr></thead>
                 <tbody>@forelse($members as $member)
                     <tr><td>{{ $member->first_name }} {{ $member->last_name }}</td><td>{{ $member->position?->name ?? 'Position unavailable' }}</td><td>
@@ -58,8 +70,9 @@
                     </td></tr>
                 @empty<tr><td colspan="3">No eligible members are available.</td></tr>@endforelse</tbody>
             </table></div>
-            <nav aria-label="Eligible member pages">@if($members->previousPageUrl())<a class="button" href="{{ $members->previousPageUrl() }}">Previous</a>@endif @if($members->nextPageUrl())<a class="button" href="{{ $members->nextPageUrl() }}">Next</a>@endif</nav>
+            @if($prefix === 'field-officer')@include('associations.partials.pagination', ['paginator' => $members, 'label' => 'Eligible member pages'])@else<nav aria-label="Eligible member pages">@if($members->previousPageUrl())<a class="button" href="{{ $members->previousPageUrl() }}">Previous</a>@endif @if($members->nextPageUrl())<a class="button" href="{{ $members->nextPageUrl() }}">Next</a>@endif</nav>@endif
         </section>
+        {{-- Keep the confirmation fields and safeguards unchanged. --}}
         @if($selected)
             <form id="officer-appointment" class="card form-section" method="POST" action="{{ route($prefix.'.association-officers.update', $association) }}" @if($officerErrors->any() && old('member_id') === $selected->id) data-feedback-error-bag="officerPosition" @endif>
                 @csrf @method('PATCH')

@@ -1,6 +1,7 @@
 """Render only the canonical result. Exporters contain no business calculations."""
 
-from datetime import date
+from datetime import date, datetime
+from collections import Counter
 from decimal import Decimal
 from math import ceil
 import os
@@ -35,17 +36,22 @@ def metadata(result):
 def pdf(result, destination):
     import reportlab
     from reportlab.lib import colors
-    from reportlab.lib.enums import TA_LEFT, TA_RIGHT
+    from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
     from reportlab.lib.pagesizes import A4, landscape
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.lib.units import mm
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
-    from reportlab.platypus import LongTable, Paragraph, SimpleDocTemplate, Spacer, TableStyle
+    from reportlab.pdfgen import canvas as pdf_canvas
+    from reportlab.platypus import HRFlowable, Image, LongTable, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
     bundled = Path(reportlab.__file__).resolve().parent / "fonts"
-    regular = os.environ.get("ASSOCMAP_REPORT_FONT_REGULAR") or str(bundled / "Vera.ttf")
-    bold = os.environ.get("ASSOCMAP_REPORT_FONT_BOLD") or str(bundled / "VeraBd.ttf")
+    # Use the installed Times New Roman pair when available; keep the existing safe fallback on other hosts.
+    times_dir = Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts"
+    times_regular, times_bold = times_dir / "times.ttf", times_dir / "timesbd.ttf"
+    use_times = times_regular.is_file() and times_bold.is_file()
+    regular = os.environ.get("ASSOCMAP_REPORT_FONT_REGULAR") or str(times_regular if use_times else bundled / "Vera.ttf")
+    bold = os.environ.get("ASSOCMAP_REPORT_FONT_BOLD") or str(times_bold if use_times else bundled / "VeraBd.ttf")
     for name, path in (("AssocMap", regular), ("AssocMapBold", bold)):
         font_path = Path(path)
         if not font_path.is_absolute() or not font_path.is_file():
@@ -54,14 +60,21 @@ def pdf(result, destination):
     pdfmetrics.registerFontFamily("AssocMap", normal="AssocMap", bold="AssocMapBold", italic="AssocMap", boldItalic="AssocMapBold")
     blue = colors.HexColor("#0B427B")
     muted = colors.HexColor("#566B7E")
-    style = ParagraphStyle("Cell", fontName="AssocMap", fontSize=7.5, leading=11, alignment=TA_LEFT,
-                           textColor=colors.HexColor("#203348"), wordWrap="CJK", splitLongWords=True)
+    # Keep ordinary words together; long identifiers can still wrap when needed.
+    style = ParagraphStyle("Cell", fontName="AssocMap", fontSize=11, leading=14, alignment=TA_LEFT,
+                           textColor=colors.HexColor("#203348"), splitLongWords=True)
     numeric_style = ParagraphStyle("Number", parent=style, alignment=TA_RIGHT)
-    heading = ParagraphStyle("Heading", parent=style, fontName="AssocMapBold", fontSize=12, leading=17,
-                             textColor=blue, spaceBefore=14, spaceAfter=8, keepWithNext=True)
-    title_style = ParagraphStyle("Title", parent=heading, fontSize=22, leading=29, spaceBefore=3, spaceAfter=10)
-    caption = ParagraphStyle("Caption", parent=style, textColor=muted, fontSize=8, leading=12, spaceAfter=4)
+    heading = ParagraphStyle("Heading", parent=style, fontName="AssocMapBold", fontSize=12, leading=16,
+                             textColor=blue, spaceBefore=12, spaceAfter=5, keepWithNext=True)
+    title_style = ParagraphStyle("Title", parent=heading, fontSize=12, leading=16, spaceBefore=3, spaceAfter=7, alignment=TA_CENTER)
+    caption = ParagraphStyle("Caption", parent=style, textColor=muted, fontSize=11, leading=15, spaceAfter=4, alignment=TA_JUSTIFY)
+    centered = ParagraphStyle("Centered", parent=caption, alignment=TA_CENTER)
+    bullet_style = ParagraphStyle("Bullet", parent=caption, leftIndent=14, firstLineIndent=-10)
+    # Keep identifiers easy to scan without stretching spaces across the line.
+    dash_style = ParagraphStyle("Dash", parent=caption, leftIndent=25, firstLineIndent=-10, alignment=TA_LEFT)
+    long_style = ParagraphStyle("LongCell", parent=style, alignment=TA_JUSTIFY)
     table_heading = ParagraphStyle("TableHeading", parent=style, fontName="AssocMapBold", textColor=colors.white)
+    numeric_heading = ParagraphStyle("NumericTableHeading", parent=table_heading, alignment=TA_RIGHT)
 
     def paragraph(value, selected=style):
         text = "Unobserved / not applicable" if value is None else str(value)
@@ -70,28 +83,52 @@ def pdf(result, destination):
             raise ValueError("font_missing_glyph")
         return Paragraph(escape(text).replace("\n", "<br/>"), selected)
 
+    # Separate major sections with a subtle line in the existing palette.
+    def section_title(text):
+        rule = HRFlowable(width="100%", thickness=0.4, color=colors.HexColor("#DFE7EE"), spaceAfter=5)
+        rule.keepWithNext = True
+        return [paragraph(text.replace("current snapshot", "current records").replace("Current snapshot", "Current records"), heading), rule]
+
     wide = any(section["rows"] and len(section["columns"]) > 6 for section in result["sections"])
     page_size = landscape(A4) if wide else A4
     doc = SimpleDocTemplate(str(destination), pagesize=page_size, rightMargin=15 * mm, leftMargin=15 * mm,
-                            topMargin=20 * mm, bottomMargin=19 * mm, title="AssocMap - " + result["title"], author="AssocMap")
+                            topMargin=20 * mm, bottomMargin=19 * mm, title="AssocMap - " + result["title"], author="AssocMap",
+                            subject=reporting_period(result))
 
     def table(columns, rows):
-        header = [paragraph(column["label"], table_heading) for column in columns]
+        # Align number headings with their values and shorten the busiest headings.
+        labels = {"Association count": "Associations", "Municipality subtotal": "Subtotal", "Municipality/City": "Municipality / City"}
+        header = [paragraph(labels.get(column["label"], column["label"]),
+                            numeric_heading if column["type"] in ("integer", "decimal") or column.get("align") == "right" else table_heading)
+                  for column in columns]
         body = []
         for row in rows:
             cells = []
             for column in columns:
                 value = row[column["key"]]
                 kind = column["type"]
+                # Use the same plain wording in summary rows as in section headings.
+                if value is not None and column["key"] == "section":
+                    value = str(value).replace("current snapshot", "current records").replace("Current snapshot", "Current records")
                 if value is not None and kind == "decimal":
                     value = format(Decimal(value), ",.2f")
                 elif value is not None and kind == "integer" and column["key"] not in ("year", "program_year", "quarter", "month"):
                     value = format(value, ",")
-                cells.append(paragraph(value, numeric_style if kind in ("integer", "decimal") or column.get("align") == "right" else style))
+                elif value is not None and kind == "date":
+                    try:
+                        value = date.fromisoformat(str(value)).strftime("%b %d, %Y")
+                    except ValueError:
+                        pass
+                elif value is not None and column["key"] in ("status", "lifecycle"):
+                    value = str(value).capitalize()
+                selected = numeric_style if kind in ("integer", "decimal") or column.get("align") == "right" else long_style if value and len(str(value)) > 100 else style
+                if row.get("_subtotal"):
+                    selected = ParagraphStyle("SubtotalCell", parent=selected, fontName="AssocMapBold")
+                cells.append(paragraph(value, selected))
             body.append(cells)
         weights = [4 if column["key"] in ("project", "training", "activity", "measure") else
-                   3 if column["key"] == "association" else 1.3 if column["key"] in ("status", "lifecycle", "unit") else
-                   2.6 if column["type"] == "text" else 1.5 if column["type"] == "date" else 1.2 for column in columns]
+                   3 if column["key"] == "association" else 2 if column["key"] in ("status", "lifecycle", "unit") else
+                   2.6 if column["type"] == "text" else 1.5 if column["type"] == "date" else 1.8 for column in columns]
         rendered = LongTable([header] + body, colWidths=[doc.width * weight / sum(weights) for weight in weights],
                              repeatRows=1, splitByRow=1, splitInRow=1, hAlign="LEFT")
         rendered.setStyle(TableStyle([
@@ -101,43 +138,128 @@ def pdf(result, destination):
             ("LINEBELOW", (0, 1), (-1, -1), 0.3, colors.HexColor("#E0E7EE")),
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ("LEFTPADDING", (0, 0), (-1, -1), 6), ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-            ("TOPPADDING", (0, 0), (-1, -1), 4), ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ("TOPPADDING", (0, 0), (-1, -1), 5), ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
         ]))
         return rendered
 
-    elements = [paragraph("ASSOCMAP", caption), paragraph(result["title"], title_style),
-                paragraph(reporting_period(result), caption),
-                paragraph("Generated " + result["meta"]["generated_at"] + " (" + result["meta"]["timezone"] + ")", caption),
-                paragraph("Scope: " + result["meta"]["scope_basis"], caption)]
+    try:
+        generated = datetime.fromisoformat(result["meta"]["generated_at"])
+        generated_text = f"{generated.strftime('%B')} {generated.day}, {generated.year}, {generated.strftime('%I:%M %p').lstrip('0')}"
+        generated_text += " (Philippine Time)" if result["meta"]["timezone"] == "Asia/Manila" else " (" + result["meta"]["timezone"] + ")"
+    except ValueError:
+        generated_text = result["meta"]["generated_at"] + " (" + result["meta"]["timezone"] + ")"
+    scope_basis = result["meta"]["scope_basis"]
+    if scope_basis == "Currently assigned active, unarchived associations.":
+        scope_basis = "Assigned associations that are currently active and not archived."
+    # Keep the logo and name together in the center of the report header.
+    logo_path = Path(__file__).resolve().parents[2] / "web" / "public" / "images" / "brand" / "assocmap-symbol-64.png"
+    logo = Image(str(logo_path), width=9 * mm, height=9 * mm) if logo_path.is_file() else ""
+    brand_width = pdfmetrics.stringWidth("ASSOCMAP", "AssocMap", 11) + 4 * mm
+    brand = Table([[logo, paragraph("ASSOCMAP", centered)]], colWidths=[11 * mm, brand_width], hAlign="CENTER")
+    brand.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0)]))
+    header_text = [brand, paragraph(result["title"], title_style)]
+    # Keep actual reporting periods visible, but omit the generic current-records label.
+    if reporting_period(result) != "Current snapshot":
+        header_text.append(paragraph(reporting_period(result), centered))
+    header_text.append(paragraph("Generated: " + generated_text, centered))
+    if result["meta"].get("prepared_by"):
+        author = result["meta"]["prepared_by"]
+        header_text.append(paragraph("Generated by: " + author["name"] + " — " + author["role"], centered))
+    elements = header_text + [paragraph("Covers: " + scope_basis, centered)]
+    # Show the covered associations near the title so readers can identify the report.
+    if result["meta"]["scope"]:
+        elements.append(paragraph("Associations covered: " + ", ".join(result["meta"]["scope"]), centered))
+    # The line closes the report header after its coverage details.
+    elements.append(HRFlowable(width="100%", thickness=0.6, color=blue, spaceBefore=4, spaceAfter=7))
     if result["empty"]:
         elements.append(paragraph("No recorded results match the selected report scope and filters.", heading))
     measures = [{"section": section["title"], "measure": item["label"],
                  "value": "Unobserved" if item["value"] is None else
                  format(Decimal(item["value"]), ",.2f") if isinstance(item["value"], str) else format(item["value"], ",")}
                 for section in result["sections"] for item in section["measures"]]
-    elements.append(paragraph("Summary indicators", heading))
-    elements.append(paragraph("Recorded values only. Missing observations are not zero. Units and definitions follow each indicator.", caption))
+    elements.extend(section_title("Summary indicators"))
+    elements.append(paragraph("These figures show only what has been recorded in AssocMap. A blank means no record was entered. It does not mean zero.", caption))
     if measures:
-        elements.append(table([{"key": "section", "label": "Report section", "type": "text"},
+        summary_columns = [{"key": "section", "label": "Report section", "type": "text"},
                                {"key": "measure", "label": "Indicator", "type": "text"},
-                               {"key": "value", "label": "Recorded value", "type": "text", "align": "right"}], measures))
+                               {"key": "value", "label": "Recorded value", "type": "text", "align": "right"}]
+        if len({row["section"] for row in measures}) == 1:
+            elements.append(paragraph(measures[0]["section"].replace("current snapshot", "current records"), caption))
+            summary_columns = summary_columns[1:]
+        elements.append(table(summary_columns, measures))
     else:
         elements.append(paragraph("No summary indicators are available for this selection.", caption))
 
-    elements.append(paragraph("Reporting scope and applied filters", heading))
-    for label, value in metadata(result):
-        if label not in ("Application", "Report", "Reporting period", "Generated at", "Timezone", "Scope basis"):
-            elements.append(paragraph(label + ": " + value, caption))
+    # Combine location tables only when every original count can be reconciled.
+    by_key = {section["key"]: section for section in result["sections"]}
+    geo = by_key.get("association_geography")
+    municipality = by_key.get("association_municipality")
+    barangay = by_key.get("association_barangay")
+    merge_geography = False
+    if result["meta"]["filters"].get("report_type") == "associations" and geo and municipality and barangay:
+        totals = {}
+        for row in geo["rows"]:
+            key = row["municipality_id"]
+            totals[key] = (row["municipality"], row["municipality_total"])
+        merge_geography = (
+            Counter((row["label"], row["count"]) for row in municipality["rows"]) == Counter(totals.values())
+            and Counter((row["label"], row["count"]) for row in barangay["rows"]) ==
+                Counter((row["municipality"] + " / " + row["barangay"], row["count"]) for row in geo["rows"])
+        )
+    # Move geographic identifiers to the technical section without losing their context.
+    geographic_ids = []
     for section in result["sections"]:
-        elements.append(paragraph(section["title"], heading))
+        if merge_geography and section["key"] in ("association_municipality", "association_barangay"):
+            continue
+        elements.extend(section_title("Where the associations are" if merge_geography and section["key"] == "association_geography" else section["title"]))
         if section["rows"]:
-            elements.append(table(section["columns"], section["rows"]))
+            columns = section["columns"]
+            rows = section["rows"]
+            if section["key"] == "association_status":
+                rows = [{**row, "label": str(row["label"]).capitalize()} for row in rows]
+            if section["key"] == "association_geography":
+                columns = [column for column in columns if column["key"] not in ("municipality_id", "barangay_id")]
+                geographic_ids.extend(
+                    f"{row['municipality']} / {row['barangay']}: municipality ID {row['municipality_id']}; barangay ID {row['barangay_id']}"
+                    for row in section["rows"]
+                )
+                if merge_geography:
+                    columns = [column for column in columns if column["key"] != "municipality_total"]
+                    rows = []
+                    counts = Counter(row["municipality_id"] for row in section["rows"])
+                    for index, row in enumerate(section["rows"]):
+                        rows.append(row)
+                        if counts[row["municipality_id"]] > 1 and (index + 1 == len(section["rows"]) or section["rows"][index + 1]["municipality_id"] != row["municipality_id"]):
+                            rows.append({"municipality": row["municipality"], "barangay": "Municipality total", "count": row["municipality_total"], "_subtotal": True})
+            elements.append(table(columns, rows))
         else:
             elements.append(paragraph("No recorded rows for this section.", caption))
-        elements.extend(paragraph(note, caption) for note in section["notes"])
-        elements.append(Spacer(1, 3 * mm))
-    elements.append(paragraph("Data quality and interpretation", heading))
-    elements.extend(paragraph(note, caption) for note in result["notes"])
+        for note in section["notes"]:
+            if merge_geography and section["key"] == "association_geography":
+                note = "Counts include associations in the report scope, including any archived associations."
+                if any(row.get("_subtotal") for row in rows):
+                    note += " Municipality totals include their barangays; do not add the totals to the barangay counts."
+            elements.append(paragraph("• " + note, bullet_style))
+        elements.append(Spacer(1, 1 * mm))
+    elements.extend(section_title("How to read this report"))
+    plain_notes = {
+        "Association/member counts and project statuses are current snapshots, not reconstructed historical states.":
+            "These numbers show records as they are today, not as they were in the past.",
+        "Program year is an administrative cohort. Reporting year/quarter selects training start dates, activity dates and monitoring reporting periods.":
+            "Program year is the year group a project is filed under in the program. Reporting year and quarter decide which training dates, activity dates and monitoring periods are included.",
+    }
+    if result["meta"]["filters"].get("report_type") == "associations" and result["meta"]["scope_basis"] == "Currently assigned active, unarchived associations.":
+        plain_notes["Archived records are retained within the current authorized association scope. Counts describe recorded data only."] = (
+            "Only active assigned associations that are not archived are included. These figures show only what has been recorded in AssocMap."
+        )
+    elements.extend(paragraph("• " + plain_notes.get(note, note), bullet_style) for note in result["notes"])
+    # Keep technical details available for support without crowding the report's opening.
+    elements.extend(section_title("Technical details"))
+    for label, value in metadata(result):
+        if label not in ("Application", "Report", "Contract", "Authorized associations", "Reporting period", "Generated at", "Timezone", "Scope basis"):
+            elements.append(paragraph("– " + label + ": " + value, dash_style))
+    elements.append(paragraph("– Original generated time: " + result["meta"]["generated_at"], dash_style))
+    elements.extend(paragraph("– " + value, dash_style) for value in geographic_ids)
 
     def footer(canvas, document):
         canvas.saveState()
@@ -145,18 +267,36 @@ def pdf(result, destination):
         canvas.setLineWidth(0.6)
         canvas.line(15 * mm, page_size[1] - 14 * mm, page_size[0] - 15 * mm, page_size[1] - 14 * mm)
         if document.page > 1:
-            canvas.setFont("AssocMap", 7.5)
+            canvas.setFont("AssocMap", 11)
             canvas.setFillColor(muted)
             canvas.drawString(15 * mm, page_size[1] - 11 * mm, "AssocMap | " + result["title"])
         canvas.setStrokeColor(colors.HexColor("#DFE7EE"))
         canvas.line(15 * mm, 15 * mm, page_size[0] - 15 * mm, 15 * mm)
-        canvas.setFont("AssocMap", 7)
+        canvas.setFont("AssocMap", 11)
         canvas.setFillColor(muted)
-        canvas.drawString(15 * mm, 10 * mm, "AssocMap | " + result["meta"]["timezone"] + " | Authorized report scope")
-        canvas.drawRightString(page_size[0] - 15 * mm, 10 * mm, "Page " + str(document.page))
         canvas.restoreState()
 
-    doc.build(elements, onFirstPage=footer, onLaterPages=footer)
+    # Add total page counts only after the document has finished laying out.
+    class NumberedCanvas(pdf_canvas.Canvas):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.saved_pages = []
+
+        def showPage(self):
+            self.saved_pages.append(dict(self.__dict__))
+            self._startPage()
+
+        def save(self):
+            total = len(self.saved_pages)
+            for state in self.saved_pages:
+                self.__dict__.update(state)
+                self.setFont("AssocMap", 11)
+                self.setFillColor(muted)
+                self.drawRightString(page_size[0] - 15 * mm, 10 * mm, f"Page {self._pageNumber} of {total}")
+                pdf_canvas.Canvas.showPage(self)
+            pdf_canvas.Canvas.save(self)
+
+    doc.build(elements, onFirstPage=footer, onLaterPages=footer, canvasmaker=NumberedCanvas)
 
 
 def xlsx(result, destination):

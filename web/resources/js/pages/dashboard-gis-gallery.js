@@ -4,9 +4,7 @@ export function initDashboardGisGallery() {
         const base = root.dataset.gisBase.replace(/\/$/, '');
         const grid = root.querySelector('[data-gallery-grid]');
         const status = root.querySelector('[data-gallery-status]');
-        const previous = root.querySelector('[data-gallery-previous]');
-        const next = root.querySelector('[data-gallery-next]');
-        const pageLabel = root.querySelector('[data-gallery-page]');
+        const pageSize = root.dataset.photoPageSize === '2' ? 2 : 4;
         const viewer = root.querySelector('[data-gallery-viewer]');
         const image = root.querySelector('[data-gallery-image]');
         const viewerStatus = root.querySelector('[data-viewer-status]');
@@ -18,14 +16,14 @@ export function initDashboardGisGallery() {
         let photoPage = 0;
         let page = 1, lastPage = 1, opener = null, photos = [], photoIndex = 0, touchStart = null, photoRequest = 0;
 
-        // Show four photos at a time within the selected locations page.
+        // Fit the photos to the space used by each account's details.
         const updatePhotoPage = () => {
-            const pages = Math.max(1, Math.ceil(grid.children.length / 4));
+            const pages = Math.max(1, Math.ceil(grid.children.length / pageSize));
             photoPage = Math.min(photoPage, pages - 1);
-            [...grid.children].forEach((button, index) => { button.hidden = index < photoPage * 4 || index >= photoPage * 4 + 4; });
-            photoPrevious.disabled = photoPage === 0;
-            photoNext.disabled = photoPage >= pages - 1;
-            photoPageLabel.textContent = grid.children.length ? `Photos ${photoPage + 1} of ${pages}` : '';
+            [...grid.children].forEach((button, index) => { button.hidden = index < photoPage * pageSize || index >= (photoPage + 1) * pageSize; });
+            photoPrevious.disabled = photoPage === 0 && page <= 1;
+            photoNext.disabled = photoPage >= pages - 1 && page >= lastPage;
+            photoPageLabel.textContent = grid.children.length ? `Photos ${photoPage * pageSize + 1}–${Math.min((photoPage + 1) * pageSize, grid.children.length)}` : '';
         };
 
         // Show the selected photo and its loading or error message.
@@ -68,11 +66,15 @@ export function initDashboardGisGallery() {
             return response.json();
         };
         const uuid = value => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-        const load = async () => {
-            previous.disabled = next.disabled = true;
+        const load = async (showLast = false) => {
+            photoPrevious.disabled = photoNext.disabled = true;
             grid.replaceChildren(); photos = []; photoPage = 0; updatePhotoPage(); status.textContent = 'Loading GIS photos…';
+            photoPrevious.disabled = photoNext.disabled = true;
             try {
-                const data = await get(`${base}/data?mode=list&page=${page}`);
+                // Limit detail-page photos to the association being viewed.
+                const query = new URLSearchParams({ mode: 'list', page: String(page) });
+                if (root.dataset.associationId) query.set('association_id', root.dataset.associationId);
+                const data = await get(`${base}/data?${query}`);
                 if (!Array.isArray(data.features) || !data.meta) throw new Error('Locations unavailable');
                 lastPage = Math.max(1, Number(data.meta.last_page) || 1);
                 const results = await Promise.allSettled(data.features.map(async feature => ({
@@ -104,20 +106,17 @@ export function initDashboardGisGallery() {
                         } catch { failed++; }
                     });
                 });
+                if (showLast) photoPage = Math.max(0, Math.ceil(grid.children.length / pageSize) - 1);
                 updatePhotoPage();
                 status.textContent = failed ? (count ? 'Some location photos could not be loaded. Try again later.' : 'Photos could not be loaded. Try again later or visit the GIS map.') : (count ? '' : 'No approved photos are available for the locations on this page.');
-                pageLabel.textContent = `Locations page ${page} of ${lastPage}`;
-                previous.disabled = page <= 1; next.disabled = page >= lastPage;
             } catch {
                 status.textContent = 'The gallery could not be loaded. Try again later or visit the GIS map.';
-                pageLabel.textContent = '';
+                updatePhotoPage();
             }
         };
         // Connect the gallery and photo viewer controls.
-        previous.addEventListener('click', () => { if (page > 1) { page--; void load(); } });
-        next.addEventListener('click', () => { if (page < lastPage) { page++; void load(); } });
-        photoPrevious.addEventListener('click', () => { if (photoPage > 0) { photoPage--; updatePhotoPage(); } });
-        photoNext.addEventListener('click', () => { if ((photoPage + 1) * 4 < grid.children.length) { photoPage++; updatePhotoPage(); } });
+        photoPrevious.addEventListener('click', () => { if (photoPage > 0) { photoPage--; updatePhotoPage(); } else if (page > 1) { page--; void load(true); } });
+        photoNext.addEventListener('click', () => { if ((photoPage + 1) * pageSize < grid.children.length) { photoPage++; updatePhotoPage(); } else if (page < lastPage) { page++; void load(); } });
         root.querySelector('[data-gallery-close]').addEventListener('click', () => viewer.close());
         viewerPrevious.addEventListener('click', () => showPhoto(photoIndex - 1));
         viewerNext.addEventListener('click', () => showPhoto(photoIndex + 1));

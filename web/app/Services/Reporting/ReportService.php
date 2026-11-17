@@ -49,6 +49,9 @@ class ReportService
                     default => 'Current active linked association only.',
                 },
                 'currency' => 'PHP',
+                // Include the signed-in person's name only in PDF exports.
+                ...($action === 'pdf' && filled($actor->display_name) && filled($actor->role?->name)
+                    ? ['prepared_by' => ['name' => $actor->display_name, 'role' => $actor->role->name]] : []),
             ],
             'datasets' => $datasets,
         ], $actor->id);
