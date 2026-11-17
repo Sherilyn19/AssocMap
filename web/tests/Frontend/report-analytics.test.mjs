@@ -111,6 +111,36 @@ test('association charts are grouped by topic while retaining their detail table
     } finally { globalThis.document = previous; }
 });
 
+test('association single-category statuses use a scaled chart and retain data table', () => {
+    const previous = globalThis.document;
+    const create = tag => Object.assign(new Element(tag), { clientWidth: 608 });
+    globalThis.document = { createElement: create, createElementNS: (_namespace, tag) => create(tag) };
+    try {
+        const container = new Element('section');
+        container.closest = selector => selector === '.association-workspace' ? {} : null;
+        renderReportAnalytics(result([distribution('project_status', [{ label: 'ongoing', count: 2 }])]), container);
+        const figure = container.all('figure')[0];
+        assert.ok(figure.all('svg').some(chart => String(chart.attributes.get('class')).includes('report-vertical-bars')));
+        assert.ok(figure.all('rect').some(bar => bar.attributes.get('class') === 'report-chart-bar'));
+        assert.equal(figure.all('table').length, 1);
+        assert.equal(figure.all('a').length, 1);
+    } finally { globalThis.document = previous; }
+});
+
+test('association chart explanations use plain language without changing report values', () => {
+    const previous = globalThis.document;
+    const create = tag => Object.assign(new Element(tag), { clientWidth: 608 });
+    globalThis.document = { createElement: create, createElementNS: (_namespace, tag) => create(tag) };
+    try {
+        const container = new Element('section');
+        container.closest = selector => selector === '.association-workspace' ? {} : null;
+        renderReportAnalytics(result([distribution('project_status', [{ label: 'ongoing', count: 2 }])]), container);
+        const figure = container.all('figure')[0];
+        assert.ok(figure.all('p').some(item => String(item.textContent).includes('Status alone does not show whether a project succeeded.')));
+        assert.ok(figure.all('td').some(item => item.textContent === '2'));
+    } finally { globalThis.document = previous; }
+});
+
 function render(input, width = 608) {
     const previous = globalThis.document;
     const create = tag => Object.assign(new Element(tag), { clientWidth: width });

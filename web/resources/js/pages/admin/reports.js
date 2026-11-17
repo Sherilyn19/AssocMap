@@ -1,5 +1,6 @@
 import { applyFormErrors, errorFeedback, showFeedback, showOperationError } from '../../core/feedback.js';
 import { initReportDownloads } from '../report-download.js';
+import { initSummaryCounters } from '../../components/summary-counter.js';
 
 function element(tag, text, className) {
     const node = document.createElement(tag);
@@ -24,8 +25,13 @@ function initReportControls(root, form, readFilters, defaultYear) {
     }
 
     toggle.hidden = false;
-    setOpen(true);
+    const associationReport = Boolean(root.closest?.('.association-workspace'));
+    setOpen(!associationReport);
     toggle.addEventListener('click', () => setOpen(panel.hidden));
+    if (associationReport) toggle.closest('.section-heading')?.addEventListener('click', event => {
+        if (event.target.closest('button, a, input, select, textarea, summary, .area-info')) return;
+        setOpen(panel.hidden);
+    });
     panel.addEventListener('keydown', event => {
         if (event.key === 'Escape') { event.preventDefault(); setOpen(false, true); }
     });
@@ -55,6 +61,12 @@ export function initReports() {
     const preview = root.querySelector('[data-report-result]');
     const status = root.querySelector('[data-report-status]');
     const associationReport = Boolean(root.closest?.('.association-workspace'));
+    const plain = value => {
+        if (!associationReport || typeof value !== 'string') return value;
+        const incomeNote = value.match(/^(\d+) quarterly entries excluded: quarterly income cannot be allocated to the selected month\.$/);
+        if (incomeNote) return `${incomeNote[1]} quarterly income entries are excluded because they cannot be assigned to the selected month.`;
+        return initial.plainLanguage?.[value] || value;
+    };
     let guideFrame = null;
     function updateReportGuide() {
         guideFrame = null;
@@ -231,11 +243,11 @@ export function initReports() {
         scroll.setAttribute('role', 'region');
         scroll.setAttribute('aria-label', section.title);
         const table = element('table');
-        table.append(element('caption', section.title));
+        table.append(element('caption', plain(section.title)));
         const head = element('thead');
         const tr = element('tr');
         for (const column of section.columns) {
-            const th = element('th', column.label);
+            const th = element('th', plain(column.label));
             th.scope = 'col';
             if (['integer', 'decimal'].includes(column.type)) th.className = 'report-numeric';
             tr.append(th);
@@ -260,7 +272,7 @@ export function initReports() {
             body.replaceChildren();
             for (const row of section.rows.slice(page * 50, (page + 1) * 50)) {
                 const rowNode = element('tr');
-                for (const column of section.columns) rowNode.append(element('td', row[column.key] ?? 'Unobserved / N/A',
+                for (const column of section.columns) rowNode.append(element('td', row[column.key] ?? plain('Unobserved / N/A'),
                     ['integer', 'decimal'].includes(column.type) ? 'report-numeric' : undefined));
                 body.append(rowNode);
             }
@@ -278,7 +290,7 @@ export function initReports() {
         const navigation = element('nav', undefined, 'report-section-nav');
         navigation.setAttribute('aria-label', 'Report sections');
         for (const [label, target] of [['Scope', 'report-scope'], ['Overview', 'report-summary'], ['Charts', 'report-analytics'], ['Interpretation', 'report-quality'], ['Detailed records →', 'report-details']]) {
-            const link = element('a', label); link.href = `#${target}`; navigation.append(link);
+            const link = element('a', plain(label)); link.href = `#${target}`; navigation.append(link);
         }
         const content = element('div', undefined, 'report-result-content');
         content.append(element('h2', result.title));
@@ -287,15 +299,14 @@ export function initReports() {
         scope.id = 'report-scope';
         const applied = result.meta.filters;
         const associationScope = result.meta.scope.length === 1 ? result.meta.scope[0] : `${result.meta.scope.length} authorized associations`;
-        const period = `${applied.year ? `Reporting year ${applied.year}` : 'Current snapshot'}${applied.quarter ? ` · Q${applied.quarter}` : ''}${applied.month ? ` · Month ${applied.month}` : ''}${applied.program_year ? ` · Program year ${applied.program_year}` : ''}`;
-        scope.append(element('h3', 'Reporting scope and period'), element('p', `${associationScope} · ${period}`, 'report-context-brief'));
+        const period = `${applied.year ? `Reporting year ${applied.year}` : (associationReport ? 'Current information' : 'Current snapshot')}${applied.quarter ? ` · Q${applied.quarter}` : ''}${applied.month ? ` · Month ${applied.month}` : ''}${applied.program_year ? ` · Program year ${applied.program_year}` : ''}`;
+        scope.append(element('h3', plain('Reporting scope and period')), element('p', `${associationScope} · ${period}`, 'report-context-brief'));
         const scopeDetails = element('details', undefined, 'report-scope-details');
-        scopeDetails.append(element('summary', 'Scope and applied filters'), element('p', result.meta.scope_basis),
+        scopeDetails.append(element('summary', plain('Scope and applied filters')), element('p', plain(result.meta.scope_basis)),
             element('p', `Associations: ${result.meta.scope.join('; ') || 'None in this scope'}`),
             element('p', `Generated ${result.meta.generated_at} · ${result.meta.timezone}`, 'field-help'));
         const snapshot = ['associations', 'members', 'projects'].includes(result.meta.filters.report_type);
-        scopeDetails.append(element('p', snapshot ? 'Current snapshot. Program year selects a cohort; reporting dates do not reconstruct historical counts.'
-            : 'Reporting year/quarter selects training start dates, activity dates and quarterly monitoring periods. Association/member counts and project statuses remain current snapshots.', 'field-help'));
+        scopeDetails.append(element('p', associationReport ? (snapshot ? 'These counts show current information. Program year selects projects by their recorded program year; reporting dates do not show past counts.' : 'Reporting year and quarter select training start dates, activity dates, and monitoring periods. Association and member counts and project statuses show their current state.') : (snapshot ? 'Current snapshot. Program year selects a cohort; reporting dates do not reconstruct historical counts.' : 'Reporting year/quarter selects training start dates, activity dates and quarterly monitoring periods. Association/member counts and project statuses remain current snapshots.'), 'field-help'));
         const context = Object.entries(result.meta.filters).map(([key, value]) => {
             const select = field(key);
             const label = select ? [...select.options].find(option => option.value === String(value))?.textContent : value;
@@ -309,15 +320,16 @@ export function initReports() {
         summary.setAttribute('aria-labelledby', 'report-summary-title');
         const summaryHeading = element('div', undefined, 'report-section-heading'), summaryCopy = element('div');
         const summaryTitle = element('h3', 'At a glance'); summaryTitle.id = 'report-summary-title';
-        summaryCopy.append(summaryTitle, element('p', 'Recorded indicators within the applied scope. Unobserved values are not zero.'));
+        summaryCopy.append(summaryTitle, element('p', plain('Recorded indicators within the applied scope. Unobserved values are not zero.')));
         summaryHeading.append(summaryCopy); summary.append(summaryHeading);
         const primary = element('dl', undefined, 'report-measures report-primary-measures');
         primary.setAttribute('data-report-kpis', '');
         for (const [key, label] of initial.primaryMeasureMap?.[applied.report_type] || []) {
             const measure = result.sections.find(section => section.key === key)?.measures.find(measure => measure.label === label);
             if (!measure) continue;
-            const card = element('div'), definition = element('dd'), value = element('span', measureValue(measure.value));
-            const labelNode = element('dt', measure.label);
+            const card = element('div'), definition = element('dd'), value = element('span', plain(measureValue(measure.value)));
+            if (associationReport && /^\d+$/.test(String(measure.value))) value.setAttribute('data-summary-counter', '');
+            const labelNode = element('dt', plain(measure.label));
             if (root.closest?.('.association-workspace')) {
                 const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 icon.setAttribute('viewBox', '0 0 24 24'); icon.setAttribute('fill', 'none'); icon.setAttribute('stroke', 'currentColor'); icon.setAttribute('stroke-width', '1.5'); icon.setAttribute('aria-hidden', 'true'); icon.classList.add('icon');
@@ -330,20 +342,43 @@ export function initReports() {
         }
         summary.append(primary);
         const allMeasures = element('details', undefined, 'report-all-measures');
-        allMeasures.append(element('summary', 'All report measures'), element('p', 'Recorded values within the applied scope. Unobserved values are not zero.', 'field-help'));
+        allMeasures.append(element('summary', 'All report measures'), element('p', plain('Recorded values within the applied scope. Unobserved values are not zero.'), 'field-help'));
+        const measureGroups = element('div', undefined, 'report-measure-groups');
         for (const section of result.sections.filter(section => section.measures.length)) {
-            allMeasures.append(element('h4', section.title));
+            const group = element('section', undefined, 'report-measure-group');
+            const groupTitle = element('h4', associationReport ? undefined : plain(section.title));
+            if (associationReport) {
+                const paths = {
+                    associations: 'M4 21V6l8-3 8 3v15M9 21v-6h6v6M8 9h.01M16 9h.01',
+                    members: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8-7a4 4 0 0 1 0 8m4 9v-2a4 4 0 0 0-3-3.87',
+                    projects: 'M4 7h16v13H4zM9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2',
+                    trainings: 'M3 9l9-5 9 5-9 5-9-5Zm3 2v5c3 3 9 3 12 0v-5',
+                    income: 'M3 6h18v12H3zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
+                    activities: 'M4 5h16v15H4zM8 2v6m8-6v6M4 10h16',
+                    monitoring: 'M8 4h8M9 2h6v4H9zM6 4H5v17h14V4h-1M8 14l2 2 5-5',
+                };
+                const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                for (const [name, value] of Object.entries({ viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.5', 'aria-hidden': 'true' })) icon.setAttribute(name, value);
+                icon.classList.add('icon');
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('stroke-linecap', 'round'); path.setAttribute('stroke-linejoin', 'round'); path.setAttribute('d', paths[section.key] || 'M4 20h16M6 17v-6m6 6V5m6 12V9');
+                icon.append(path); groupTitle.append(icon);
+            }
+            if (associationReport) groupTitle.append(element('span', plain(section.title)));
+            group.append(groupTitle);
             const measures = element('dl', undefined, 'report-secondary-measures');
             for (const measure of section.measures) {
                 const card = element('div');
-                const value = element('span', measureValue(measure.value));
+                const value = element('span', plain(measureValue(measure.value)));
                 const definition = element('dd'); definition.append(value);
-                card.append(element('dt', measure.label), definition); measures.append(card);
+                card.append(element('dt', plain(measure.label)), definition); measures.append(card);
             }
-            allMeasures.append(measures);
+            group.append(measures); measureGroups.append(group);
         }
+        allMeasures.append(measureGroups);
         summary.append(allMeasures);
         content.append(summary);
+        if (associationReport) initSummaryCounters(primary);
         const analytics = element('section', undefined, 'report-analytics');
         analytics.id = 'report-analytics'; analytics.tabIndex = -1;
         analytics.setAttribute('aria-labelledby', 'report-analytics-title');
@@ -365,14 +400,14 @@ export function initReports() {
         });
         const quality = element('details', undefined, 'report-quality');
         quality.id = 'report-quality'; quality.tabIndex = -1;
-        quality.append(element('summary', 'Data interpretation and quality'));
+        quality.append(element('summary', plain('Data interpretation and quality')));
         const notes = element('ul');
-        for (const note of result.notes) notes.append(element('li', note));
+        for (const note of result.notes) notes.append(element('li', plain(note)));
         quality.append(notes);
         for (const section of result.sections.filter(section => section.notes.length)) {
-            quality.append(element('h4', section.title));
+            quality.append(element('h4', plain(section.title)));
             const sectionNotes = element('ul');
-            for (const note of section.notes) sectionNotes.append(element('li', note));
+            for (const note of section.notes) sectionNotes.append(element('li', plain(note)));
             quality.append(sectionNotes);
         }
         content.append(quality);
@@ -385,7 +420,7 @@ export function initReports() {
             const container = element('section', undefined, 'report-section report-data-section');
             container.id = `report-table-${section.key || index}`;
             container.tabIndex = -1;
-            container.append(element('h4', section.title));
+            container.append(element('h4', plain(section.title)));
             table(section, container);
             detailed.append(container);
         });
