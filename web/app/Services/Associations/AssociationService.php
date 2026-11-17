@@ -70,6 +70,14 @@ class AssociationService
             }
             $this->assignments->assertCurrent($association, $expectedId, 'expected_primary_field_officer_id');
             $this->geography->assertCurrent($association, $data);
+            // Keep the association in its recorded barangay when editing.
+            $recordedBarangay = $association->locationBarangay();
+            $requestedBarangayId = $this->geography->enabled() ? ($data['barangay_id'] ?? null)
+                : \App\Models\Area::whereKey($data['area_id'] ?? null)->value('barangay_id');
+            if (! $recordedBarangay || ! is_string($requestedBarangayId)
+                || strcasecmp((string) $recordedBarangay->id, $requestedBarangayId) !== 0) {
+                throw ValidationException::withMessages(['barangay_id' => 'The recorded municipality and barangay cannot be changed here.']);
+            }
             $previousOfficer = $association->primary_field_officer_id;
             if ($officer !== null) {
                 $this->assignments->assertReassignable($association, $data['status'], 'primary_field_officer_id');
@@ -108,7 +116,7 @@ class AssociationService
             if ($accreditation) {
                 $this->lifecycle->assertOperational($association, 'registration.id');
                 $changes = array_intersect_key($data['registration'], array_flip([
-                    'registration_number', 'registration_date', 'expiration_date', 'remarks',
+                    'registration_number', 'registration_date', 'expiration_date', 'remarks', 'renewal_count', 'latest_renewal_date',
                 ]));
                 $changes['registration_number'] = trim($changes['registration_number']);
                 if (array_key_exists('remarks', $changes) && is_string($changes['remarks'])) {
@@ -139,7 +147,7 @@ class AssociationService
     {
         $this->lifecycle->assertOperational($association, 'registration.id');
         $data = validator(['registration' => $input], [
-            'registration' => ['required', 'array:id,expected_updated_at,registration_number,registration_date,expiration_date,remarks',
+            'registration' => ['required', 'array:id,expected_updated_at,registration_number,registration_date,expiration_date,remarks,renewal_count,latest_renewal_date',
                 'required_array_keys:id,expected_updated_at,registration_number,registration_date'],
             'registration.id' => ['required', 'uuid'],
             'registration.expected_updated_at' => ['required', 'string', 'max:50'],
@@ -147,12 +155,14 @@ class AssociationService
             'registration.registration_date' => ['bail', 'required', 'string', 'date_format:Y-m-d'],
             'registration.expiration_date' => ['bail', 'sometimes', 'nullable', 'string', 'date_format:Y-m-d',
                 ...(is_array($input) && is_string($input['registration_date'] ?? null) ? ['after_or_equal:registration.registration_date'] : [])],
+            'registration.renewal_count' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1000'],
+            'registration.latest_renewal_date' => ['sometimes', 'nullable', 'date_format:Y-m-d', 'after_or_equal:registration.registration_date', 'before_or_equal:'.now('Asia/Manila')->toDateString()],
             'registration.remarks' => ['sometimes', 'nullable', 'string', 'max:4000'],
         ])->validate()['registration'];
         $record = AssociationRegistration::query()->where('association_id', $association->id)
             ->whereKey($data['id'])->lockForUpdate()->first();
         $agency = $record ? RegistrationAgency::whereKey($record->agency_id)->sharedLock()->first() : null;
-        if (! $agency?->is_active || $agency->registration_kind !== 'accreditation') {
+        if (! $agency?->is_active) {
             throw ValidationException::withMessages(['registration.id' => 'Select an existing accreditation record for this association with an active issuing agency.']);
         }
         if ($data['expected_updated_at'] !== $record->updated_at?->format('Y-m-d\TH:i:s.uP')) {

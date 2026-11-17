@@ -14,10 +14,10 @@ class StoreMunicipalityRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        // Keep the saved name when an existing municipality is edited.
+        $name = $this->route('municipality')?->name ?? $this->name;
         $this->merge([
-            'name' => is_string($this->name)
-                ? trim($this->name)
-                : $this->name,
+            'name' => is_string($name) ? trim($name) : $name,
 
             'psgc_code' => is_string($this->psgc_code)
                 ? (trim($this->psgc_code) === '' ? null : trim($this->psgc_code))

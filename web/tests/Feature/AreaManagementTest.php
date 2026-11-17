@@ -508,10 +508,21 @@ class AreaManagementTest extends TestCase
         $this->assertSame(5, DB::table('areas')->count());
         $this->from('/admin/areas')->patch('/admin/barangays/'.self::id(11), [
             'area_form' => 'editor', 'area_type' => 'Barangay', 'area_record_id' => self::id(11),
-            'municipality_id' => self::id(1), 'name' => '',
-        ])->assertRedirect('/admin/areas')->assertSessionHasErrors('name');
+            'municipality_id' => self::id(1), 'name' => '', 'psgc_code' => str_repeat('1', 21),
+        ])->assertRedirect('/admin/areas')->assertSessionHasErrors('psgc_code');
         $this->get('/admin/areas')->assertOk()->assertSee('data-mode="edit"', false)
             ->assertSee('action="'.route('admin.barangays.update', self::id(11)).'"', false);
+    }
+
+    // Existing geographic names stay unchanged even if a request sends another name.
+    public function test_editing_geography_keeps_the_recorded_names(): void
+    {
+        $municipalityName = DB::table('municipalities')->where('id', self::id(1))->value('name');
+        $barangayName = DB::table('barangays')->where('id', self::id(11))->value('name');
+        $this->patch('/admin/municipalities/'.self::id(1), ['name' => 'Changed municipality', 'psgc_code' => 'M-EDIT'])->assertRedirect();
+        $this->patch('/admin/barangays/'.self::id(11), ['name' => 'Changed barangay', 'municipality_id' => self::id(1), 'psgc_code' => 'B-EDIT'])->assertRedirect();
+        $this->assertDatabaseHas('municipalities', ['id' => self::id(1), 'name' => $municipalityName, 'psgc_code' => 'M-EDIT']);
+        $this->assertDatabaseHas('barangays', ['id' => self::id(11), 'name' => $barangayName, 'psgc_code' => 'B-EDIT']);
     }
 
     private function geographySnapshot(): array

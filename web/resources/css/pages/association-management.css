@@ -10,6 +10,34 @@
 #association-editor [data-association-registration] { margin-top: 22px; padding: 16px; border: 1px solid #dce7f1; border-radius: 9px; background: #f8fbfe; }
 #association-editor .association-registration-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-bottom: 8px; }
 #association-editor .association-registration-heading h3 { margin: 0; color: #193650; font-size: 14px; }
+/* Group document details with the same quiet colours used elsewhere. */
+#association-editor .association-documents { margin-top: 24px; padding-top: 20px; border-top: 1px solid #dce7f1; }
+#association-editor .association-documents-heading { display: flex; align-items: flex-start; gap: 12px; }
+#association-editor .association-documents-heading > div { min-width: 0; }
+#association-editor .association-documents-heading h3 { margin: 0; color: #193650; }
+#association-editor .association-documents-heading p { margin: 5px 0 0; color: #526b82; line-height: 1.5; }
+#association-editor .association-documents-icon { display: grid; place-items: center; flex: none; width: 38px; height: 38px; border-radius: 9px; background: #e8f2fb; color: var(--primary); }
+#association-editor .association-documents-icon .icon, #association-editor .association-document-hint .icon { width: 18px; height: 18px; flex: none; }
+#association-editor .association-document-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 14px 0; border-bottom: 1px solid #dce7f1; }
+#association-editor .association-document-row > div { display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
+#association-editor .association-document-row strong { color: #193650; }
+/* Keep the update action aligned with its document. */
+#association-editor .association-document-action { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 8px 12px; white-space: nowrap; }
+#association-editor .association-document-action .icon { width: 16px; height: 16px; }
+#association-editor .association-document-action:hover { background: #e8f2fb; border-color: #9bbad8; }
+#association-editor .association-document-row span, #association-editor .association-document-empty { color: #526b82; }
+#association-editor .association-document-empty { margin-top: 16px; }
+/* Use one light background to identify the editable details. */
+#association-editor .association-document-fields { min-width: 0; max-width: 100%; margin: 20px 0 0; padding: 16px; border: 1px solid #dce7f1; border-radius: 9px; background: #f3f6f9; }
+#association-editor .association-document-fields legend { padding: 0 6px; color: #193650; }
+/* Let long names and fields wrap inside the document section. */
+#association-editor .association-document-grid, #association-editor .association-document-grid > * { min-width: 0; }
+#association-editor .association-document-grid :is(input, textarea, select) { max-width: 100%; }
+#association-editor .association-document-meta { overflow-wrap: anywhere; }
+#association-editor .association-document-meta { display: flex; flex-wrap: wrap; gap: 8px 20px; padding-bottom: 12px; border-bottom: 1px solid #dce7f1; color: #526b82; }
+#association-editor .association-document-meta span { display: flex; flex-wrap: wrap; gap: 6px; }
+#association-editor .association-document-meta strong { color: #193650; }
+#association-editor .association-document-hint { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: #365e7f; line-height: 1.5; }
 /* Show a quiet progress layer while association changes are being saved. */
 #association-editor .association-saving:not([hidden]) { position: absolute; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; gap: 12px; background: rgb(255 255 255 / 94%); color: var(--primary); font-weight: 700; }
 #association-editor .association-saving-spinner { width: 24px; height: 24px; border: 3px solid #dbe6ee; border-top-color: var(--primary); border-radius: 50%; }

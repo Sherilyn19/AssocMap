@@ -18,7 +18,8 @@ class BarangayService
         DB::transaction(function () use ($barangay, $data, $currentUser): void {
             $actor = $this->actors->lock($currentUser);
             abort_unless($actor->role?->code === 'system_admin', 403);
-            $name = trim($data['name']);
+            // Use the recorded name even if a different name was submitted.
+            $name = $barangay->name;
             if (Barangay::query()
                 ->where('id', '!=', $barangay->id)
                 ->where('municipality_id', $data['municipality_id'])

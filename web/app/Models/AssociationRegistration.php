@@ -16,7 +16,7 @@ class AssociationRegistration extends Model
 
     protected function casts(): array
     {
-        return ['registration_date' => 'date', 'expiration_date' => 'date', 'is_primary' => 'boolean'];
+        return ['registration_date' => 'date', 'expiration_date' => 'date', 'latest_renewal_date' => 'date', 'renewal_count' => 'integer', 'is_primary' => 'boolean'];
     }
 
     public function association(): BelongsTo
