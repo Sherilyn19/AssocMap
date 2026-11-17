@@ -10,6 +10,18 @@
 #association-editor [data-association-registration] { margin-top: 22px; padding: 16px; border: 1px solid #dce7f1; border-radius: 9px; background: #f8fbfe; }
 #association-editor .association-registration-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-bottom: 8px; }
 #association-editor .association-registration-heading h3 { margin: 0; color: #193650; font-size: 14px; }
+/* Show a quiet progress layer while association changes are being saved. */
+#association-editor .association-saving:not([hidden]) { position: absolute; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; gap: 12px; background: rgb(255 255 255 / 94%); color: var(--primary); font-weight: 700; }
+#association-editor .association-saving-spinner { width: 24px; height: 24px; border: 3px solid #dbe6ee; border-top-color: var(--primary); border-radius: 50%; }
+@media (prefers-reduced-motion: no-preference) { #association-editor .association-saving-spinner { animation: association-save-spin .8s linear infinite; } @keyframes association-save-spin { to { transform: rotate(360deg); } } }
+/* Keep the explanation next to its label without covering the select. */
+#association-editor .association-primary-label { display: flex; align-items: center; gap: 5px; }
+#association-editor .association-primary-label label { margin: 0; }
+/* Match the detail navigation used throughout the workspace. */
+.admin-workspace .association-management .workflow-navigation { margin: 0; }
+.admin-workspace .association-management .workflow-navigation .back-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
+.admin-workspace .association-management .workflow-navigation nav a { font-weight: 600; text-decoration: none; }
+.admin-workspace .association-management .workflow-navigation .back-link:hover { background: #edf4fb; border-color: #9bbad8; }
 #association-editor [data-association-registration] > label { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; }
 #association-editor [data-registration-fields] { margin-top: 14px; }
 #association-editor [data-registration-fields]:disabled { opacity: .65; }

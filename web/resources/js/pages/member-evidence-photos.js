@@ -7,12 +7,15 @@ export function initMemberEvidencePhotos() {
         const image = root.querySelector('[data-evidence-image]');
         const viewerStatus = root.querySelector('[data-evidence-viewer-status]');
         const close = root.querySelector('[data-evidence-close]');
+        const fallback = root.querySelector('[data-evidence-fallback]');
 
         // Show a clear message if the small photo cannot be displayed.
         const thumbnailLoaded = () => { status.hidden = true; };
         const thumbnailFailed = () => {
             link.hidden = true;
-            status.hidden = false;
+            // Use initials for member profiles when their photo is unavailable.
+            if (fallback) fallback.hidden = false;
+            status.hidden = Boolean(fallback);
             status.classList.remove('is-loading');
             status.textContent = 'Photo unavailable. Refresh the page to check your access or try again.';
         };

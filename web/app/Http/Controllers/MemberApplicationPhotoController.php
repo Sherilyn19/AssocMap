@@ -21,7 +21,10 @@ class MemberApplicationPhotoController extends Controller
             return $this->unavailable(403);
         }
 
+        // Only allow each account to see photos within its permitted work.
         $allowed = match ($actor->role?->code) {
+            'system_admin' => $memberApplication->status === 'approved'
+                && $memberApplication->member()->useWritePdo()->exists(),
             'association_account' => $memberApplication->submitted_by_user_id === $actor->id
                 && AssociationAccount::query()->useWritePdo()->where('user_id', $actor->id)
                     ->where('association_id', $memberApplication->association_id)->where('is_active', true)->exists(),

@@ -8,9 +8,10 @@
         $values[$field] = is_string($value) || is_int($value) ? (string) $value : '';
     }
 @endphp
-<div data-workspace-module="users" data-workspace-title="Invite User">
-    <a class="back-link" href="{{ route('admin.users.index') }}"><x-icon name="back" />Back to User Management</a>
-    @include('partials.page-header', ['title' => 'Invite User', 'description' => 'The recipient sets a password and activates the invited account before signing in.', 'eyebrow' => 'User Management'])
+<div class="user-management" data-workspace-module="users" data-workspace-title="Invite User">
+    {{-- Keep the return path consistent with account details. --}}
+    <div class="card user-page-heading">@include('partials.page-header', ['title' => 'Invite User', 'description' => 'The recipient sets a password and activates the invited account before signing in.'])</div>
+    <x-workflow-navigation :back="['label' => 'User Management', 'url' => route('admin.users.index')]" :parents="[['label' => 'User Management', 'url' => route('admin.users.index')]]" current="Invite User" />
 
     @if($configurationProblems !== [])
         <div class="notice notice-error" role="alert"><div>
@@ -23,7 +24,7 @@
 
     @if(session('invitation_result'))
         @php($result = session('invitation_result'))
-        <div class="notice" role="status">
+        <div @class(['toast' => ($result['status'] ?? null) === 'sent', 'notice' => ($result['status'] ?? null) !== 'sent']) role="status">
             <div>
                 <p>{{ $result['message'] }}</p>
                 @if($result['invitation_id'])<p>Operation reference: {{ $result['invitation_id'] }}. Status: {{ $result['status'] }}.</p>@endif

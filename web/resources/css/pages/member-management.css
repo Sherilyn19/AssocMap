@@ -129,6 +129,12 @@
 .member-evidence-photo [hidden] { display: none !important; }
 .member-evidence-link { display: inline-block; max-width: 100%; border-radius: 8px; }
 .member-evidence-link img { display: block; max-width: 100%; height: auto; border-radius: 8px; }
+/* Keep the member photo compact beside the name. */
+.member-profile-photo { flex: none; max-width: 160px; }
+.member-profile-photo .member-evidence-link img { width: 50px; height: 50px; object-fit: cover; }
+.member-profile-photo .member-evidence-link:hover img { opacity: .9; }
+/* Make initials slightly easier to read when there is no photo. */
+.admin-member-modal .member-record-dialog .member-avatar { font-size: 17px; }
 .member-evidence-link:focus-visible, .member-evidence-close:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 .member-evidence-status { display: flex; align-items: center; gap: 10px; color: var(--text-secondary); line-height: 1.5; }
 .member-evidence-status.is-loading::before { content: ''; width: 22px; height: 22px; flex: none; border: 3px solid #dbe6ee; border-top-color: var(--primary); border-radius: 50%; }

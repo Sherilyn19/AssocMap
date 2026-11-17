@@ -2,10 +2,11 @@
 
 @section('content')
 <section class="area-management" data-workspace-module="areas" data-workspace-title="Barangay Details">
-    <nav class="area-breadcrumbs" aria-label="Breadcrumb"><a href="{{ $backUrl }}">Area Management</a><span aria-hidden="true">/</span><a href="{{ route('admin.municipalities.show', $record->municipality_id) }}">{{ $record->municipality?->name }}</a><span aria-hidden="true">/</span><span>{{ $record->name }}</span></nav>
     <header class="card area-page-heading"><div><p class="eyebrow">Barangay details</p><h1 tabindex="-1">{{ $record->name }}</h1><p><a href="{{ route('admin.municipalities.show', $record->municipality_id) }}">{{ $record->municipality?->name }}</a> / {{ $record->municipality?->province }} / {{ $record->municipality?->region }}</p></div><x-status-badge :value="$record->is_active ? 'Active' : 'Inactive'" /></header>
+    {{-- Return to the register while showing the geographic path. --}}
+    <x-workflow-navigation :back="['label' => 'Area Management', 'url' => $backUrl]" :parents="[['label' => 'Area Management', 'url' => $backUrl], ['label' => $record->municipality?->name ?? 'Municipality', 'url' => route('admin.municipalities.show', $record->municipality_id)]]" :current="$record->name" />
     <section class="card area-information" aria-labelledby="geographic-information-title">
-        <div class="area-section-heading"><h2 id="geographic-information-title">Barangay information</h2>@include('admin.areas.partials.actions')</div>
+        <div class="area-section-heading"><h2 id="geographic-information-title"><x-icon name="pin" /> Barangay information</h2>@include('admin.areas.partials.actions')</div>
         <dl class="area-information-grid"><div><dt>Name</dt><dd>{{ $record->name }}</dd></div><div><dt>City / Municipality</dt><dd><a href="{{ route('admin.municipalities.show', $record->municipality_id) }}">{{ $record->municipality?->name }}</a></dd></div><div><dt>PSGC code</dt><dd>{{ $record->psgc_code ?? 'Not recorded' }}</dd></div><div><dt>Source</dt><dd>{{ $record->source === 'psgc' ? 'PSGC' : 'Manual' }}</dd></div><div><dt>Connected associations</dt><dd>{{ number_format($record->associations_count) }}</dd></div><div><dt>Created</dt><dd>{{ $record->created_at?->timezone('Asia/Manila')->format('M d, Y') ?? 'Not recorded' }}</dd></div></dl>
         <p class="area-help">Connected associations include active, inactive, and archived records. Inactive geography remains readable.</p>
     </section>
@@ -19,6 +20,5 @@
         </tbody></table></div>
         @include('admin.areas.partials.pagination', ['paginator' => $areas, 'label' => 'Recorded address pages'])
     </section>
-    <a class="back-link" href="{{ $backUrl }}"><x-icon name="back" />Return to Area Management</a>
 </section>
 @endsection

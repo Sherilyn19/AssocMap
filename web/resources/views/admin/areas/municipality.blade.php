@@ -2,10 +2,11 @@
 
 @section('content')
 <section class="area-management" data-workspace-module="areas" data-workspace-title="City / Municipality Details">
-    <nav class="area-breadcrumbs" aria-label="Breadcrumb"><a href="{{ $backUrl }}">Area Management</a><span aria-hidden="true">/</span><span>{{ $record->name }}</span></nav>
     <header class="card area-page-heading"><div><p class="eyebrow">{{ ucfirst($record->locality_type) }} details</p><h1 tabindex="-1">{{ $record->name }}</h1><p>{{ $record->province }} / {{ $record->region }}</p></div><x-status-badge :value="$record->is_active ? 'Active' : 'Inactive'" /></header>
+    {{-- Keep the return link and path in the same place as other detail pages. --}}
+    <x-workflow-navigation :back="['label' => 'Area Management', 'url' => $backUrl]" :parents="[['label' => 'Area Management', 'url' => $backUrl]]" :current="$record->name" />
     <section class="card area-information" aria-labelledby="geographic-information-title">
-        <div class="area-section-heading"><h2 id="geographic-information-title">Geographic information</h2>@include('admin.areas.partials.actions')</div>
+        <div class="area-section-heading"><h2 id="geographic-information-title"><x-icon name="pin" /> Geographic information</h2>@include('admin.areas.partials.actions')</div>
         <dl class="area-information-grid"><div><dt>Name</dt><dd>{{ $record->name }}</dd></div><div><dt>Type</dt><dd>{{ ucfirst($record->locality_type) }}</dd></div><div><dt>Province</dt><dd>{{ $record->province }}</dd></div><div><dt>Region</dt><dd>{{ $record->region }}</dd></div><div><dt>PSGC code</dt><dd>{{ $record->psgc_code ?? 'Not recorded' }}</dd></div><div><dt>Source</dt><dd>{{ $record->source === 'psgc' ? 'PSGC' : 'Manual' }}</dd></div><div><dt>Connected barangays</dt><dd>{{ number_format($record->barangays_count) }}</dd></div><div><dt>Connected associations</dt><dd>{{ number_format($record->associations_count) }}</dd></div></dl>
         <p class="area-help">Connected counts include inactive geographic records and archived associations. Historical references remain available.</p>
     </section>
@@ -18,6 +19,5 @@
         @include('admin.areas.partials.pagination', ['paginator' => $barangays, 'label' => 'Connected barangay pages'])
     </section>
     @include('admin.areas.partials.associations', ['municipalityName' => $record->name])
-    <a class="back-link" href="{{ $backUrl }}"><x-icon name="back" />Return to Area Management</a>
 </section>
 @endsection
