@@ -28,7 +28,7 @@
     </nav>
     <div class="area-info-row"><span>About these totals</span><x-area-info label="About geographic totals">City and municipality totals include all records. Current barangays are active; current associations include all unarchived statuses.</x-area-info></div>
     <section class="card area-directory" aria-labelledby="area-directory-title">
-        <div class="area-section-heading"><div><div class="area-heading-title"><h2 id="area-directory-title">Geographic directory</h2><x-area-info label="About connected records">Counts include inactive areas and all association statuses, including archived records. Deactivation keeps existing links.</x-area-info></div><p>{{ number_format($records->total()) }} matching record(s)</p></div><p>Record specific addresses from a barangay's detail page.</p></div>
+        <div class="area-section-heading"><div><div class="area-heading-title"><h2 id="area-directory-title">Geographic directory</h2><x-area-info label="About connected records">Counts include inactive areas and all association statuses, including archived records. Deactivation keeps existing links.</x-area-info></div><p>{{ number_format($records->total()) }} matching record(s)</p></div></div>
         <nav class="area-tabs" aria-label="Geographic record type">
             @foreach(['municipalities' => 'Cities / Municipalities', 'barangays' => 'Barangays'] as $tab => $label)
                 <a href="{{ route('admin.areas.index', ['tab' => $tab, 'status' => $tab === 'barangays' ? 'active' : '', 'q' => $filters['q'], 'sort' => $filters['sort']]) }}" @if($filters['tab'] === $tab) aria-current="page" @endif>{{ $label }}</a>

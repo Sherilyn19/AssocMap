@@ -8,6 +8,7 @@
     'compact' => false,
     'scrollContext' => false,
     'associationName' => null,
+    'adminAccount' => null,
 ])
 
 <header @class(['topbar', 'workspace-header', 'workspace-header--compact' => $compact, 'workspace-header--scroll-context' => $scrollContext])>
@@ -26,7 +27,20 @@
             <span class="avatar">{{ $avatar }}</span>
         @endif
         <div class="account-copy">
-            @if($associationName)
+            @if($adminAccount)
+                <details class="admin-account-details">
+                    <summary><strong>{{ $displayName }}</strong><x-icon name="chevron-down" /></summary>
+                    <div class="admin-account-popover">
+                        <div class="admin-account-title"><x-icon name="shield" /><span><small>Account</small><strong>{{ $adminAccount->display_name }}</strong></span></div>
+                        <dl>
+                            <div><dt><x-icon name="user" /> User ID</dt><dd>{{ $adminAccount->id }}</dd></div>
+                            <div><dt><x-icon name="calendar" /> Created</dt><dd>{{ $adminAccount->created_at?->copy()->timezone('Asia/Manila')->format('M d, Y · g:i A') ?? 'Not recorded' }}</dd></div>
+                            <div><dt><x-icon name="calendar" /> Activated</dt><dd>{{ $adminAccount->activated_at?->copy()->timezone('Asia/Manila')->format('M d, Y · g:i A') ?? 'Not recorded' }}</dd></div>
+                        </dl>
+                        <small>Times shown in Philippine time</small>
+                    </div>
+                </details>
+            @elseif($associationName)
                 <details class="account-association"><summary><strong>{{ $displayName }}</strong><x-icon name="chevron-down" /></summary><div class="account-association-popover"><x-icon name="building" /><span><small>Association</small><strong>{{ $associationName }}</strong></span></div></details>
             @else
                 <strong>{{ $displayName }}</strong>
