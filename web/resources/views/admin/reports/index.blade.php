@@ -1,5 +1,12 @@
 @php
     $defaultYear = (int) now('Asia/Manila')->format('Y');
+    $plainLabels = $role === 'association_account' ? json_decode(file_get_contents(resource_path('ui/report-plain-language.json')), true, 512, JSON_THROW_ON_ERROR) : [];
+    $plain = function ($text) use ($plainLabels, $role) {
+        if ($role === 'association_account' && preg_match('/^(\d+) quarterly entries excluded: quarterly income cannot be allocated to the selected month\.$/', $text, $matches)) {
+            return $matches[1].' quarterly income entries are excluded because they cannot be assigned to the selected month.';
+        }
+        return $plainLabels[$text] ?? $text;
+    };
     $activeFilterCount = count(array_filter($filters, fn ($value, $key) => $key !== 'report_type'
         && !($key === 'year' && (int) $value === $defaultYear), ARRAY_FILTER_USE_BOTH));
     $primaryMeasureMap = [
@@ -12,6 +19,10 @@
         'income' => [['income', 'Sum of recorded gross income (PHP)'], ['income', 'Recorded income observations'], ['income', 'Recorded zero income observations'], ['income', 'Production observations without selected income']],
         'activities' => [['activities', 'Recorded program activities'], ['monitoring', 'Monitoring records'], ['monitoring', 'Visit-report rows'], ['monitoring', 'Selected projects without monitoring']],
     ];
+    if ($role === 'association_account') {
+        $primaryMeasureMap['comprehensive'][] = ['production', 'Production observations'];
+        $primaryMeasureMap['comprehensive'][] = ['income', 'Sum of recorded gross income (PHP)'];
+    }
     $primaryMeasures = [];
     $measureValue = fn ($value) => $value === null ? 'Unobserved' : preg_replace('/\B(?=(\d{3})+(?!\d))/', ',', (string) $value);
     foreach ($primaryMeasureMap[$filters['report_type']] as [$sectionKey, $measureLabel]) {
@@ -43,7 +54,7 @@
         @endslot
     @endcomponent
     <section class="card report-configuration" aria-labelledby="report-filter-title">
-        <div class="section-heading"><div><h2 id="report-filter-title"><button class="report-filter-disclosure" type="button" data-report-filter-toggle aria-controls="report-filter-panel" aria-expanded="true">Build your report <span class="report-filter-count" data-report-filter-count @if(!$activeFilterCount) hidden @endif>{{ $activeFilterCount }}</span><x-icon name="chevron-down" /></button></h2><p>Select a report and filters to get started.</p></div><div class="report-heading-meta"><x-area-info label="About reporting periods">Periods apply to recorded events. Association and member counts are current snapshots; month filters use recorded details.</x-area-info></div></div>
+        <div class="section-heading"><div><h2 id="report-filter-title"><button class="report-filter-disclosure" type="button" data-report-filter-toggle aria-controls="report-filter-panel" aria-expanded="true">Build your report <span class="report-filter-count" data-report-filter-count @if(!$activeFilterCount) hidden @endif>{{ $activeFilterCount }}</span><x-icon name="chevron-down" /></button></h2><p>Select a report and filters to get started.</p></div><div class="report-heading-meta"><x-area-info label="About reporting periods">{{ $role === 'association_account' ? 'Program year selects projects by their recorded program year. Reporting year and quarter select applicable activities and monitoring periods. Month filters use recorded monthly details. Member and association counts show their current state.' : 'Periods apply to recorded events. Association and member counts are current snapshots; month filters use recorded details.' }}</x-area-info></div></div>
         <form id="report-filter-panel" data-report-form method="GET" action="{{ route($prefix.'.index') }}">
             <noscript><p>Choose a report type below before setting its filters:</p><ul>@foreach($types as $value => $label)<li><a href="{{ route($prefix.'.index', ['report_type' => $value]) }}">{{ $label }}</a></li>@endforeach</ul></noscript>
             <div class="field"><label for="report-type">Report type</label><select id="report-type" name="report_type" required>
@@ -57,7 +68,7 @@
                     @foreach($options['associations'] as $option)<option value="{{ $option['id'] }}" data-municipality="{{ $option['municipality_id'] }}" @selected(($filters['association_id'] ?? '') === $option['id'])>{{ $option['name'] }}</option>@endforeach
                 </select></div>
             @else
-                <p class="field-help">Your current active association determines the reporting scope.</p>
+                <p class="field-help">This report covers your currently active linked association.</p>
             @endif
             @foreach(['program_year' => 'Program year', 'year' => 'Reporting year', 'quarter' => 'Quarter', 'month' => 'Recorded month', 'project_id' => 'Project', 'product_id' => 'Product', 'component_id' => 'Program component'] as $key => $label)
                 <div class="field" data-report-filter="{{ $key }}" @if(!in_array($key, $filterMap[$filters['report_type']], true)) hidden @endif>
@@ -92,32 +103,33 @@
                 @class(['notice-error' => $unavailable || isset($sizeLimitMessage)])>{{ $sizeLimitMessage ?? ($unavailable ? 'Reporting is temporarily unavailable. Please try again later.' : ($role === 'association_account' ? '' : 'Report loaded from authorized records.')) }}</p>
             <div data-report-result>
                 @if($result)
-                    <nav class="report-section-nav" aria-label="Report sections"><a href="#report-scope">Scope</a><a href="#report-summary">Overview</a><a href="#report-analytics">Charts</a><a href="#report-quality">Interpretation</a><a href="#report-details">Detailed records <x-icon name="arrow" /></a></nav>
+                    <nav class="report-section-nav" aria-label="Report sections"><a href="#report-scope">{{ $plain('Scope') }}</a><a href="#report-summary">Overview</a><a href="#report-analytics">Charts</a><a href="#report-quality">{{ $plain('Interpretation') }}</a><a href="#report-details">Detailed records <x-icon name="arrow" /></a></nav>
                     <div class="report-result-content">
                     <h2>{{ $result['title'] }}</h2>
                     <section class="report-context-card" id="report-scope" aria-labelledby="report-scope-title">
-                        <h3 id="report-scope-title">Reporting scope and period</h3>
-                        <p class="report-context-brief">{{ count($result['meta']['scope']) === 1 ? $result['meta']['scope'][0] : count($result['meta']['scope']).' authorized associations' }} · {{ isset($filters['year']) ? 'Reporting year '.$filters['year'] : 'Current snapshot' }}{{ isset($filters['quarter']) ? ' · Q'.$filters['quarter'] : '' }}{{ isset($filters['month']) ? ' · Month '.$filters['month'] : '' }}{{ isset($filters['program_year']) ? ' · Program year '.$filters['program_year'] : '' }}</p>
-                        <details class="report-scope-details"><summary>Scope and applied filters</summary>
-                            <p>{{ $result['meta']['scope_basis'] }}</p>
+                        <h3 id="report-scope-title">{{ $plain('Reporting scope and period') }}</h3>
+                        <p class="report-context-brief">{{ count($result['meta']['scope']) === 1 ? $result['meta']['scope'][0] : count($result['meta']['scope']).' authorized associations' }} · {{ isset($filters['year']) ? 'Reporting year '.$filters['year'] : ($role === 'association_account' ? 'Current information' : 'Current snapshot') }}{{ isset($filters['quarter']) ? ' · Q'.$filters['quarter'] : '' }}{{ isset($filters['month']) ? ' · Month '.$filters['month'] : '' }}{{ isset($filters['program_year']) ? ' · Program year '.$filters['program_year'] : '' }}</p>
+                        <details class="report-scope-details"><summary>{{ $plain('Scope and applied filters') }}</summary>
+                            <p>{{ $plain($result['meta']['scope_basis']) }}</p>
                             <p>Associations: {{ implode('; ', $result['meta']['scope']) ?: 'None in this scope' }}</p>
                             <p class="field-help">Generated {{ $result['meta']['generated_at'] }} · {{ $result['meta']['timezone'] }}</p>
                             <p class="field-help">@foreach($result['meta']['filters'] as $key => $value){{ str_replace('_', ' ', $key) }}: {{ $value }}{{ $loop->last ? '' : ' · ' }}@endforeach</p>
-                            <p class="field-help">Current association/member counts and project statuses are snapshots. Program year selects a cohort; reporting year/quarter selects recorded events and monitoring periods.</p>
+                            <p class="field-help">{{ $role === 'association_account' ? 'Association and member counts and project statuses show their current state. Program year selects projects by their recorded program year; reporting year and quarter select applicable events and monitoring periods.' : 'Current association/member counts and project statuses are snapshots. Program year selects a cohort; reporting year/quarter selects recorded events and monitoring periods.' }}</p>
                         </details>
                     </section>
                     @if($result['empty'])<p class="notice">No recorded results match the selected report and filters.</p>@endif
                     <section class="report-summary" id="report-summary" tabindex="-1" aria-labelledby="report-summary-title">
-                        <div class="report-section-heading"><div><h3 id="report-summary-title">At a glance</h3><p>Recorded indicators within the applied scope. Unobserved values are not zero.</p></div></div>
-                        <dl class="report-measures report-primary-measures" data-report-kpis>@foreach($primaryMeasures as $measure)<div><dt>{{ $measure['label'] }}@if($role === 'association_account')<x-icon :name="match (true) { str_contains(strtolower($measure['label']), 'member') => 'users', str_contains(strtolower($measure['label']), 'project') => 'briefcase', str_contains(strtolower($measure['label']), 'training') => 'graduation', default => 'chart' }" />@endif</dt><dd>{{ $measureValue($measure['value']) }}</dd></div>@endforeach</dl>
+                        <div class="report-section-heading"><div><h3 id="report-summary-title">At a glance</h3><p>{{ $plain('Recorded indicators within the applied scope. Unobserved values are not zero.') }}</p></div></div>
+                        <dl class="report-measures report-primary-measures" data-report-kpis>@foreach($primaryMeasures as $measure)<div><dt>{{ $plain($measure['label']) }}@if($role === 'association_account')<x-icon :name="match (true) { str_contains(strtolower($measure['label']), 'member') => 'users', str_contains(strtolower($measure['label']), 'project') => 'briefcase', str_contains(strtolower($measure['label']), 'training') => 'graduation', default => 'chart' }" />@endif</dt><dd>{{ $plain($measureValue($measure['value'])) }}</dd></div>@endforeach</dl>
                         <details class="report-all-measures"><summary>All report measures</summary>
-                        <p class="field-help">Recorded values within the applied scope. Unobserved values are not zero.</p>
-                        @foreach($result['sections'] as $section)
+                        <p class="field-help">{{ $plain('Recorded values within the applied scope. Unobserved values are not zero.') }}</p>
+                        <div class="report-measure-groups">@foreach($result['sections'] as $section)
                             @if($section['measures'])
-                                <h4>{{ $section['title'] }}</h4>
-                                <dl class="report-secondary-measures">@foreach($section['measures'] as $measure)<div><dt>{{ $measure['label'] }}</dt><dd>{{ $measureValue($measure['value']) }}</dd></div>@endforeach</dl>
+                                <section class="report-measure-group"><h4>@if($role === 'association_account')<x-icon :name="match ($section['key']) { 'associations' => 'building', 'members' => 'users', 'projects' => 'briefcase', 'trainings' => 'graduation', 'income' => 'receipt', 'activities' => 'calendar', 'monitoring' => 'clipboard-check', default => 'chart' }" />@endif<span>{{ $plain($section['title']) }}</span></h4>
+                                <dl class="report-secondary-measures">@foreach($section['measures'] as $measure)<div><dt>{{ $plain($measure['label']) }}</dt><dd>{{ $plain($measureValue($measure['value'])) }}</dd></div>@endforeach</dl>
+                                </section>
                             @endif
-                        @endforeach
+                        @endforeach</div>
                         </details>
                     </section>
                     <section class="report-analytics" id="report-analytics" tabindex="-1" aria-labelledby="report-analytics-title">
@@ -125,18 +137,18 @@
                         <p class="field-help">Enable JavaScript for charts. All measures and detailed tables remain available. Chart images are HTML-only.</p>
                         @include('admin.reports.partials.geography', ['geography' => collect($result['sections'])->firstWhere('key', 'association_geography')])
                     </section>
-                    <details class="report-quality" id="report-quality" tabindex="-1"><summary>Data interpretation and quality</summary>
-                        <ul>@foreach($result['notes'] as $note)<li>{{ $note }}</li>@endforeach</ul>
+                    <details class="report-quality" id="report-quality" tabindex="-1"><summary>{{ $plain('Data interpretation and quality') }}</summary>
+                        <ul>@foreach($result['notes'] as $note)<li>{{ $plain($note) }}</li>@endforeach</ul>
                         @foreach($result['sections'] as $section)
-                            @if($section['notes'])<h4>{{ $section['title'] }}</h4><ul>@foreach($section['notes'] as $note)<li>{{ $note }}</li>@endforeach</ul>@endif
+                            @if($section['notes'])<h4>{{ $plain($section['title']) }}</h4><ul>@foreach($section['notes'] as $note)<li>{{ $plain($note) }}</li>@endforeach</ul>@endif
                         @endforeach
                     </details>
                     <details class="report-detailed-data" id="report-details" tabindex="-1"><summary>Detailed records <span class="report-detail-count">{{ count($result['sections']) }} sections</span></summary>
                     @foreach($result['sections'] as $section)
-                        <section class="report-section report-data-section" id="report-table-{{ $section['key'] ?? $loop->index }}" tabindex="-1"><h4>{{ $section['title'] }}</h4>
+                        <section class="report-section report-data-section" id="report-table-{{ $section['key'] ?? $loop->index }}" tabindex="-1"><h4>{{ $plain($section['title']) }}</h4>
                             @if($section['rows'])
-                                <div class="report-table-scroll" role="region" tabindex="0" aria-label="{{ $section['title'] }}"><table><caption>{{ $section['title'] }}</caption><thead><tr>@foreach($section['columns'] as $column)<th scope="col" @class(['report-numeric' => in_array($column['type'], ['integer', 'decimal'], true)])>{{ $column['label'] }}</th>@endforeach</tr></thead><tbody>
-                                    @foreach(array_slice($section['rows'], 0, 100) as $row)<tr>@foreach($section['columns'] as $column)<td @class(['report-numeric' => in_array($column['type'], ['integer', 'decimal'], true)])>{{ $row[$column['key']] ?? 'Unobserved / N/A' }}</td>@endforeach</tr>@endforeach
+                                <div class="report-table-scroll" role="region" tabindex="0" aria-label="{{ $plain($section['title']) }}"><table><caption>{{ $plain($section['title']) }}</caption><thead><tr>@foreach($section['columns'] as $column)<th scope="col" @class(['report-numeric' => in_array($column['type'], ['integer', 'decimal'], true)])>{{ $plain($column['label']) }}</th>@endforeach</tr></thead><tbody>
+                                    @foreach(array_slice($section['rows'], 0, 100) as $row)<tr>@foreach($section['columns'] as $column)<td @class(['report-numeric' => in_array($column['type'], ['integer', 'decimal'], true)])>{{ $row[$column['key']] ?? $plain('Unobserved / N/A') }}</td>@endforeach</tr>@endforeach
                                 </tbody></table></div>
                                 @if(count($section['rows']) > 100)<p>Showing the first 100 rows. Enable JavaScript for all table pages.</p>@endif
                             @else<p class="report-empty">No recorded rows for this section.</p>@endif
@@ -148,6 +160,6 @@
             </div>
         </section>
     </div>
-    @php $initialReport = ['result' => $result, 'options' => $options, 'filterMap' => $filterMap, 'primaryMeasureMap' => $primaryMeasureMap, 'defaultYear' => (int) now('Asia/Manila')->format('Y')]; @endphp
+    @php $initialReport = ['result' => $result, 'options' => $options, 'filterMap' => $filterMap, 'primaryMeasureMap' => $primaryMeasureMap, 'plainLanguage' => $plainLabels, 'defaultYear' => (int) now('Asia/Manila')->format('Y')]; @endphp
     <script type="application/json" data-report-initial>@json($initialReport)</script>
 </div>
