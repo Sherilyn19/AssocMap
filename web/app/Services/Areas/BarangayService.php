@@ -32,6 +32,7 @@ class BarangayService
                 'name' => $name,
                 'municipality_id' => $data['municipality_id'],
                 'psgc_code' => $data['psgc_code'] ?? null,
+                'zip_code' => $data['zip_code'],
             ]);
             // Keep the activity history with the saved change.
             if ($barangay->wasChanged()) $this->audit->recordActor($actor, 'UPDATE BARANGAY', 'Area Management', 'barangay', (string) $barangay->id);
@@ -72,6 +73,7 @@ class BarangayService
                 'municipality_id' => $data['municipality_id'],
                 'name' => $name,
                 'psgc_code' => $data['psgc_code'] ?? null,
+                'zip_code' => $data['zip_code'],
                 'source' => 'manual',
                 'is_active' => true,
             ]);

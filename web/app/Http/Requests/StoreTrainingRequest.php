@@ -50,7 +50,8 @@ class StoreTrainingRequest extends FormRequest
             ],
 
             'related_project_id' => [
-                'nullable',
+                // Every training must be linked to a project.
+                'required',
                 'uuid',
                 'exists:projects,id',
             ],
@@ -84,7 +85,8 @@ class StoreTrainingRequest extends FormRequest
             ],
 
             'end_date' => [
-                'nullable',
+                // Each training must have a recorded end date.
+                'required',
                 'date',
                 'after_or_equal:start_date',
             ],
@@ -96,7 +98,8 @@ class StoreTrainingRequest extends FormRequest
             ],
 
             'conducted_by' => [
-                'nullable',
+                // Record who conducted the training.
+                'required',
                 'string',
                 'max:255',
             ],

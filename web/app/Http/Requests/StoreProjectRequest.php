@@ -72,10 +72,12 @@ class StoreProjectRequest extends FormRequest
             ],
 
             'implementation_end_date' => [
-                'nullable',
+                // An implementation end date is required for every project.
+                'required',
                 'date',
                 'after_or_equal:implementation_start_date',
             ],
+
 
             'status' => [
                 'required',

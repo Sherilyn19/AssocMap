@@ -28,6 +28,8 @@ class StoreBarangayRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // Keep ZIP codes as text so leading zeroes are preserved.
+            'zip_code' => ['required', 'string', 'regex:/\A[0-9]{4}\z/'],
             'municipality_id' => [
                 'required',
                 'uuid',

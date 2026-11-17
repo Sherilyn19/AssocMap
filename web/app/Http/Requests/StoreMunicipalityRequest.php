@@ -28,6 +28,8 @@ class StoreMunicipalityRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // A Philippine ZIP code has four digits and may start with zero.
+            'zip_code' => ['required', 'string', 'regex:/\A[0-9]{4}\z/'],
             'name' => [
                 'required',
                 'string',

@@ -43,6 +43,8 @@ export function initDialogs() {
             $('[name=area_record_id]', form).value = record?.id || '';
             $$('[name=name]', form).forEach(input => { input.value = record?.name || ''; });
             $('[name=psgc_code]', form).value = record?.psgc_code || '';
+            // Restore the saved ZIP code when an existing record is opened.
+            $('[name=zip_code]', form).value = record?.zip_code || '';
             $('[data-specific-municipality]', form).value = editing ? '' : (button.dataset.areaParent || '');
             $('[name=barangay_id]', form).value = editing ? '' : (button.dataset.areaBarangay || '');
             $('[name=address]', form).value = '';

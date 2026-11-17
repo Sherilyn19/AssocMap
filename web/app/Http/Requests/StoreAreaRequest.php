@@ -27,6 +27,8 @@ class StoreAreaRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // Require a four-digit ZIP code for the specific area.
+            'zip_code' => ['required', 'string', 'regex:/\A[0-9]{4}\z/'],
             'municipality_id' => [
                 'bail',
                 'required',

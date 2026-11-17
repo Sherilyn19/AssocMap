@@ -17,6 +17,7 @@ class Area extends Model
     protected $fillable = [
         'barangay_id',
         'address',
+        'zip_code',
         'source',
         'is_active',
     ];

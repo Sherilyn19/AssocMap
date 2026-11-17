@@ -97,6 +97,7 @@ class AreaManagementTest extends TestCase
                     $t->unique(['id', 'barangay_id']);
                 }
                 else { $t->string('name'); $t->string('psgc_code')->nullable()->unique(); }
+                $t->string('zip_code', 4)->nullable();
                 $t->string('source')->default('manual'); $t->boolean('is_active')->default(true);
                 $t->uuid('created_by')->nullable(); $t->timestamps();
             });
@@ -258,10 +259,10 @@ class AreaManagementTest extends TestCase
     public function test_summary_cards_match_lifecycle_counts_and_filter_destinations(): void
     {
         $response = $this->get('/admin/areas')->assertOk()->assertViewIs('admin.areas.register');
-        $this->assertSame(['municipalities' => 4, 'associations' => 4, 'current_barangays' => 3, 'inactive_barangays' => 1], $response->viewData('summary'));
+        $this->assertSame(['municipalities' => 4, 'associations' => 4, 'current_barangays' => 3, 'inactive_municipalities' => 1], $response->viewData('summary'));
         $dom = $this->dom($response->getContent());
         foreach (['municipalities' => [4, 'municipalities', ''], 'current_barangays' => [3, 'barangays', 'active'],
-            'inactive_barangays' => [1, 'barangays', 'inactive']] as $card => [$count, $tab, $status]) {
+            'inactive_municipalities' => [1, 'municipalities', 'inactive']] as $card => [$count, $tab, $status]) {
             $href = $dom->query('//a[@data-area-summary="'.$card.'"]')->item(0)->getAttribute('href');
             $filtered = $this->get($href)->assertOk();
             $this->assertSame($count, $filtered->viewData('records')->total());
@@ -273,7 +274,7 @@ class AreaManagementTest extends TestCase
         }
         $this->assertSame(route('admin.associations.index').'#associations',
             $dom->query('//a[@data-area-summary="associations"]')->item(0)->getAttribute('href'));
-        $response->assertSee('Inactive Barangays')->assertDontSee('Archived Barangays')
+        $response->assertSee('Inactive Municipalities')->assertDontSee('Archived Barangays')
             ->assertDontSee('data-area-list-type="Specific Area"', false);
     }
 
@@ -523,6 +524,22 @@ class AreaManagementTest extends TestCase
         $this->patch('/admin/barangays/'.self::id(11), ['name' => 'Changed barangay', 'municipality_id' => self::id(1), 'psgc_code' => 'B-EDIT'])->assertRedirect();
         $this->assertDatabaseHas('municipalities', ['id' => self::id(1), 'name' => $municipalityName, 'psgc_code' => 'M-EDIT']);
         $this->assertDatabaseHas('barangays', ['id' => self::id(11), 'name' => $barangayName, 'psgc_code' => 'B-EDIT']);
+    }
+
+    // ZIP codes are required for each new geographic record.
+    public function test_new_geographic_records_require_four_digit_zip_codes(): void
+    {
+        $municipality = ['name' => 'New Municipality'];
+        $barangay = ['municipality_id' => self::id(1), 'name' => 'New Barangay'];
+        $area = ['municipality_id' => self::id(1), 'barangay_id' => self::id(11), 'address' => 'New Area'];
+        foreach (['/admin/municipalities' => $municipality, '/admin/barangays' => $barangay, '/admin/areas' => $area] as $url => $data) {
+            $this->postJson($url, $data)->assertUnprocessable()->assertJsonValidationErrors('zip_code');
+            $this->postJson($url, $data + ['zip_code' => '12AB'])->assertUnprocessable()->assertJsonValidationErrors('zip_code');
+            $this->post($url, $data + ['zip_code' => '0600'])->assertSessionHasNoErrors();
+        }
+        $this->assertDatabaseHas('municipalities', ['name' => 'New Municipality', 'zip_code' => '0600']);
+        $this->assertDatabaseHas('barangays', ['name' => 'New Barangay', 'zip_code' => '0600']);
+        $this->assertDatabaseHas('areas', ['address' => 'New Area', 'zip_code' => '0600']);
     }
 
     private function geographySnapshot(): array

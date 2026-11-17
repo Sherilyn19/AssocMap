@@ -269,7 +269,7 @@ class DailyHarvestMonitoringTest extends TestCase
         $this->assertDatabaseCount('monitoring_harvest_entries', 1);
     }
 
-    public function test_goal_creation_revision_audit_missing_zero_and_over_100_percent(): void
+    public function test_saved_goal_cannot_be_revised_even_when_zero(): void
     {
         $row = $this->initialize(); $calculator = app(ProductionMonitoringService::class);
         $this->assertNull($calculator->goalAttainment($row, 0));
@@ -277,17 +277,13 @@ class DailyHarvestMonitoringTest extends TestCase
         $service->reviseGoal($this->record(), $row->id, $this->request(['target_output' => '0', 'reason' => 'No target approved']));
         $this->save($row, '2026-01-01', '15');
         $this->assertNull($calculator->goalAttainment($row->fresh(), 1));
-        $service->reviseGoal($this->record(), $row->id, $this->request(['target_output' => '10', 'reason' => 'Revised approved plan']));
-        $this->assertSame('150.00', $calculator->goalAttainment($row->fresh(), 1));
+        // A second submission must not change the saved goal or create an audit entry.
+        $this->rejected(fn () => $service->reviseGoal($this->record(), $row->id, $this->request(['target_output' => '10', 'reason' => 'Revised approved plan'])));
         $audit = DB::table('audit_logs')->where('entity_type', 'monitoring_production_goal')->orderBy('performed_at')->get();
-        $this->assertCount(2, $audit);
-        $revision = $audit->first(fn ($event) => json_decode($event->new_values, true)['target_output'] === '10.00');
-        $this->assertSame(self::ADMIN, $revision->actor_user_id);
-        $this->assertSame(['target_output' => '0.00'], json_decode($revision->old_values, true));
-        $this->assertSame(['target_output' => '10.00', 'reason' => 'Revised approved plan'], json_decode($revision->new_values, true));
-        $this->assertNotNull($revision->performed_at);
+        $this->assertCount(1, $audit);
+        $this->assertSame(self::ADMIN, $audit->first()->actor_user_id);
         $this->rejected(fn () => $service->reviseGoal($this->record(), $row->id, $this->request(['target_output' => '20', 'reason' => '   '])));
-        $this->assertSame('10.00', $row->fresh()->target_output);
+        $this->assertSame('0.00', $row->fresh()->target_output);
     }
 
     public function test_stale_repeated_submission_and_equal_quantity_edit_invalidate_revisions(): void

@@ -18,6 +18,7 @@ class Barangay extends Model
         'municipality_id',
         'name',
         'psgc_code',
+        'zip_code',
         'source',
         'is_active',
     ];

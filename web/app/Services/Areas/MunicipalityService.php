@@ -28,7 +28,7 @@ class MunicipalityService
                 throw ValidationException::withMessages(['name' => 'This locality already exists in the province.']);
             }
 
-            $municipality->update(['name' => $name, 'psgc_code' => $data['psgc_code'] ?? null]);
+            $municipality->update(['name' => $name, 'psgc_code' => $data['psgc_code'] ?? null, 'zip_code' => $data['zip_code']]);
             // Keep the activity history with the saved change.
             if ($municipality->wasChanged()) $this->audit->recordActor($actor, 'UPDATE MUNICIPALITY', 'Area Management', 'municipality', (string) $municipality->id);
         });
@@ -67,6 +67,7 @@ class MunicipalityService
             $municipality = new Municipality([
                 'name' => $name,
                 'psgc_code' => $data['psgc_code'] ?? null,
+                'zip_code' => $data['zip_code'],
                 'province' => 'Cebu',
                 'region' => 'Region VII',
                 'source' => 'manual',

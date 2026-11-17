@@ -107,6 +107,10 @@ class DailyHarvestMonitoringService
             $reason = trim($data['reason']);
             if ($reason === '') throw ValidationException::withMessages(['reason' => 'Explain why this quarterly goal is being set or revised.']);
             $row = $this->dailyRow($record, $productionId);
+            // A saved goal cannot be changed, including a goal of zero.
+            if ($row->target_output !== null) {
+                throw ValidationException::withMessages(['target_output' => 'The quarterly goal has already been saved and cannot be changed.']);
+            }
             $old = ['target_output' => $row->target_output];
             $target = $this->production->sumQuantities([$data['target_output']], 'target_output');
             if ($target === $row->target_output) {

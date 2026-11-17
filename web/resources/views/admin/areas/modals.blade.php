@@ -103,6 +103,9 @@
                 />
             </div>
 
+            {{-- Keep ZIP codes separate from PSGC codes for every area type. --}}
+            <div class="field"><label for="area-editor-zip">ZIP Code <span class="field-hint">*</span></label><input id="area-editor-zip" name="zip_code" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" value="{{ $areaOld('zip_code', $editingArea['zip_code'] ?? '') }}" required></div>
+
             <div class="form-grid field-wide area-reference-fields" data-area-reference-fields @if($areaType === 'Specific Area') hidden @endif>
             <div class="area-territory field-wide"><p class="area-territory-label">Parent administrative territory</p><div class="area-territory-grid">
                 <div><span>Province</span><strong data-area-editor-detail="province">{{ $editingArea['province'] ?? 'Cebu' }}</strong></div>

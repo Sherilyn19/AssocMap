@@ -15,14 +15,14 @@
         ],
         'Classification' => [
             ['name' => 'saad_activity_id', 'label' => 'SAAD Training Activity', 'type' => 'select', 'required' => true, 'choices' => $activities->map(fn ($activity) => ['value' => $activity->id, 'label' => $activity->name])->all()],
-            ['name' => 'related_project_id', 'label' => 'Related Project', 'type' => 'select', 'choices' => [], 'empty_label' => 'No related project'],
+            ['name' => 'related_project_id', 'label' => 'Related Project', 'type' => 'select', 'choices' => [], 'required' => true, 'empty_label' => 'Select a related project'],
         ],
         'Implementation' => [
             ['name' => 'program_year', 'label' => 'Program Year', 'type' => 'number', 'required' => true, 'min' => 2000, 'max' => 2100, 'step' => 1],
             ['name' => 'start_date', 'label' => 'Start Date', 'type' => 'date', 'required' => true],
-            ['name' => 'end_date', 'label' => 'End Date', 'type' => 'date'],
+            ['name' => 'end_date', 'label' => 'End Date', 'type' => 'date', 'required' => true],
             ['name' => 'venue', 'label' => 'Venue', 'type' => 'text', 'maxlength' => 255],
-            ['name' => 'conducted_by', 'label' => 'Conducted By', 'type' => 'text', 'maxlength' => 255],
+            ['name' => 'conducted_by', 'label' => 'Conducted By', 'type' => 'text', 'required' => true, 'maxlength' => 255],
             ['name' => 'training_cost', 'label' => 'Training Cost', 'type' => 'number', 'min' => 0, 'step' => 'any'],
             ['name' => 'status', 'label' => 'Status', 'type' => 'select', 'required' => true, 'choices' => collect($statuses)->map(fn ($label, $value) => compact('value', 'label'))->all()],
             ['name' => 'remarks', 'label' => 'Remarks', 'type' => 'textarea'],
@@ -111,7 +111,8 @@
         return Boolean(selected && select.value !== String(selected));
     }
     function projectChoices(selected = '') {
-        relatedProject.replaceChildren(new Option('No related project', ''));
+        // The project must be selected from the current association.
+        relatedProject.replaceChildren(new Option('Select a related project', ''));
         projects.filter(project => String(project.association_id) === association.value).forEach(project => relatedProject.add(new Option(project.label, project.value)));
         const unavailable = Boolean(selected && !Array.from(relatedProject.options).some(option => option.value === String(selected)));
         if (unavailable) {
@@ -183,7 +184,7 @@
         });
         notice.hidden = !unavailable;
         notice.textContent = unavailableProject
-            ? 'The previous Project selection has been preserved but is unavailable for new selection. Saving must still pass server validation. To change the relationship, choose an eligible Project or explicitly select No related project. Review the association, activity, and participants before saving.'
+            ? 'The previous project is unavailable for a new selection. Select an eligible project for this association before saving.'
             : 'Some previous selections are no longer available. Review the association, activity, project, and participants before saving.';
         if (unavailableEdit) {
             notice.hidden = false;
