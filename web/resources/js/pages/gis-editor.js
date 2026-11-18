@@ -1,5 +1,5 @@
 import { L, createGisMap, fitLayer } from './gis-map.js';
-import { debounce, fillOptions, gisRequest, queryUrl, showStatus } from '../core/gis-api.js';
+import { fillOptions, gisRequest, queryUrl, showStatus } from '../core/gis-api.js';
 import { applyFormErrors, showFeedback, showOperationError } from '../core/feedback.js';
 
 function validateGeometry(geometry, boundary) {
@@ -47,7 +47,6 @@ export async function initGis(root) {
     const type = form.elements.location_type;
     const association = root.querySelector('[data-gis-editor-association]');
     const project = form.elements.project_id;
-    const parentSearch = root.querySelector('[data-gis-option-search]');
     const parentNote = root.querySelector('[data-gis-option-note]');
     const associationRetry = root.querySelector('[data-gis-association-retry]');
     const projectStatus = root.querySelector('[data-gis-project-status]');
@@ -61,7 +60,6 @@ export async function initGis(root) {
     const seed = JSON.parse(root.querySelector('[data-gis-seed]').textContent);
     const correcting = form.dataset.gisCorrection === 'true';
     const identityLocked = correcting || Boolean(seed?.properties.project_finalized);
-    parentSearch.disabled = identityLocked;
     const map = createGisMap(root.querySelector('[data-gis-editor-map]'), root.querySelector('[data-gis-tile-notice]'));
     const editable = L.featureGroup().addTo(map);
     let forceMulti = false, syncing = false, dirty = false, saving = false;
@@ -162,7 +160,8 @@ export async function initGis(root) {
             if (!info) showStatus(registeredStatus, 'Registered area information unavailable.');
             else {
                 registeredArea.value = [info.address, info.context].filter(Boolean).join('\n');
-                showStatus(registeredStatus, `${info.message || ''} This is association-area information, not a verified project site. It is not saved as Project Site Address.`.trim());
+                // Keep other address warnings without showing the removed note.
+                showStatus(registeredStatus, info.message === 'No confirmed address is available for this association.' ? '' : (info.message || ''));
             }
         }
     }
@@ -182,7 +181,7 @@ export async function initGis(root) {
         associationController?.abort(); associationController = new AbortController();
         const controller = associationController;
         const requestedAssociation = selectedAssociation;
-        const q = parentSearch.value;
+        const q = '';
         associationState = 'loading';
         updateRegisteredArea();
         association.setAttribute('aria-busy', 'true');
@@ -192,7 +191,7 @@ export async function initGis(root) {
         try {
             const associations = await gisRequest(queryUrl(`${base}/parents`, { kind: 'association', q, selected: requestedAssociation }), { signal: controller.signal });
             if (controller !== associationController || controller.signal.aborted
-                || requestedAssociation !== selectedAssociation || q !== parentSearch.value) return;
+                || requestedAssociation !== selectedAssociation) return;
             if (!Array.isArray(associations.options)) throw new Error('Invalid association lookup response.');
             if (identityLocked && !associations.options.some(option => option.value === selectedAssociation)) {
                 associationReady = false;
@@ -204,7 +203,7 @@ export async function initGis(root) {
             associationReady = true;
             association.disabled = identityLocked;
             form.elements.parent_association_id.value = association.value;
-            parentNote.textContent = associations.truncated ? 'More associations are available. Refine the search.' : 'Only eligible associations within your current scope are available.';
+            parentNote.textContent = associations.truncated ? 'Only the first 50 associations are shown.' : 'Only associations you can manage are shown.';
             if (association.value !== selectedAssociation) {
                 selectedAssociation = association.value;
                 selectedProject = '';
@@ -229,7 +228,7 @@ export async function initGis(root) {
     async function loadProjects(force = false) {
         if (saving) return;
         const requestedAssociation = selectedAssociation;
-        const q = parentSearch.value;
+        const q = '';
         if (!requestedAssociation) {
             projectController?.abort(); projectKey = null;
             setProjectState('idle', 'Select an association first', 'Select an association to load its eligible projects.');
@@ -244,7 +243,7 @@ export async function initGis(root) {
         selectedProject = requestedProject;
         setProjectState('loading', 'Loading projects...', 'Loading projects...');
         const isCurrent = () => controller === projectController && !controller.signal.aborted
-            && requestedAssociation === selectedAssociation && q === parentSearch.value;
+            && requestedAssociation === selectedAssociation;
         try {
             const projects = await gisRequest(queryUrl(`${base}/parents`, {
                 kind: 'project', q, association_id: requestedAssociation, selected: requestedProject,
@@ -264,7 +263,8 @@ export async function initGis(root) {
             selectedProject = project.value;
             project.disabled = identityLocked;
             updateSaveState();
-            showStatus(projectStatus, projects.truncated ? 'More eligible projects are available. Refine the search.' : 'Eligible projects for the selected association are loaded.');
+            // Keep the limit notice only when more results are available.
+            showStatus(projectStatus, projects.truncated ? 'Only the first 50 projects are shown.' : '');
         } catch (error) {
             if (error.name !== 'AbortError' && isCurrent()) {
                 setProjectState('error', 'Projects unavailable — retry', 'Projects could not be loaded. Retry to load projects for the selected association.');
@@ -294,7 +294,7 @@ export async function initGis(root) {
     association.addEventListener('change', () => {
         associationController?.abort();
         association.setAttribute('aria-busy', 'false');
-        parentNote.textContent = 'Only eligible associations within your current scope are available.';
+        parentNote.textContent = 'Only associations you can manage are shown.';
         selectedAssociation = association.value;
         selectedProject = ''; project.value = '';
         associationState = 'ready';
@@ -304,14 +304,6 @@ export async function initGis(root) {
         loadProjects(); markDirty();
     });
     project.addEventListener('change', () => { selectedProject = project.value; address.value = ''; markDirty(); });
-    parentSearch.addEventListener('input', () => {
-        associationController?.abort(); projectController?.abort(); projectKey = null;
-        associationState = 'loading';
-        updateRegisteredArea();
-        if (project.value) selectedProject = project.value;
-        if (selectedAssociation) setProjectState('loading', 'Loading projects...', 'Loading projects...');
-    });
-    parentSearch.addEventListener('input', debounce(() => loadParents()));
     associationRetry.addEventListener('click', () => loadAssociations());
     projectRetry.addEventListener('click', () => loadProjects(true));
     root.querySelector('[data-gis-preview]').addEventListener('click', () => {
@@ -324,7 +316,7 @@ export async function initGis(root) {
         syncing = true; editable.clearLayers(); syncing = false; forceMulti = false; json.value = ''; longitude.value = ''; latitude.value = ''; markDirty();
         showStatus(status, 'Geometry cleared from this form. Supply replacement geometry before saving.');
     });
-    form.addEventListener('input', event => { if (!event.target.matches('[data-gis-option-search]')) markDirty(); });
+    form.addEventListener('input', () => markDirty());
     window.addEventListener('beforeunload', event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });
     form.addEventListener('submit', async event => {
         event.preventDefault();

@@ -78,15 +78,16 @@
     </x-modal>
     @if($manageable && !$member->archived_at && $member->member_status === 'active')
         <x-modal :id="'member-profile-'.$member->id" title="Edit Member">
-            <div class="member-record-dialog">
-            <p>{{ $nameOf($member) }} · {{ $member->association->name }}</p>
+            <div class="member-record-dialog member-edit-dialog">
+            {{-- Identify the member before the editable personal details. --}}
+            <div class="member-detail-banner"><span class="member-avatar"><x-icon name="user" /></span><div><h3>{{ $nameOf($member) }}</h3><p>{{ $member->association->name }}</p></div></div>
             @if($restoring && old('member_action') === 'profile')<div class="notice notice-error" role="alert">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
-            <form method="POST" action="{{ route('field-officer.members.update', $member) }}" @if($restoring && old('member_action') === 'profile') data-feedback-error-bag="default" @endif>
+            {{-- Ask for confirmation before saving the member's changes. --}}
+            <form method="POST" action="{{ route('field-officer.members.update', $member) }}" onsubmit="return confirm('Save these changes to the member record? Please check the details before continuing.')" @if($restoring && old('member_action') === 'profile') data-feedback-error-bag="default" @endif>
                 @csrf @method('PATCH')
                 <input type="hidden" name="member_record_id" value="{{ $member->id }}"><input type="hidden" name="member_action" value="profile">
                 <input type="hidden" name="expected_updated_at" value="{{ $restoring && old('member_action') === 'profile' ? $oldVersion : $version }}">
-                <p>Association, position, classifications, and membership status are maintained through their authorized workflows.</p>
-                <div class="form-grid">
+                <section class="member-detail-card"><h3><x-icon name="user" />Personal Information</h3><div class="form-grid">
                     @foreach($fields as $field => [$label, $type, $maximum, $required])
                         @php($value = $restoring && old('member_action') === 'profile' ? old($field) : ($field === 'birth_date' ? $member->birth_date?->format('Y-m-d') : $member->{$field}))
                         <div class="field"><label for="member-{{ $member->id }}-{{ $field }}">{{ $label }} <span class="field-hint">{{ $required ? '*' : 'Optional' }}</span></label>
@@ -98,7 +99,7 @@
                         @if($member->sex && !$sexCategories->contains('id', $member->sex_id))<option value="{{ $member->sex_id }}" @selected($selectedSex === (string) $member->sex_id)>{{ $member->sex->name }} (inactive reference)</option>@endif
                         @foreach($sexCategories as $sex)<option value="{{ $sex->id }}" @selected($selectedSex === (string) $sex->id)>{{ $sex->name }}</option>@endforeach
                     </select>@if($restoring) @error('sex_id')<span class="field-error">{{ $message }}</span>@enderror @endif</div>
-                </div>
+                </div></section>
                 <div class="modal-actions"><button type="button" class="button" data-close-dialog>Cancel</button><button type="submit" class="button button-primary">Save Changes</button></div>
             </form>
             </div>

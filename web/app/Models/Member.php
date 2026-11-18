@@ -48,6 +48,12 @@ class Member extends Model
         return $this->belongsTo(Association::class);
     }
 
+    // Connect a member to the application that created the record.
+    public function sourceApplication(): BelongsTo
+    {
+        return $this->belongsTo(MemberApplication::class, 'source_application_id');
+    }
+
     public function sex(): BelongsTo
     {
         return $this->belongsTo(

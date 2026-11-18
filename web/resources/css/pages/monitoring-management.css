@@ -19,17 +19,18 @@
 .monitoring-management .monitoring-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding: 24px; border-top: 3px solid var(--primary); }
 .monitoring-management .monitoring-heading > div { flex: 1 1 280px; min-width: 0; overflow-wrap: anywhere; }
 .monitoring-management .monitoring-heading p:not(.eyebrow) { font-size: 13px; margin-top: 7px; }
-.admin-workspace .monitoring-record-header { min-width: 0; padding: 20px 24px; border-color: #dbe6ee; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
-.admin-workspace .monitoring-record-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; min-width: 0; }
-.admin-workspace .monitoring-record-heading > div { flex: 1 1 200px; min-width: 0; }
-.admin-workspace .monitoring-record-heading h1 { margin: 0; color: #17314d; text-transform: uppercase; overflow-wrap: anywhere; }
-.admin-workspace .monitoring-record-heading .eyebrow { margin-bottom: 4px; }
-.admin-workspace .monitoring-record-heading .badge { max-width: 100%; white-space: normal; }
-.admin-workspace .monitoring-record-header .monitoring-record-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 10px; background: #edf4fb; color: #386a96; }
-.admin-workspace .monitoring-record-header .monitoring-record-icon svg { width: 22px; height: 22px; }
-.admin-workspace .monitoring-record-identity { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 24px; margin: 16px 0 0; padding-top: 14px; border-top: 1px solid #edf1f5; }
-.admin-workspace .monitoring-record-identity dt { margin-bottom: 4px; color: #71869b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
-.admin-workspace .monitoring-record-identity dd { margin: 0; color: #263f58; font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+/* Share the desktop monitoring header with Field Officers. */
+:is(.admin-workspace, .field-officer-polish) .monitoring-record-header { min-width: 0; padding: 20px 24px; border-color: #dbe6ee; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+:is(.admin-workspace, .field-officer-polish) .monitoring-record-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; min-width: 0; }
+:is(.admin-workspace, .field-officer-polish) .monitoring-record-heading > div { flex: 1 1 200px; min-width: 0; }
+:is(.admin-workspace, .field-officer-polish) .monitoring-record-heading h1 { margin: 0; color: #17314d; text-transform: uppercase; overflow-wrap: anywhere; }
+:is(.admin-workspace, .field-officer-polish) .monitoring-record-heading .eyebrow { margin-bottom: 4px; }
+:is(.admin-workspace, .field-officer-polish) .monitoring-record-heading .badge { max-width: 100%; white-space: normal; }
+:is(.admin-workspace, .field-officer-polish) .monitoring-record-header .monitoring-record-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 10px; background: #edf4fb; color: #386a96; }
+:is(.admin-workspace, .field-officer-polish) .monitoring-record-header .monitoring-record-icon svg { width: 22px; height: 22px; }
+:is(.admin-workspace, .field-officer-polish) .monitoring-record-identity { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 24px; margin: 16px 0 0; padding-top: 14px; border-top: 1px solid #edf1f5; }
+:is(.admin-workspace, .field-officer-polish) .monitoring-record-identity dt { margin-bottom: 4px; color: #71869b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+:is(.admin-workspace, .field-officer-polish) .monitoring-record-identity dd { margin: 0; color: #263f58; font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
 @media (max-width: 600px) { .admin-workspace .monitoring-record-header { padding: 18px; } .admin-workspace .monitoring-record-identity { grid-template-columns: minmax(0, 1fr); } }
 .admin-workspace .monitoring-record-view .monitoring-heading { align-items: center; border-color: #dbe6ee; border-top-color: var(--primary); box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
 .admin-workspace .monitoring-record-view .monitoring-record-icon { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border-radius: 10px; background: #edf4fb; color: #386a96; }

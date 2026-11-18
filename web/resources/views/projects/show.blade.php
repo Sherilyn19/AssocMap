@@ -7,8 +7,7 @@
 
 @section('content')
 <section class="program-management" data-workspace-module="projects" data-workspace-title="Project Details">
-    {{-- Keep field officer navigation as it is; admin navigation follows the header. --}}
-    @if($prefix !== 'admin')<x-workflow-navigation :back="$workflowBack" :parents="[['label' => $project->association->name, 'url' => $associationUrl]]" :current="$project->title" />@endif
+    {{-- Show the same navigation placement for both staff roles. --}}
     <header class="card program-heading">
         <div>
             <div class="eyebrow">Project Management</div>
@@ -21,7 +20,7 @@
             :filters="['association_id' => $project->association_id, 'project_id' => $project->id, 'program_year' => (int) $project->program_year]"
             :scope="'Selected project: '.$project->title.'. Program year '.$project->program_year.'. Current portfolio snapshot; no event reporting period. Materials, deliveries, monitoring and private documents are not included. Register filters do not apply.'" />
     </header>
-    @if($prefix === 'admin')<x-workflow-navigation :back="$workflowBack" :parents="[['label' => $project->association->name, 'url' => $associationUrl]]" :current="$project->title" />@endif
+    <x-workflow-navigation :back="$workflowBack" :parents="[['label' => $project->association->name, 'url' => $associationUrl]]" :current="$project->title" />
     @include('projects.partials.cover', ['canManage' => $canEdit])
     @php($closureErrors = $errors->getBag('projectClosure'))
     @php($terminationErrors = $errors->getBag('projectTermination'))

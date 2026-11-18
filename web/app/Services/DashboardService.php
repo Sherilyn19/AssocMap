@@ -146,9 +146,13 @@ class DashboardService
                 ? 'a.specific_address as address' : 'ar.address as address';
             $linked = (clone $associations)->first(['a.id', 'a.name', 'a.acronym', 'a.status', 'b.id as barangay_id',
                 'b.name as barangay', 'mu.name as municipality', 'mu.province', 'mu.region', $addressColumn,
-                'a.saad_phase2_join_date as joined_on']);
+                'a.saad_phase2_join_date as joined_on', 'a.updated_at']);
             abort_unless($linked, 403);
             $association = (array) $linked;
+            // Show the saved association update time in Philippine time.
+            $association['updated_at'] = $linked->updated_at
+                ? \Illuminate\Support\Carbon::parse($linked->updated_at)->timezone('Asia/Manila')->format('M d, Y g:i A').' PHT'
+                : null;
         }
         $attention = $role === 'system_admin' ? $this->optional('officer_assignments', fn () => (clone $associations)
             ->where('a.status', 'active')->whereNull('a.archived_at')

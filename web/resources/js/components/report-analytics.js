@@ -388,13 +388,14 @@ export function renderReportGeography(result, container) {
 export function renderReportAnalytics(result, container) {
     const heading = node('div', undefined, 'report-section-heading'), copy = node('div');
     const title = node('h3', 'Visual analytics'); title.id = 'report-analytics-title';
-    const adminDesktop = Boolean(container.closest?.('.admin-workspace') && window.matchMedia('(min-width: 768px)').matches);
+    // Use the same chart layout in desktop staff reports.
+    const adminDesktop = Boolean(container.closest?.(':is(.admin-workspace, .field-officer-workspace)') && window.matchMedia('(min-width: 768px)').matches);
     copy.append(title, node('p', adminDesktop ? 'Explore recorded results and view the details behind each chart.' : 'Compare recorded values and explore the detail behind each chart.'));
     heading.append(copy); container.replaceChildren(heading);
     const charts = buildReportCharts(result);
     if (!charts.length) container.append(node('p', 'No suitable recorded chart data for this selection. Review the summary indicators and detailed tables below.', 'report-empty'));
     // Use the same chart presentation for desktop administrators.
-    const associationView = Boolean(container.closest?.('.association-workspace') || (container.closest?.('.admin-workspace') && window.matchMedia('(min-width: 768px)').matches));
+    const associationView = Boolean(container.closest?.('.association-workspace') || adminDesktop);
     if (associationView) charts.forEach(chart => {
         chart.title = reportPlainLanguage[chart.title] || chart.title;
         const rankingSuffix = ' Ranked by recorded count, not success, effectiveness or financial performance.';

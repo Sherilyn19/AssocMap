@@ -10,15 +10,14 @@
 @endphp
 @section('content')
 <section class="program-management activity-management" data-workspace-module="program-activities" data-workspace-title="Program Activity Details">
-    {{-- Preserve the original path while placing it below the admin heading. --}}
-    @if($prefix !== 'admin')<x-workflow-navigation :back="$workflowBack" :parents="$breadcrumbs" :current="$row['title']" />@endif
+    {{-- Keep the same path below the heading in both staff workspaces. --}}
     <header class="card program-heading">
         <div><p class="eyebrow">Program Operations</p><h1 tabindex="-1">Program Activity Details</h1><p>{{ $row['title'] }}</p></div>
         @if($canEdit)
             <a class="button button-primary" href="{{ route($activityPrefix.'.edit', $row['id']) }}"><x-icon name="pencil" />Edit Program Activity</a>
         @endif
     </header>
-    @if($prefix === 'admin')<x-workflow-navigation :back="$workflowBack" :parents="$breadcrumbs" :current="$row['title']" />@endif
+    <x-workflow-navigation :back="$workflowBack" :parents="$breadcrumbs" :current="$row['title']" />
     <section class="card program-information">
         <h2>General Information</h2>
         @if($row['association_archived'])

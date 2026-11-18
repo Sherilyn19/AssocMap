@@ -18,7 +18,8 @@
     @if($prefix === 'field-officer')
         <section class="card association-information" aria-labelledby="officer-association-title">
             <div class="association-section-heading"><h2 id="officer-association-title"><x-icon name="building" /> Association information</h2></div>
-            <dl class="association-info-grid"><div><dt>Association name</dt><dd>{{ $association->name }}</dd></div><div><dt>President</dt><dd>{{ $association->currentPresident ? collect([$association->currentPresident->first_name, $association->currentPresident->middle_name, $association->currentPresident->last_name, $association->currentPresident->suffix])->filter(fn ($part) => filled($part))->implode(' ') : 'No active President assigned' }}</dd></div></dl>
+            {{-- This date belongs to the association record. --}}
+            <dl class="association-info-grid"><div><dt>Association name</dt><dd>{{ $association->name }}</dd></div><div><dt>President</dt><dd>{{ $association->currentPresident ? collect([$association->currentPresident->first_name, $association->currentPresident->middle_name, $association->currentPresident->last_name, $association->currentPresident->suffix])->filter(fn ($part) => filled($part))->implode(' ') : 'No active President assigned' }}</dd></div><div><dt>Last updated</dt><dd>{{ $association->updated_at ? $association->updated_at->copy()->timezone('Asia/Manila')->format('M d, Y g:i A').' PHT' : 'Not recorded' }}</dd></div></dl>
         </section>
     @else
         <p>President: {{ $association->currentPresident ? collect([$association->currentPresident->first_name, $association->currentPresident->middle_name, $association->currentPresident->last_name, $association->currentPresident->suffix])->filter(fn ($part) => filled($part))->implode(' ') : 'No active President assigned' }}</p>

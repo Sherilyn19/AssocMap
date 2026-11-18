@@ -42,8 +42,8 @@
                                     <small>{{ $row['related_project'] }}</small>
                                 @endif
                             </td>
-                            {{-- Keep the saved schedule while adding a visual timeline for admins. --}}
-                            <td @class(['admin-timeline-date' => $prefix === 'admin'])>@if($prefix === 'admin')<span class="admin-timeline-marker" aria-hidden="true"></span>@endif{{ $row['activity_date'] }}<small>Program year {{ $row['program_year'] }}</small><small>{{ $row['venue'] ?: 'Venue not recorded' }}</small></td>
+                            {{-- Show the same visual timeline for both staff workspaces. --}}
+                            <td class="admin-timeline-date"><span class="admin-timeline-marker" aria-hidden="true"></span>{{ $row['activity_date'] }}<small>Program year {{ $row['program_year'] }}</small><small>{{ $row['venue'] ?: 'Venue not recorded' }}</small></td>
                             <td><x-status-badge :value="$row['status']" />
                                 @if($row['archived'])
                                     <span class="badge badge-neutral">Archived</span>
