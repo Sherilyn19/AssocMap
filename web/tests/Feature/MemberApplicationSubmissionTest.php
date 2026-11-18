@@ -140,6 +140,10 @@ class MemberApplicationSubmissionTest extends TestCase
             $table->foreign('member_application_id')->references('id')->on('member_applications');
             $table->foreign('classification_id')->references('id')->on('member_classifications');
         });
+        Schema::create('member_application_review_events', function (Blueprint $table) {
+            $table->uuid('id')->primary(); $table->uuid('member_application_id'); $table->uuid('actor_id')->nullable();
+            $table->string('actor_name'); $table->string('action'); $table->text('note'); $table->timestamp('created_at');
+        });
     }
 
     private function fixtures(): void

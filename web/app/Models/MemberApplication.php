@@ -43,6 +43,7 @@ class MemberApplication extends Model
         'reviewed_by',
         'reviewed_at',
         'rejection_reason',
+        'endorsement_stage',
     ];
 
     protected $casts = [
@@ -56,6 +57,11 @@ class MemberApplication extends Model
     public function association(): BelongsTo
     {
         return $this->belongsTo(Association::class);
+    }
+
+    public function reviewEvents(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(MemberApplicationReviewEvent::class)->orderBy('created_at')->orderBy('id');
     }
 
     public function submittedBy(): BelongsTo

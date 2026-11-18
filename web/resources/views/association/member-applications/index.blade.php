@@ -4,11 +4,11 @@
     /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\AssociationPosition> $positions */
     $applicationRegister = true;
     $indexRoute = 'association.member-applications.index';
-    $cards = ['total' => ['All Applications', '', 'users'], 'pending' => ['Pending Review', 'pending', 'clipboard-check'], 'approved' => ['Approved', 'approved', 'check'], 'rejected' => ['Rejected', 'rejected', 'close']];
+    $cards = ['total' => ['All Applications', '', 'users'], 'pending' => ['Pending Review', 'pending', 'clipboard-check'], 'approved' => ['Approved', 'approved', 'check'], 'rejected' => ['Rejected', 'rejected', 'close'], 'declined' => ['Endorsement Declined', 'declined', 'close']];
     $summaryNote = 'Your submissions and public applications for the linked association.';
     $association = $associationAccount->association;
     $canSubmit = $association && !$association->archived_at && $association->status === 'active';
-    $submissionErrors = $errors->any() && !$errors->hasAny(['q', 'status', 'sort', 'page', 'association']);
+    $submissionErrors = $errors->any() && !old('association_review_id') && !$errors->hasAny(['q', 'status', 'sort', 'page', 'association']);
     $area = $association?->area;
     $barangay = $association?->locationBarangay();
     $otherPositionId = $positions->firstWhere('code', 'OTHER')?->id;
@@ -21,6 +21,7 @@
         @if($canSubmit)<button type="button" class="button button-primary" data-dialog="submit-member-application"><x-icon name="plus" />Submit Member Application</button>@else<span class="badge badge-neutral">Association read only</span>@endif
     </header>
     @include('members.partials.summary')
+    @if($associationReviewCount)<p class="notice">{{ $associationReviewCount }} public application(s) need your association's review.</p>@endif
     @if(!$canSubmit)<p class="notice">This association is archived or inactive. You can view application history; new applications are unavailable.</p>@endif
     <details class="card member-association-context"><summary><span class="member-association-summary"><x-icon name="building" /><span><span class="member-association-label">Linked association:</span> <strong>{{ $association?->name ?? 'Unavailable' }}</strong></span></span><x-icon name="chevron-down" /></summary>
         <dl class="detail-grid">
@@ -41,6 +42,7 @@
                         @php
                             $fullName = collect([$application->first_name, $application->middle_name, $application->last_name, $application->suffix])->filter(fn ($part) => filled($part))->implode(' ');
                             $tone = match ($application->status) { 'approved' => 'success', 'rejected' => 'danger', default => 'warning' };
+                            $stageLabel = $application->submission_source === 'public_gis' && $application->status === 'pending' ? match ($application->endorsement_stage) { 'endorsed' => 'Endorsed to Field Officer', 'returned' => 'Returned to association', 'declined' => 'Endorsement declined', default => 'Pending association review' } : ucfirst($application->status);
                             $details = [
                                 'Full Name' => $fullName,
                                 'Association' => $association?->name,
@@ -51,7 +53,7 @@
                                 'FishR Registration Number' => $application->fishr_registration_number,
                                 'Position' => $application->position?->name,
                                 'Member Classifications' => $application->classifications->pluck('name')->implode(', ') ?: 'None recorded',
-                                'Application Status' => ucfirst($application->status),
+                                'Application Status' => $stageLabel,
                                 'Submitted Date' => $application->created_at?->format('M j, Y g:i A'),
                             ];
                             if (filled($application->position_other_text)) $details['Other Position'] = $application->position_other_text;
@@ -65,17 +67,31 @@
                             <td>{{ $association?->name ?? '—' }}</td>
                             <td>{{ $application->position?->name ?? '—' }}</td>
                             <td>{{ $application->created_at?->format('M j, Y') ?? '—' }}</td>
-                            <td><span class="badge badge-{{ $tone }}">{{ ucfirst($application->status) }}</span>@if($application->reviewed_at)<small>Reviewed {{ $application->reviewed_at->format('M j, Y') }}</small>@endif</td>
+                            <td><span class="badge badge-{{ $tone }}">{{ $stageLabel }}</span>@if($application->reviewed_at)<small>Reviewed {{ $application->reviewed_at->format('M j, Y') }}</small>@endif</td>
                             <td><div class="row-actions"><button type="button" class="button button-quiet" data-dialog="application-{{ $application->id }}" aria-label="View application for {{ $fullName }}"><x-icon name="eye" />View</button></div></td>
                         </tr>
                         @push('dialogs')
                             <x-modal :id="'application-'.$application->id" title="Application Details">
                                 <div class="member-record-dialog application-details-dialog">
-                                <div class="member-detail-banner"><span class="member-avatar"><x-icon name="user" /></span><div><h3>{{ $fullName }}</h3><p>{{ $association?->name }}</p>@if($application->submission_source === 'public_gis')<span class="badge badge-neutral">Public applicant</span>@endif</div><span class="badge badge-{{ $tone }}">{{ ucfirst($application->status) }}</span></div>
+                                <div class="member-detail-banner"><span class="member-avatar"><x-icon name="user" /></span><div><h3>{{ $fullName }}</h3><p>{{ $association?->name }}</p>@if($application->submission_source === 'public_gis')<span class="badge badge-neutral">Public applicant</span>@endif</div><span class="badge badge-{{ $tone }}">{{ $stageLabel }}</span></div>
                                 <section class="application-details-section" aria-label="Applicant information"><h3><x-icon name="user" />Applicant information</h3><dl class="detail-grid">@foreach($details as $label => $value)<div><dt>{{ $label }}</dt><dd>{{ filled($value) ? $value : '—' }}</dd></div>@endforeach</dl></section>
                                 @include('partials.member-application-evidence', ['photoRoute' => 'association.member-applications.photo'])
+                                @include('partials.member-application-review-history')
+                                @if($canSubmit && $application->submission_source === 'public_gis' && $application->status === 'pending' && in_array($application->endorsement_stage, [null, 'returned'], true))
+                                    <section class="application-details-section"><h3>Association review</h3>
+                                        <form method="POST" action="{{ route('association.member-applications.review', $application) }}" onsubmit="this.elements.note.value = this.elements.note.value.trim(); return this.reportValidity();">
+                                            @csrf @method('PATCH')
+                                            <input type="hidden" name="association_review_id" value="{{ $application->id }}">
+                                            <div class="field"><label for="association-note-{{ $application->id }}">Endorsement or decline reason <span class="field-hint">*</span></label><textarea id="association-note-{{ $application->id }}" name="note" rows="4" maxlength="1000" required>{{ old('association_review_id') === $application->id ? old('note') : '' }}</textarea><small>Explain your decision. Up to 1,000 characters.</small>@if(old('association_review_id') === $application->id) @error('note')<span class="field-error" role="alert">{{ $message }}</span>@enderror @endif</div>
+                                            <div class="modal-actions"><button type="submit" name="action" value="decline" class="button button-danger-outline">Decline endorsement</button><button type="submit" name="action" value="endorse" class="button button-primary">Endorse to Field Officer</button></div>
+                                        </form>
+                                    </section>
+                                @endif
                                 </div>
                             </x-modal>
+                            @if(old('association_review_id') === $application->id && $errors->any())
+                                @push('scripts') document.getElementById(@json('application-'.$application->id)).dataset.feedbackRestore = 'true'; @endpush
+                            @endif
                         @endpush
                     @endforeach
                 </tbody>
@@ -87,6 +103,19 @@
         @include('members.partials.pagination', ['paginator' => $applications, 'recordLabel' => 'applications'])
     </section>
 </section>
+@if(session('declined_contact'))
+    @php $contact = session('declined_contact'); @endphp
+    @push('dialogs')
+        <dialog id="association-declined-contact" class="modal" aria-labelledby="association-declined-contact-title" data-feedback-restore="true">
+            <div class="modal-heading"><h2 id="association-declined-contact-title">Contact the applicant</h2></div>
+            <p>Please contact {{ $contact['name'] }} to explain the decision and any next steps.</p>
+            <div class="member-review-contact-actions">
+                @if(filled($contact['phone']))<a class="button" href="tel:{{ preg_replace('/[^0-9+]/', '', $contact['phone']) }}">Call</a><a class="button" href="sms:{{ preg_replace('/[^0-9+]/', '', $contact['phone']) }}">Send a text</a>@endif
+                @if(filled($contact['email']))<a class="button" href="mailto:{{ rawurlencode($contact['email']) }}">Email</a>@endif
+            </div><div class="modal-actions"><button type="button" class="button" data-close-dialog>Done</button></div>
+        </dialog>
+    @endpush
+@endif
 @endsection
 
 @push('dialogs')

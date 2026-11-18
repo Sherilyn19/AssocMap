@@ -23,12 +23,24 @@ class MemberApplicationController extends Controller
         $statusFilter = $filters['status'];
         $associations = $directory->associations($currentUser, true);
         if ($filters['association'] !== '') abort_unless($associations->contains('id', $filters['association']), 404);
-        $scope = MemberApplication::query()->useWritePdo()->whereHas('association',
+        // Share only an oversight count until public applications are endorsed.
+        $associationPending = MemberApplication::query()->useWritePdo()->where('submission_source', 'public_gis')->where('status', 'pending')
+            ->where(fn ($q) => $q->whereNull('endorsement_stage')->orWhere('endorsement_stage', 'returned'))
+            ->whereHas('association', fn ($q) => $q->where('primary_field_officer_id', $currentUser->id))->count();
+        $scope = MemberApplication::query()->useWritePdo()->where(fn ($q) => $q->where('submission_source', '!=', 'public_gis')
+            ->orWhere('status', '!=', 'pending')->orWhere('endorsement_stage', 'endorsed'))->whereHas('association',
             fn ($query) => $query->where('primary_field_officer_id', $currentUser->id));
         $summary = $directory->applicationSummary($scope);
         $applications = $directory->applications($scope, $filters, true, $summary);
 
-        return view('field-officer.member-applications.index', compact('applications', 'statusFilter', 'filters', 'associations', 'summary'));
+        return view('field-officer.member-applications.index', compact('applications', 'statusFilter', 'filters', 'associations', 'summary', 'associationPending'));
+    }
+
+    public function returnToAssociation(Request $request, MemberApplication $memberApplication, MemberApplicationService $service): RedirectResponse
+    {
+        $data = $request->validate(['note' => ['required', 'string', 'max:1000']]);
+        $service->returnToAssociation($memberApplication, $request->attributes->get('current_user'), $data['note']);
+        return redirect()->route('field-officer.member-applications.index')->with('success', 'Application returned to the association.');
     }
 
     // Approve the application and return to the same list.

@@ -7,6 +7,7 @@ use App\Models\AssociationAccount;
 use App\Models\AssociationPosition;
 use App\Models\Member;
 use App\Models\MemberApplication;
+use App\Models\MemberApplicationReviewEvent;
 use App\Models\Role;
 use App\Models\UserProfile;
 use App\Services\Associations\AssociationLifecycleService;
@@ -147,6 +148,10 @@ class MemberApplicationService
         ) {
             [$application, $fieldOfficer] = $this->lockForReview($application, $fieldOfficer);
 
+            // Public applicants cannot become members before association endorsement.
+            if ($application->status === 'pending' && $application->submission_source === 'public_gis' && $application->endorsement_stage !== 'endorsed') {
+                throw ValidationException::withMessages(['application' => 'The association must endorse this application before Field Officer review.'])->status(409);
+            }
             if ($application->status !== 'pending') {
                 throw ValidationException::withMessages([
                     'application' =>
@@ -232,6 +237,10 @@ class MemberApplicationService
         ) {
             [$application, $fieldOfficer] = $this->lockForReview($application, $fieldOfficer);
 
+            // Rejecting also requires a completed association endorsement for public applications.
+            if ($application->status === 'pending' && $application->submission_source === 'public_gis' && $application->endorsement_stage !== 'endorsed') {
+                throw ValidationException::withMessages(['application' => 'The association must endorse this application before Field Officer review.'])->status(409);
+            }
             if ($application->status !== 'pending') {
                 throw ValidationException::withMessages([
                     'application' =>
@@ -258,6 +267,57 @@ class MemberApplicationService
 
             return $application;
         });
+    }
+
+    // Association decisions are serialized with account replacement and other reviews.
+    public function associationReview(MemberApplication $application, UserProfile $currentUser, string $action, string $note): void
+    {
+        $note = trim($note);
+        if (!in_array($action, ['endorse', 'decline'], true) || $note === '' || mb_strlen($note) > 1000) {
+            throw ValidationException::withMessages(['note' => 'Enter a reason of up to 1,000 characters.']);
+        }
+        DB::transaction(function () use ($application, $currentUser, $action, $note) {
+            $role = Role::whereKey($currentUser->role_id)->where('code', 'association_account')->sharedLock()->first();
+            abort_unless($role, 403);
+            $this->lifecycle->lockOperational([$application->association_id]);
+            $actor = UserProfile::whereKey($currentUser->id)->lockForUpdate()->first();
+            abort_unless($actor && (string) $actor->role_id === (string) $role->id && $actor->getRawOriginal('auth_sessions_valid_after') === $currentUser->getRawOriginal('auth_sessions_valid_after'), 403);
+            $actor->setRelation('role', $role);
+            $this->ensureAssociationAccountCanSubmit($actor);
+            $link = AssociationAccount::where('user_id', $actor->id)->where('association_id', $application->association_id)->where('is_active', true)->lockForUpdate()->first();
+            abort_unless($link, 403);
+            $locked = MemberApplication::whereKey($application->id)->lockForUpdate()->firstOrFail();
+            abort_unless($locked->association_id === $link->association_id, 403);
+            if ($locked->submission_source !== 'public_gis' || $locked->status !== 'pending' || !in_array($locked->endorsement_stage, [null, 'returned'], true)) {
+                throw ValidationException::withMessages(['application' => 'This application is no longer awaiting association review.'])->status(409);
+            }
+            $locked->endorsement_stage = $action === 'endorse' ? 'endorsed' : 'declined';
+            $locked->save();
+            $this->recordReviewEvent($locked, $actor, $action, $note);
+        });
+    }
+
+    public function returnToAssociation(MemberApplication $application, UserProfile $fieldOfficer, string $note): void
+    {
+        $note = trim($note);
+        if ($note === '' || mb_strlen($note) > 1000) throw ValidationException::withMessages(['note' => 'Enter a reason of up to 1,000 characters.']);
+        DB::transaction(function () use ($application, $fieldOfficer, $note) {
+            [$locked, $actor] = $this->lockForReview($application, $fieldOfficer);
+            if ($locked->submission_source !== 'public_gis' || $locked->status !== 'pending' || $locked->endorsement_stage !== 'endorsed') {
+                throw ValidationException::withMessages(['application' => 'This application is no longer awaiting Field Officer review.'])->status(409);
+            }
+            $locked->endorsement_stage = 'returned';
+            $locked->save();
+            $this->recordReviewEvent($locked, $actor, 'return', $note);
+        });
+    }
+
+    private function recordReviewEvent(MemberApplication $application, UserProfile $actor, string $action, string $note): void
+    {
+        // Keep each note and reviewer even when an application is returned and endorsed again.
+        MemberApplicationReviewEvent::create(['member_application_id' => $application->id, 'actor_id' => $actor->id,
+            'actor_name' => $actor->display_name, 'action' => $action, 'note' => $note, 'created_at' => now()]);
+        $this->recordApplicationAction($actor, $application, strtoupper($action).' MEMBER APPLICATION');
     }
 
     // Keep a simple history of each decision without copying private applicant details.

@@ -59,9 +59,16 @@ class MemberDirectoryQueryService
 
     public function applications(Builder $scope, array $filters, bool $fieldOfficer, ?array $summary = null): LengthAwarePaginator
     {
-        $query = (clone $scope)->when($filters['status'] !== '', fn ($query) => $query->where('status', $filters['status']));
+        $query = clone $scope;
+        if ($filters['status'] === 'declined') {
+            $query->where('status', 'pending')->where('endorsement_stage', 'declined');
+        } elseif ($filters['status'] === 'pending') {
+            $query->where('status', 'pending')->where(fn ($q) => $q->whereNull('endorsement_stage')->orWhere('endorsement_stage', '!=', 'declined'));
+        } elseif ($filters['status'] !== '') {
+            $query->where('status', $filters['status']);
+        }
         $this->filterAndOrder($query, $filters, 'created_at');
-        $relations = ['sex:id,name', 'position:id,name', 'classifications', 'reviewedBy:id,display_name'];
+        $relations = ['sex:id,name', 'position:id,name', 'classifications', 'reviewedBy:id,display_name', 'reviewEvents'];
         if ($fieldOfficer) {
             $geography = app(AssociationGeographyService::class);
             $relations = [...$relations, 'association:'.implode(',', $geography->associationColumns(['id', 'name', 'area_id', 'status', 'archived_at'])),
@@ -74,7 +81,8 @@ class MemberDirectoryQueryService
     public function applicationSummary(Builder $scope): array
     {
         $counts = (clone $scope)->selectRaw("COUNT(*) AS total,
-            COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending,
+            COUNT(CASE WHEN status = 'pending' AND (endorsement_stage IS NULL OR endorsement_stage <> 'declined') THEN 1 END) AS pending,
+            COUNT(CASE WHEN status = 'pending' AND endorsement_stage = 'declined' THEN 1 END) AS declined,
             COUNT(CASE WHEN status = 'approved' THEN 1 END) AS approved,
             COUNT(CASE WHEN status = 'rejected' THEN 1 END) AS rejected")->toBase()->first();
 

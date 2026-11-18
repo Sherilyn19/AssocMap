@@ -108,6 +108,8 @@ trait MemberMutationFixture
             $table->uuid('id')->primary();
             $table->uuid('association_id');
             $table->uuid('submitted_by_user_id');
+            $table->string('submission_source')->default('association_account');
+            $table->string('endorsement_stage')->nullable();
             $table->string('first_name');
             $table->string('middle_name')->nullable();
             $table->string('last_name');
@@ -126,6 +128,10 @@ trait MemberMutationFixture
             $table->timestamps();
             $table->text('endorsement_letter')->nullable();
             $table->string('applicant_photo_path')->nullable();
+        });
+        Schema::create('member_application_review_events', function (Blueprint $table) {
+            $table->uuid('id')->primary(); $table->uuid('member_application_id'); $table->uuid('actor_id')->nullable();
+            $table->string('actor_name'); $table->string('action'); $table->text('note'); $table->timestamp('created_at');
         });
         Schema::create('member_application_classifications', function (Blueprint $table) {
             $table->uuid('member_application_id');

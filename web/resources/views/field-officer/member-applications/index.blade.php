@@ -10,6 +10,7 @@
 <section class="member-management" data-workspace-module="member-applications" data-workspace-title="Member Applications">
     <header class="card member-heading"><div><p class="eyebrow">Field Officer</p><h1 tabindex="-1">Member Applications</h1><p>Review applicants and application evidence from your assigned associations.</p></div><a class="button" href="{{ route('field-officer.members.index') }}"><x-icon name="users" />Member Register</a></header>
     @include('members.partials.summary')
+    @if($associationPending)<p class="notice">{{ $associationPending }} public application(s) awaiting association review.</p>@endif
     <section class="card member-register" aria-labelledby="application-register-title">
         <div class="member-section-heading"><div><h2 id="application-register-title">{{ ucfirst($statusFilter) }} applications</h2><p>{{ number_format($applications->total()) }} matching application(s)</p></div><p>Review the applicant details and evidence before deciding.</p></div>
         @include('members.partials.filters')
@@ -40,7 +41,7 @@
                                 'FishR Registration Number' => $application->fishr_registration_number,
                                 'Association Position' => $application->position?->name,
                                 'Member Classifications' => $application->classifications->pluck('name')->implode(', ') ?: 'None recorded',
-                                'Application Status' => ucfirst($application->status),
+                                'Application Status' => $application->submission_source === 'public_gis' && $application->status === 'pending' ? 'Pending Field Officer review' : ucfirst($application->status),
                                 'Submitted Date' => $application->created_at?->format('M j, Y g:i A'),
                             ];
                             if (filled($application->position_other_text)) $details['Other Position'] = $application->position_other_text;
@@ -63,7 +64,7 @@
                             <td>{{ $application->position?->name ?? '—' }}</td>
                             <td>{{ $application->created_at?->format('M j, Y') ?? '—' }}</td>
                             @if(in_array($statusFilter, ['approved', 'rejected'], true))<td>{{ $application->reviewed_at?->copy()->timezone('Asia/Manila')->format('M j, Y g:i A') ?? 'Not recorded' }}@if($application->reviewed_at)<small>PHT</small>@endif</td>@endif
-                            <td><span class="badge badge-{{ $tone }}">{{ ucfirst($application->status) }}</span></td>
+                            <td><span class="badge badge-{{ $tone }}">{{ $application->submission_source === 'public_gis' && $application->status === 'pending' ? 'Awaiting final review' : ucfirst($application->status) }}</span>@if($application->submission_source === 'public_gis' && $application->endorsement_stage === 'endorsed')<small>Association endorsed</small>@endif</td>
                             <td><div class="row-actions member-row-actions">
                                 <button type="button" class="button button-quiet" data-dialog="application-{{ $application->id }}" aria-label="View application for {{ $fullName }}"><x-icon name="eye" />{{ $application->status === 'pending' && $reviewable ? 'Review' : 'View' }}</button>
                                 @if($application->status === 'pending' && $reviewable)
@@ -82,9 +83,22 @@
                                 <section class="application-details-section" aria-label="Association and application details"><h3><x-icon name="building" />Association and application details</h3><dl class="detail-grid">@foreach($applicationDetails as $label => $value)<div><dt>{{ $label }}</dt><dd>{{ filled($value) ? $value : '—' }}</dd></div>@endforeach</dl></section>
                                 @if($decisionDetails)<section class="application-details-section" aria-label="Review decision"><h3><x-icon name="clipboard-check" />Review decision</h3><dl class="detail-grid">@foreach($decisionDetails as $label => $value)<div><dt>{{ $label }}</dt><dd>{{ filled($value) ? $value : 'Not recorded' }}</dd></div>@endforeach</dl></section>@endif
                                 @include('partials.member-application-evidence', ['photoRoute' => 'field-officer.member-applications.photo'])
+                                @include('partials.member-application-review-history')
+                                @if($application->status === 'pending' && $reviewable && $application->submission_source === 'public_gis')
+                                    <section class="application-details-section"><h3>Return to association</h3><p>Request clarification or further verification.</p>
+                                        <form method="POST" action="{{ route('field-officer.member-applications.return', $application) }}" onsubmit="this.elements.note.value = this.elements.note.value.trim(); return this.reportValidity();">@csrf @method('PATCH')
+                                            <input type="hidden" name="officer_return_id" value="{{ $application->id }}">
+                                            <div class="field"><label for="return-note-{{ $application->id }}">Reason for return <span class="field-hint">*</span></label><textarea id="return-note-{{ $application->id }}" name="note" rows="4" maxlength="1000" required>{{ old('officer_return_id') === $application->id ? old('note') : '' }}</textarea>@if(old('officer_return_id') === $application->id) @error('note')<span class="field-error" role="alert">{{ $message }}</span>@enderror @endif</div>
+                                            <div class="modal-actions"><button class="button" type="submit">Return to association</button></div>
+                                        </form>
+                                    </section>
+                                @endif
                                 <div class="modal-actions"><button type="button" class="button" data-close-dialog>Close</button></div>
                                 </div>
                             </x-modal>
+                            @if(old('officer_return_id') === $application->id && $errors->any())
+                                @push('scripts') document.getElementById(@json('application-'.$application->id)).dataset.feedbackRestore = 'true'; @endpush
+                            @endif
                             @if($application->status === 'pending' && $reviewable)
                                 <x-modal :id="'approve-'.$application->id" title="Approve Application">
                                     <div class="member-review-warning"><strong>Please confirm your decision</strong><p>Approving <strong>{{ $fullName }}</strong> will create an active member record. Review the application carefully before continuing; this decision cannot be changed here.</p></div>

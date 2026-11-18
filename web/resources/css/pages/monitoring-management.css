@@ -1,5 +1,7 @@
 /* Monitoring pages share the established management tokens. */
 .monitoring-management { display: grid; gap: 22px; min-width: 0; }
+/* Shared headings also appear on Manage and Edit pages. */
+.monitoring-management .monitoring-heading-icon { width: 17px; height: 17px; flex: none; vertical-align: -2px; color: #547b9c; }
 .association-workspace .monitoring-record-view :is(.monitoring-heading h1, .monitoring-section-heading h2, .monitoring-detail-grid dt, .monitoring-visit-notes dt) { text-transform: uppercase; font-weight: 700; }
 .association-workspace .monitoring-record-view :is(.monitoring-heading, .monitoring-overview, .monitoring-section, .monitoring-register) { min-width: 0; border-color: #dbe6ee; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); overflow-wrap: anywhere; }
 .association-workspace .monitoring-record-view .monitoring-heading { border-top: 3px solid var(--primary); }

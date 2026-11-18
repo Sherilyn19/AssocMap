@@ -5,6 +5,9 @@ use App\Http\Controllers\MemberApplicationPhotoController;
 use App\Http\Middleware\MemberApplicationEvidenceHeaders;
 use Illuminate\Support\Facades\Route;
 
+Route::patch('/association/member-applications/{memberApplication}/review', [AssociationAccountMemberApplicationController::class, 'review'])
+    ->whereUuid('memberApplication')->middleware(MemberApplicationEvidenceHeaders::class)->name('association.member-applications.review');
+
 Route::get(
     '/association/member-applications',
     [

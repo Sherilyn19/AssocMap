@@ -66,7 +66,8 @@ class MemberDirectoryUiTest extends TestCase
             CREATE TABLE member_classifications (id INTEGER PRIMARY KEY, name TEXT, is_active BOOLEAN);
             CREATE TABLE members (id TEXT PRIMARY KEY, association_id TEXT, source_application_id TEXT, first_name TEXT, middle_name TEXT, last_name TEXT, suffix TEXT, birth_date TEXT, sex_id INTEGER, contact_number TEXT, email TEXT, fishr_registration_number TEXT, position_id INTEGER, position_other_text TEXT, date_registered TEXT, member_status TEXT, archived_at TEXT, archived_by TEXT, created_at TEXT, updated_at TEXT);
             CREATE TABLE member_classification_assignments (member_id TEXT, classification_id INTEGER);
-            CREATE TABLE member_applications (id TEXT PRIMARY KEY, association_id TEXT, submitted_by_user_id TEXT, submission_source TEXT NOT NULL DEFAULT 'association_account', reason_for_applying TEXT, public_location_title TEXT, first_name TEXT, middle_name TEXT, last_name TEXT, suffix TEXT, birth_date TEXT, sex_id INTEGER, contact_number TEXT, email TEXT, fishr_registration_number TEXT, position_id INTEGER, position_other_text TEXT, endorsement_letter TEXT, applicant_photo_path TEXT, status TEXT, reviewed_by TEXT, reviewed_at TEXT, rejection_reason TEXT, created_at TEXT, updated_at TEXT);
+            CREATE TABLE member_applications (id TEXT PRIMARY KEY, association_id TEXT, submitted_by_user_id TEXT, submission_source TEXT NOT NULL DEFAULT 'association_account', endorsement_stage TEXT, reason_for_applying TEXT, public_location_title TEXT, first_name TEXT, middle_name TEXT, last_name TEXT, suffix TEXT, birth_date TEXT, sex_id INTEGER, contact_number TEXT, email TEXT, fishr_registration_number TEXT, position_id INTEGER, position_other_text TEXT, endorsement_letter TEXT, applicant_photo_path TEXT, status TEXT, reviewed_by TEXT, reviewed_at TEXT, rejection_reason TEXT, created_at TEXT, updated_at TEXT);
+            CREATE TABLE member_application_review_events (id TEXT PRIMARY KEY, member_application_id TEXT, actor_id TEXT, actor_name TEXT, action TEXT, note TEXT, created_at TEXT);
             CREATE TABLE member_application_classifications (member_application_id TEXT, classification_id INTEGER);
             SQL);
     }
@@ -218,7 +219,7 @@ class MemberDirectoryUiTest extends TestCase
             ->assertSee('enctype="multipart/form-data"', false)->assertSee('classification_ids[]', false)
             ->assertSee('&lt;script&gt;Private letter&lt;/script&gt;', false)->assertDontSee('<script>Private letter</script>', false)
             ->assertDontSee('ForbiddenSubmitter')->assertDontSee('ForbiddenAssociation');
-        $this->assertSame(['total' => 3, 'pending' => 1, 'approved' => 1, 'rejected' => 1], $response->viewData('summary'));
+        $this->assertSame(['total' => 3, 'pending' => 1, 'declined' => 0, 'approved' => 1, 'rejected' => 1], $response->viewData('summary'));
         $this->assertSame(3, $response->viewData('applications')->total());
         $this->assertRegisterColumns($response->getContent());
         $this->get('/association/member-applications?status=rejected&q=Jane')->assertOk()->assertSee('Test decision');
@@ -361,6 +362,32 @@ class MemberDirectoryUiTest extends TestCase
         $this->assertSame($before, $this->applicationSnapshot());
         $this->assertSame($contents, Storage::disk('member_application_photos')->get(
             DB::table('member_applications')->where('id', $this->id(201))->value('applicant_photo_path')));
+    }
+
+    public function test_public_applications_require_association_endorsement_before_field_officer_review(): void
+    {
+        $this->applicationAuditFixture();
+        $this->application(201, ['submitted_by_user_id' => null, 'submission_source' => 'public_gis', 'first_name' => 'PublicApplicant']);
+        $this->identity = $this->id(2);
+        $this->get('/field-officer/member-applications')->assertOk()->assertDontSee('PublicApplicant')->assertSee('1 public application(s)');
+        $this->patch(route('field-officer.member-applications.approve', $this->id(201)), ['decision_confirmed' => '1'])
+            ->assertSessionHasErrors('application');
+        $this->identity = $this->id(5);
+        $this->patch(route('association.member-applications.review', $this->id(201)), ['action' => 'endorse', 'note' => 'Not authorized.'])->assertForbidden();
+        $this->assertNull(DB::table('member_applications')->where('id', $this->id(201))->value('endorsement_stage'));
+        $this->identity = $this->id(4);
+        $this->get('/association/member-applications')->assertOk()->assertSee('Pending association review')->assertSee('Endorse to Field Officer');
+        $this->patch(route('association.member-applications.review', $this->id(201)), ['action' => 'endorse', 'note' => 'We verified the applicant.'])
+            ->assertSessionHasNoErrors();
+        $this->identity = $this->id(2);
+        $this->get('/field-officer/member-applications')->assertOk()->assertSee('PublicApplicant')->assertSee('We verified the applicant.');
+        $this->patch(route('field-officer.member-applications.return', $this->id(201)), ['note' => 'Please clarify the livelihood.'])
+            ->assertSessionHasNoErrors();
+        $this->identity = $this->id(4);
+        $this->get('/association/member-applications')->assertOk()->assertSee('Returned to association')->assertSee('Please clarify the livelihood.');
+        $this->patch(route('association.member-applications.review', $this->id(201)), ['action' => 'decline', 'note' => 'Unable to verify the applicant.'])->assertSessionHasNoErrors()->assertSessionHas('declined_contact');
+        $this->get('/association/member-applications?status=declined')->assertOk()->assertSee('Endorsement declined')->assertSee('PublicApplicant');
+        $this->get('/association/member-applications?status=pending')->assertOk()->assertDontSee('PublicApplicant');
     }
 
     public function test_http_review_decisions_preserve_admission_and_audit_and_reject_replayed_or_invalid_decisions(): void
