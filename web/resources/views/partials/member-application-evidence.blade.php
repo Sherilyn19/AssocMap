@@ -22,6 +22,7 @@
                 <a class="member-evidence-link" data-evidence-open href="{{ route($photoRoute, $application) }}" aria-label="Open applicant photo in a larger view">
                     <img src="{{ route($photoRoute, $application) }}" alt="Applicant photo" loading="lazy" decoding="async" width="256" height="256">
                 </a>
+                <button type="button" class="button member-evidence-retry" data-evidence-retry hidden aria-label="Try loading the applicant photo again"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.02 7.98A6 6 0 0 0 6 12H3.75m12.27-4.02V4.5m0 3.48H19.5M7.98 16.02A6 6 0 0 0 18 12h2.25M7.98 16.02v3.48m0-3.48H4.5" /></svg>Retry photo</button>
                 <dialog class="member-evidence-viewer" data-evidence-viewer aria-label="Applicant photo">
                     <button type="button" class="member-evidence-close" data-evidence-close aria-label="Close photo"><x-icon name="close" /></button>
                     <p class="member-evidence-status" data-evidence-viewer-status role="status" aria-live="polite">Loading photo…</p>

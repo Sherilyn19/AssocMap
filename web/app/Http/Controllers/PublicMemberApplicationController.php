@@ -47,7 +47,7 @@ class PublicMemberApplicationController extends Controller
             'last_name' => ['required', 'string', 'max:120'], 'suffix' => ['nullable', 'string', 'max:20'],
             'birth_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
             'sex_id' => ['required', 'integer', \Illuminate\Validation\Rule::exists('sex_categories', 'id')->where('is_active', true)],
-            'contact_number' => ['required', 'string', 'max:30', 'regex:/^(?=(?:\D*\d){7})[0-9+() .-]{7,30}$/'],
+            'contact_number' => ['required', 'string', \App\Support\PhilippineMobileNumber::RULE],
             'email' => ['nullable', 'email', 'max:255'],
             'reason_for_applying' => ['required', 'string', 'max:5000', function ($attribute, $value, $fail) {
                 if (\App\Support\ApplicationReason::wordCount($value) > 500) $fail('The reason must not exceed 500 words.');
@@ -56,7 +56,7 @@ class PublicMemberApplicationController extends Controller
                 'extensions:jpg,jpeg,png', 'max:5120', 'dimensions:max_width=2048,max_height=2048'],
             // The hidden website field catches simple automated submissions.
             'acknowledgement' => ['accepted'], 'website' => ['prohibited'],
-        ]);
+        ], ['contact_number.regex' => \App\Support\PhilippineMobileNumber::MESSAGE]);
         $site = $this->location($gis, $location);
         $applicationId = (string) Str::uuid();
         $photoPath = null;

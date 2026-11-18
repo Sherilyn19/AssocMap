@@ -40,6 +40,8 @@ class MemberApplicationController extends Controller
         $currentUser = $request->attributes->get('current_user');
 
         try {
+            // Require an explicit confirmation even when a request bypasses the dialog.
+            $request->validate(['decision_confirmed' => ['accepted']]);
             $member = $memberApplicationService->approve($memberApplication, $currentUser);
         } catch (ValidationException $exception) {
             throw $exception->redirectTo(MemberApplicationReturn::url($request, 'field-officer.member-applications.index'));
@@ -47,7 +49,7 @@ class MemberApplicationController extends Controller
 
         // Offer contact options only after approval has committed successfully.
         return redirect()->to(MemberApplicationReturn::url($request, 'field-officer.member-applications.index'))
-            ->with('approved_contact', ['name' => trim($member->first_name.' '.$member->last_name), 'phone' => $member->contact_number, 'email' => $member->email])
+            ->with('approved_contact', ['name' => trim($member->first_name.' '.$member->last_name), 'phone' => $member->contact_number, 'email' => $member->email, 'decision' => 'approved'])
             ->with(
                 'success',
                 'Member application approved successfully.'
@@ -63,11 +65,12 @@ class MemberApplicationController extends Controller
         try {
             $request->validate([
                 'rejection_reason' => ['required', 'string', 'max:1000'],
+                'decision_confirmed' => ['accepted'],
             ]);
 
             $currentUser = $request->attributes->get('current_user');
 
-            $memberApplicationService->reject(
+            $reviewed = $memberApplicationService->reject(
                 $memberApplication,
                 $currentUser,
                 $request->string('rejection_reason')->toString()
@@ -77,6 +80,7 @@ class MemberApplicationController extends Controller
         }
 
         return redirect()->to(MemberApplicationReturn::url($request, 'field-officer.member-applications.index'))
+            ->with('approved_contact', ['name' => trim($reviewed->first_name.' '.$reviewed->last_name), 'phone' => $reviewed->contact_number, 'email' => $reviewed->email, 'decision' => 'rejected'])
             ->with(
                 'success',
                 'Member application rejected.'

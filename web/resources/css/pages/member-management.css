@@ -138,6 +138,7 @@
 .member-evidence-photo [hidden] { display: none !important; }
 .member-evidence-link { display: inline-block; max-width: 100%; border-radius: 8px; }
 .member-evidence-link img { display: block; max-width: 100%; height: auto; border-radius: 8px; }
+.member-evidence-retry { margin-top: 10px; }
 /* Keep the member photo compact beside the name. */
 .member-profile-photo { flex: none; max-width: 160px; }
 .member-profile-photo .member-evidence-link img { width: 50px; height: 50px; object-fit: cover; }
@@ -218,3 +219,15 @@
 /* Keep the officer's available contact actions easy to scan. */
 .member-contact-options { display: grid; gap: 10px; margin-block: 20px; }
 .member-contact-options .button { justify-content: flex-start; }
+/* Keep the decision, contact options, and acknowledgement visually distinct. */
+.member-review-warning { margin: 8px 0 18px; padding: 16px; border: 1px solid #b7d7ca; border-radius: 12px; background: #eff9f4; color: #195c48; }
+.member-review-warning.is-rejection { border-color: #edc5bf; background: #fff5f3; color: #8a332a; }
+.member-review-warning strong { font-weight: 700; }
+.member-review-warning p { margin: 6px 0 0; line-height: 1.6; }
+.member-review-contact { margin-bottom: 18px; padding: 16px; border: 1px solid #dce7f0; border-radius: 12px; background: #f8fbfd; }
+.member-review-contact h3 { margin: 0; color: #173f60; font-size: 15px; font-weight: 700; }
+.member-review-contact p { margin: 6px 0 0; color: #52677a; font-size: 13px; line-height: 1.6; }
+.member-review-contact-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.member-review-contact-actions .button { overflow-wrap: anywhere; }
+.member-review-confirm { display: flex; align-items: flex-start; gap: 10px; margin: 18px 0; padding: 14px; border: 1px solid #dce7f0; border-radius: 10px; color: #334b5f; line-height: 1.5; }
+.member-review-confirm input { flex: none; width: 18px; height: 18px; margin-top: 2px; accent-color: #176c73; }

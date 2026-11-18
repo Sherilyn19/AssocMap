@@ -8,19 +8,37 @@ export function initMemberEvidencePhotos() {
         const viewerStatus = root.querySelector('[data-evidence-viewer-status]');
         const close = root.querySelector('[data-evidence-close]');
         const fallback = root.querySelector('[data-evidence-fallback]');
+        const retry = root.querySelector('[data-evidence-retry]');
 
         // Show a clear message if the small photo cannot be displayed.
-        const thumbnailLoaded = () => { status.hidden = true; };
+        const thumbnailLoaded = () => {
+            status.hidden = true;
+            status.classList.remove('is-loading');
+            link.hidden = false;
+            if (fallback) fallback.hidden = true;
+            if (retry) retry.hidden = true;
+        };
         const thumbnailFailed = () => {
             link.hidden = true;
             // Use initials for member profiles when their photo is unavailable.
             if (fallback) fallback.hidden = false;
             status.hidden = Boolean(fallback);
             status.classList.remove('is-loading');
-            status.textContent = 'Photo unavailable. Refresh the page to check your access or try again.';
+            status.textContent = 'Photo unavailable. Please try loading it again.';
+            if (retry) retry.hidden = false;
         };
         thumbnail.addEventListener('load', thumbnailLoaded);
         thumbnail.addEventListener('error', thumbnailFailed);
+        retry?.addEventListener('click', () => {
+            retry.hidden = true;
+            status.textContent = 'Loading photo…';
+            status.classList.add('is-loading');
+            status.hidden = false;
+            // Request the protected photo again without reloading the application list.
+            const url = new URL(link.href, window.location.href);
+            url.searchParams.set('retry', String(Date.now()));
+            thumbnail.src = url.href;
+        });
         // The photo may already have loaded before these listeners were added.
         if (thumbnail.complete && thumbnail.currentSrc) {
             if (thumbnail.naturalWidth) thumbnailLoaded(); else thumbnailFailed();
