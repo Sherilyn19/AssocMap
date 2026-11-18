@@ -26,7 +26,7 @@
         </dl>
         <h3>Description</h3><p class="program-preserve-text">{{ filled($activity->description) ? $activity->description : 'Not recorded' }}</p>
     </section>
-    <section class="card activity-gallery-card" data-activity-gallery data-activity-id="{{ $activity->id }}" data-base="{{ url('association/program-activities') }}" data-manager="false" data-csrf="{{ csrf_token() }}">
+    <section class="card activity-gallery-card activity-gallery-view" data-activity-gallery data-activity-id="{{ $activity->id }}" data-base="{{ url('association/program-activities') }}" data-manager="false" data-csrf="{{ csrf_token() }}">
         <p class="notice notice-error" data-activity-gallery-error hidden>Photo gallery is temporarily unavailable.</p>
         @include('components.gis-photos', ['gisManager' => false, 'gisPublic' => false, 'gisAdministrator' => false, 'activityGallery' => true])
     </section>
