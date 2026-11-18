@@ -45,6 +45,15 @@
                     <h2><x-icon name="layers" />Geometry <span class="gis-draft-state" data-gis-draft-state role="status" aria-live="polite">{{ $editing ? 'Saved geometry' : 'New location' }}</span></h2><p class="gis-help" id="gis-geometry-help" data-gis-geometry-help>Click the map to select a point, or draw and edit boundary polygons. Nothing is saved until you submit the form.</p>
                     <div class="gis-map gis-editor-map" data-gis-editor-map role="region" aria-label="GIS geometry selection and boundary editor" aria-describedby="gis-geometry-help"></div>
                     <p class="notice" data-gis-tile-notice hidden>Basemap tiles are unavailable. Coordinate fields and GeoJSON editing remain available.</p>
+                    <section class="gis-address-search" aria-labelledby="gis-address-search-title">
+                        <h3 id="gis-address-search-title">Find a location</h3>
+                        <p>Search for an address or landmark, then check the location on the map. Results can be approximate.</p>
+                        <div class="gis-address-search-controls"><label class="sr-only" for="gis-address-search-input">Address or landmark</label><input id="gis-address-search-input" type="search" maxlength="200" autocomplete="off" placeholder="Address or landmark, municipality" data-gis-address-input><button class="button" type="button" data-gis-address-search>Search</button><button class="button gis-locate-button" type="button" data-gis-locate aria-describedby="gis-locate-help">Use current location</button></div>
+                        <small id="gis-locate-help">At the project site? Use your device location, then review its accuracy before choosing it. Your location is not saved until you save the form.</small>
+                        <div class="gis-location-result" data-gis-location-result hidden><p data-gis-location-status role="status" aria-live="polite"></p><div class="gis-location-actions"><button type="button" class="button button-primary" data-gis-location-use hidden>Use this location</button><button type="button" class="button" data-gis-location-cancel>Cancel</button></div></div>
+                        <p class="gis-address-search-status" data-gis-address-status role="status" aria-live="polite"></p>
+                        <ul class="gis-address-results" data-gis-address-results aria-label="Address search results"></ul>
+                    </section>
                     <div class="gis-coordinate-grid" data-gis-coordinate-fields>
                         <div class="field"><label for="gis-longitude">Longitude</label><input id="gis-longitude" type="number" min="-180" max="180" step="any" data-gis-longitude></div>
                         <div class="field"><label for="gis-latitude">Latitude</label><input id="gis-latitude" type="number" min="-90" max="90" step="any" data-gis-latitude></div>

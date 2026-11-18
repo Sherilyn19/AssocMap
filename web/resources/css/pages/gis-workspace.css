@@ -156,6 +156,24 @@
 .gis-editor-spatial .field { margin-top: 18px; }
 .gis-editor-map { height: 460px; min-height: 350px; border: 1px solid var(--border-color); border-radius: 8px; }
 .gis-editor-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.gis-address-search { margin-top: 18px; padding: 16px; border: 1px solid #dbe6ee; border-radius: 9px; background: #f7faff; }
+.gis-address-search h3 { margin: 0 0 6px; color: #263f58; font-size: 16px; }
+.gis-address-search p, .gis-address-search small { color: #475569; line-height: 1.5; }
+.gis-address-search-controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 8px; }
+.gis-address-search-controls input { flex: 1 1 200px; min-width: 0; min-height: 44px; }
+.gis-address-search-controls button { min-height: 44px; }
+.gis-address-search-controls .gis-locate-button { border-color: #9bbad8; color: #164e80; background: #fff; }
+.gis-address-search-controls .gis-locate-button:hover:not(:disabled) { background: #e7f2fc; }
+.gis-location-result:not([hidden]) { margin-top: 14px; padding: 13px 15px; border: 1px solid #bfdbef; border-radius: 8px; background: #fff; }
+.gis-location-result p { margin: 0; font-size: 14px; }
+.gis-location-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.gis-location-actions .button { min-height: 40px; }
+.gis-address-search-status:not(:empty) { margin-top: 10px; font-size: 14px; }
+.gis-address-results { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.gis-address-results:empty { display: none; }
+.gis-address-results button { width: 100%; padding: 10px 12px; border: 1px solid #cbdbe9; border-radius: 6px; background: #fff; color: #234f78; text-align: left; line-height: 1.5; cursor: pointer; }
+.gis-address-results button:hover { background: #edf4fb; border-color: #82abd1; }
+.gis-address-results button:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
 /* Keep staff GIS editors aligned with Area Management detail pages. */
 @media (min-width: 768px) {
     :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .gis-heading { padding: 24px; border-top: 3px solid var(--primary); border-radius: 12px; box-shadow: var(--shadow-sm); }
