@@ -35,6 +35,7 @@
                                 'Birth Date' => $application->birth_date?->format('M j, Y'),
                                 'Sex' => $application->sex?->name,
                                 'Contact Number' => $application->contact_number,
+                                'Email' => $application->email,
                                 'FishR Registration Number' => $application->fishr_registration_number,
                                 'Association Position' => $application->position?->name,
                                 'Member Classifications' => $application->classifications->pluck('name')->implode(', ') ?: 'None recorded',
@@ -43,7 +44,7 @@
                             ];
                             if (filled($application->position_other_text)) $details['Other Position'] = $application->position_other_text;
                             // Keep personal details separate from association and application records.
-                            $personalLabels = array_flip(['Full Name', 'Birth Date', 'Sex', 'Contact Number', 'FishR Registration Number']);
+                            $personalLabels = array_flip(['Full Name', 'Birth Date', 'Sex', 'Contact Number', 'Email', 'FishR Registration Number']);
                             $personalDetails = array_intersect_key($details, $personalLabels);
                             $applicationDetails = array_diff_key($details, $personalLabels);
                             // Show the decision date in Philippine time when a decision exists.
@@ -56,7 +57,7 @@
                             if ($application->status === 'rejected') $decisionDetails['Rejection Reason'] = $application->rejection_reason;
                         @endphp
                         <tr>
-                            <th scope="row">{{ $fullName }}<small>FishR: {{ $application->fishr_registration_number ?: '—' }}</small></th>
+                            <th scope="row">{{ $fullName }} @if($application->submission_source === 'public_gis')<span class="badge badge-neutral">Public applicant</span>@endif<small>FishR: {{ $application->fishr_registration_number ?: '—' }}</small></th>
                             <td>{{ $application->association?->name ?? '—' }}<small>{{ $barangay?->name ?? '—' }} · {{ $barangay?->municipality?->name ?? '—' }}</small>@if(!$reviewable)<small>Association read only</small>@endif</td>
                             <td>{{ $application->position?->name ?? '—' }}</td>
                             <td>{{ $application->created_at?->format('M j, Y') ?? '—' }}</td>
@@ -73,7 +74,7 @@
                         @push('dialogs')
                             <x-modal :id="'application-'.$application->id" title="Application Details">
                                 <div class="member-record-dialog application-details-dialog">
-                                <div class="member-detail-banner"><span class="member-avatar"><x-icon name="user" /></span><div><h3>{{ $fullName }}</h3><p>{{ $application->association?->name }}</p></div><span class="badge badge-{{ $tone }}">{{ ucfirst($application->status) }}</span></div>
+                                <div class="member-detail-banner"><span class="member-avatar"><x-icon name="user" /></span><div><h3>{{ $fullName }}</h3><p>{{ $application->association?->name }}</p>@if($application->submission_source === 'public_gis')<span class="badge badge-neutral">Public applicant</span>@endif</div><span class="badge badge-{{ $tone }}">{{ ucfirst($application->status) }}</span></div>
                                 @if(!$reviewable)<p class="notice">This association is archived or inactive. Application history is read-only.</p>@endif
                                 {{-- Group the applicant and review information for easier reading. --}}
                                 <section class="application-details-section" aria-label="Applicant information"><h3><x-icon name="user" />Applicant information</h3><dl class="detail-grid">@foreach($personalDetails as $label => $value)<div><dt>{{ $label }}</dt><dd>{{ filled($value) ? $value : '—' }}</dd></div>@endforeach</dl></section>
@@ -124,3 +125,24 @@
     </section>
 </section>
 @endsection
+
+{{-- Queue the contact dialog after the approval feedback has been acknowledged. --}}
+@if(session('approved_contact'))
+    @php($approvedContact = session('approved_contact'))
+    @push('dialogs')
+        <dialog id="approved-contact" class="modal" aria-labelledby="approved-contact-title" data-feedback-restore="true">
+            <div class="modal-heading"><h2 id="approved-contact-title">How would you like to contact this applicant?</h2></div>
+            <p>The application for <strong>{{ $approvedContact['name'] }}</strong> was approved. You can contact the applicant to explain the next steps.</p>
+            <div class="member-contact-options">
+                @if(filled($approvedContact['phone']))
+                    @php($phoneLink = preg_replace('/[^0-9+]/', '', $approvedContact['phone']))
+                    <a class="button" href="tel:{{ $phoneLink }}">Call {{ $approvedContact['phone'] }}</a>
+                    <a class="button" href="sms:{{ $phoneLink }}">Send a text</a>
+                @endif
+                @if(filled($approvedContact['email']))<a class="button" href="mailto:{{ rawurlencode($approvedContact['email']) }}">Email {{ $approvedContact['email'] }}</a>@endif
+                @if(blank($approvedContact['phone']) && blank($approvedContact['email']))<p>No contact information was recorded.</p>@endif
+            </div>
+            <div class="modal-actions"><button type="button" class="button button-primary" data-close-dialog>Done</button></div>
+        </dialog>
+    @endpush
+@endif

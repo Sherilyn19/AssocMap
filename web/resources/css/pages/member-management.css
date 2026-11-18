@@ -215,3 +215,6 @@
 @media (prefers-reduced-motion: no-preference) {
     :is(.field-officer-polish, .association-workspace) .member-management:is([data-workspace-title="Member Management"], [data-workspace-title="Member Applications"]) .member-summary a:hover .stat-card { box-shadow: 0 5px 16px rgb(16 47 80 / 10%); }
 }
+/* Keep the officer's available contact actions easy to scan. */
+.member-contact-options { display: grid; gap: 10px; margin-block: 20px; }
+.member-contact-options .button { justify-content: flex-start; }

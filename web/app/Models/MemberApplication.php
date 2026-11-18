@@ -28,6 +28,12 @@ class MemberApplication extends Model
         'birth_date',
         'sex_id',
         'contact_number',
+        // Keep the public application's contact and selected-location details.
+        'email',
+        'submission_source',
+        'reason_for_applying',
+        'public_location_id',
+        'public_location_title',
         'fishr_registration_number',
         'position_id',
         'position_other_text',
@@ -44,7 +50,8 @@ class MemberApplication extends Model
         'reviewed_at' => 'datetime',
     ];
 
-    protected $hidden = ['endorsement_letter', 'applicant_photo_path'];
+    // Private screening information must not be serialized with the model.
+    protected $hidden = ['endorsement_letter', 'reason_for_applying', 'applicant_photo_path'];
 
     public function association(): BelongsTo
     {

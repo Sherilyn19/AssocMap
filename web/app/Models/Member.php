@@ -27,6 +27,7 @@ class Member extends Model
         'birth_date',
         'sex_id',
         'contact_number',
+        'email', // Optional contact copied from an approved application.
         'fishr_registration_number',
         'position_id',
         'position_other_text',

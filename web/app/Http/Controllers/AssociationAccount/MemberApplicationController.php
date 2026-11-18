@@ -42,9 +42,11 @@ class MemberApplicationController extends Controller
 
         $filters = $request->filters();
         $statusFilter = $filters['status'];
+        // Include public applications only within this account's linked association.
         $scope = MemberApplication::query()->useWritePdo()
             ->where('association_id', $associationAccount->association_id)
-            ->where('submitted_by_user_id', $currentUser->id);
+            ->where(fn ($query) => $query->where('submitted_by_user_id', $currentUser->id)
+                ->orWhere('submission_source', 'public_gis'));
         $summary = $directory->applicationSummary($scope);
         $applications = $directory->applications($scope, $filters, false, $summary);
 

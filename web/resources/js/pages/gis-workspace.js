@@ -66,6 +66,9 @@ export async function initGis(root) {
     }
 
     function clearSelection() {
+        // A cleared location must not leave an old application link available.
+        const apply = root.querySelector('[data-gis-apply]');
+        if (apply) { apply.disabled = true; delete apply.dataset.url; }
         if (detailsDrawer.open) detailsDrawer.close();
         detailsPanel.classList.remove('has-selection');
         gallery?.clear();
@@ -90,6 +93,12 @@ export async function initGis(root) {
         const changed = selected?.id !== feature.id;
         gallery?.select(feature.id, feature.properties.version);
         selected = feature;
+        // Send the selected location to the server for a fresh eligibility check.
+        const apply = root.querySelector('[data-gis-apply]');
+        if (apply) {
+            apply.disabled = false;
+            apply.dataset.url = apply.dataset.applyTemplate.replace('00000000-0000-4000-8000-000000000000', encodeURIComponent(feature.id));
+        }
         detailsPanel.classList.add('has-selection');
         setFeatureSelection(features, feature.id);
         setFeatureSelection(selection, feature.id);
@@ -496,6 +505,9 @@ export async function initGis(root) {
 
     root.querySelectorAll('[data-gis-view]').forEach(button => button.addEventListener('click', () => setView(button.dataset.gisView)));
     root.querySelector('[data-gis-dismiss]').addEventListener('click', () => { clearSelection(); root.querySelector(`[data-gis-view="${view}"]`).focus(); });
+    root.querySelector('[data-gis-apply]')?.addEventListener('click', event => {
+        if (event.currentTarget.dataset.url) window.location.assign(event.currentTarget.dataset.url);
+    });
     root.querySelector('[data-gis-open-details]').addEventListener('click', openDetails);
     root.querySelector('[data-gis-reload]').addEventListener('click', event => { clearSelection(); loadOptions(); load({ fit: true, notifyFailure: true, returnFocus: event.currentTarget }); });
     retry.addEventListener('click', () => load({ fit: retryFit, notifyFailure: true, returnFocus: retry }));

@@ -44,7 +44,8 @@ class UpdateMemberProfileRequest extends FormRequest
             'suffix' => ['nullable', 'string', 'max:20'],
             'birth_date' => ['required', 'date', 'before_or_equal:today'],
             'sex_id' => ['required', 'integer', 'exists:sex_categories,id'],
-            'contact_number' => ['nullable', 'string', 'max:30'],
+            // Existing records remain readable; profile updates require a contact number.
+            'contact_number' => ['required', 'string', 'max:30'],
             'fishr_registration_number' => ['nullable', 'string', 'max:100',
                 Rule::unique('members', 'fishr_registration_number')->ignore($this->route('member')?->id)],
         ];

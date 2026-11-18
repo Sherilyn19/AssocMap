@@ -40,12 +40,14 @@ class MemberApplicationController extends Controller
         $currentUser = $request->attributes->get('current_user');
 
         try {
-            $memberApplicationService->approve($memberApplication, $currentUser);
+            $member = $memberApplicationService->approve($memberApplication, $currentUser);
         } catch (ValidationException $exception) {
             throw $exception->redirectTo(MemberApplicationReturn::url($request, 'field-officer.member-applications.index'));
         }
 
+        // Offer contact options only after approval has committed successfully.
         return redirect()->to(MemberApplicationReturn::url($request, 'field-officer.member-applications.index'))
+            ->with('approved_contact', ['name' => trim($member->first_name.' '.$member->last_name), 'phone' => $member->contact_number, 'email' => $member->email])
             ->with(
                 'success',
                 'Member application approved successfully.'

@@ -64,9 +64,9 @@ class MemberDirectoryUiTest extends TestCase
             CREATE TABLE sex_categories (id INTEGER PRIMARY KEY, name TEXT, is_active BOOLEAN);
             CREATE TABLE association_positions (id INTEGER PRIMARY KEY, name TEXT, code TEXT, is_active BOOLEAN, is_officer BOOLEAN, sort_order INTEGER);
             CREATE TABLE member_classifications (id INTEGER PRIMARY KEY, name TEXT, is_active BOOLEAN);
-            CREATE TABLE members (id TEXT PRIMARY KEY, association_id TEXT, source_application_id TEXT, first_name TEXT, middle_name TEXT, last_name TEXT, suffix TEXT, birth_date TEXT, sex_id INTEGER, contact_number TEXT, fishr_registration_number TEXT, position_id INTEGER, position_other_text TEXT, date_registered TEXT, member_status TEXT, archived_at TEXT, archived_by TEXT, created_at TEXT, updated_at TEXT);
+            CREATE TABLE members (id TEXT PRIMARY KEY, association_id TEXT, source_application_id TEXT, first_name TEXT, middle_name TEXT, last_name TEXT, suffix TEXT, birth_date TEXT, sex_id INTEGER, contact_number TEXT, email TEXT, fishr_registration_number TEXT, position_id INTEGER, position_other_text TEXT, date_registered TEXT, member_status TEXT, archived_at TEXT, archived_by TEXT, created_at TEXT, updated_at TEXT);
             CREATE TABLE member_classification_assignments (member_id TEXT, classification_id INTEGER);
-            CREATE TABLE member_applications (id TEXT PRIMARY KEY, association_id TEXT, submitted_by_user_id TEXT, first_name TEXT, middle_name TEXT, last_name TEXT, suffix TEXT, birth_date TEXT, sex_id INTEGER, contact_number TEXT, fishr_registration_number TEXT, position_id INTEGER, position_other_text TEXT, endorsement_letter TEXT, applicant_photo_path TEXT, status TEXT, reviewed_by TEXT, reviewed_at TEXT, rejection_reason TEXT, created_at TEXT, updated_at TEXT);
+            CREATE TABLE member_applications (id TEXT PRIMARY KEY, association_id TEXT, submitted_by_user_id TEXT, submission_source TEXT NOT NULL DEFAULT 'association_account', reason_for_applying TEXT, public_location_title TEXT, first_name TEXT, middle_name TEXT, last_name TEXT, suffix TEXT, birth_date TEXT, sex_id INTEGER, contact_number TEXT, email TEXT, fishr_registration_number TEXT, position_id INTEGER, position_other_text TEXT, endorsement_letter TEXT, applicant_photo_path TEXT, status TEXT, reviewed_by TEXT, reviewed_at TEXT, rejection_reason TEXT, created_at TEXT, updated_at TEXT);
             CREATE TABLE member_application_classifications (member_application_id TEXT, classification_id INTEGER);
             SQL);
     }
@@ -370,20 +370,23 @@ class MemberDirectoryUiTest extends TestCase
             'id' => 2, 'name' => 'President', 'code' => 'PRESIDENT',
             'is_active' => true, 'is_officer' => true, 'sort_order' => 2,
         ]);
-        $this->application(201, ['position_id' => 2]);
+        // Approval should retain contact details for both the member and the follow-up prompt.
+        $this->application(201, ['position_id' => 2, 'email' => 'applicant@example.test', 'contact_number' => '09123456789']);
         $this->application(202);
         $this->application(203);
         $this->identity = $this->id(2);
         $this->get(route('field-officer.member-applications.index'))->assertOk()->assertSee('approve-'.$this->id(201));
         $this->from(route('field-officer.member-applications.index'))
             ->patch(route('field-officer.member-applications.approve', $this->id(201)))
-            ->assertRedirect(route('field-officer.member-applications.index'))->assertSessionHasNoErrors();
+            ->assertRedirect(route('field-officer.member-applications.index'))->assertSessionHasNoErrors()
+            ->assertSessionHas('approved_contact.email', 'applicant@example.test');
         $this->assertDatabaseHas('member_applications', [
             'id' => $this->id(201), 'status' => 'approved', 'reviewed_by' => $this->id(2), 'rejection_reason' => null,
         ]);
         $member = DB::table('members')->where('source_application_id', $this->id(201))->sole();
         $this->assertSame($this->id(11), $member->association_id);
         $this->assertSame('active', $member->member_status);
+        $this->assertSame('applicant@example.test', $member->email);
         $this->assertSame(2, $member->position_id);
         $this->assertSame([1], DB::table('member_classification_assignments')->where('member_id', $member->id)->pluck('classification_id')->all());
         $this->assertDatabaseHas('audit_logs', [
@@ -447,7 +450,7 @@ class MemberDirectoryUiTest extends TestCase
         $this->identity = $this->id(4);
         $data = [
             'first_name' => 'Synthetic', 'last_name' => 'Applicant', 'birth_date' => '2000-01-01',
-            'sex_id' => 1, 'position_id' => 1, 'classification_ids' => [1],
+            'sex_id' => 1, 'position_id' => 1, 'contact_number' => '09123456789', 'classification_ids' => [1],
             'endorsement_letter' => 'Private synthetic letter', 'fishr_registration_number' => 'SYNTHETIC-FISHR-15',
             'association_id' => $this->id(12), 'submitted_by_user_id' => $this->id(5),
             'applicant_photo' => UploadedFile::fake()->image('applicant.jpg', 8, 8),

@@ -158,8 +158,9 @@ class MemberApplicationSubmissionTest extends TestCase
 
     private function applicationData(): array
     {
+        // A valid submission now includes a mobile number.
         return ['first_name' => 'Synthetic', 'last_name' => 'Applicant', 'birth_date' => '2000-01-01',
-            'sex_id' => 1, 'position_id' => 2, 'classification_ids' => [1], 'endorsement_letter' => 'Private synthetic letter'];
+            'sex_id' => 1, 'position_id' => 2, 'contact_number' => '09123456789', 'classification_ids' => [1], 'endorsement_letter' => 'Private synthetic letter'];
     }
 
     public static function malformedTextFields(): iterable

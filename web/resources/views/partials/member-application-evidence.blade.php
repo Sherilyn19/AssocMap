@@ -1,6 +1,11 @@
 <section class="form-section" aria-label="Private application evidence">
     <div class="field">
-        @if(filled($application->endorsement_letter))
+        {{-- Public applicants provide a reason; association submissions retain their endorsement. --}}
+        @if($application->submission_source === 'public_gis')
+            <h3>Selected location</h3><p>{{ $application->public_location_title ?: 'Location unavailable' }}</p>
+            <h3>Reason for applying <span class="badge badge-neutral">Public applicant</span></h3>
+            <p style="white-space: pre-wrap; overflow-wrap: anywhere">{{ $application->reason_for_applying }}</p>
+        @elseif(filled($application->endorsement_letter))
             <label for="endorsement-{{ $application->id }}">Endorsement Letter</label>
             <textarea id="endorsement-{{ $application->id }}" rows="8" readonly>{{ $application->endorsement_letter }}</textarea>
         @else

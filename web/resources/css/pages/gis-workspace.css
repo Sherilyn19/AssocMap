@@ -5,6 +5,13 @@
 .gis-access-label .icon { width: 16px; height: 16px; }
 .gis-public-note { display: flex; align-items: flex-start; gap: 8px; margin-top: 18px; font-size: 12px; line-height: 1.7; }
 .gis-public-note .icon { width: 16px; height: 16px; margin-top: 2px; color: #52755f; }
+/* A welcoming application hint is shown only on the public map. */
+.gis-apply-note { display: flex; align-items: flex-start; gap: 13px; padding: 15px 19px; border: 1px solid #b9ded7; border-radius: 14px; background: linear-gradient(110deg, #eaf8f2, #fdf8e9); }
+.gis-apply-note-icon { display: grid; flex: 0 0 34px; height: 34px; place-items: center; border-radius: 11px; background: #d1eee0; color: #147461; font-size: 20px; }
+.gis-module .gis-apply-note p { margin: 0; color: #365b5c; font-size: 14px; line-height: 1.6; }
+.gis-apply-note strong { color: #145e55; }
+.gis-apply-guide { display: block; margin-top: 4px; font-size: 13px; }
+.gis-apply-guide a { color: #116b73; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 /* Public viewer: visual refinement without changing text sizes. */
 .gis-public-main .gis-search-panel, .gis-public-main .gis-map-panel, .gis-public-main .gis-register-panel, .gis-public-main .gis-location-panel { border: 1px solid #d5e3ec; border-radius: 14px; box-shadow: 0 10px 28px rgb(16 47 80 / 7%); }
 .gis-public-main .gis-toolbar { background: #f8fbfd; }

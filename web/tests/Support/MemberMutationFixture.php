@@ -115,6 +115,7 @@ trait MemberMutationFixture
             $table->date('birth_date');
             $table->integer('sex_id');
             $table->string('contact_number')->nullable();
+            $table->string('email')->nullable(); // Match the optional application contact field.
             $table->string('fishr_registration_number')->nullable();
             $table->unsignedBigInteger('position_id');
             $table->string('position_other_text')->nullable();
@@ -142,6 +143,7 @@ trait MemberMutationFixture
             $table->date('birth_date');
             $table->integer('sex_id');
             $table->string('contact_number')->nullable();
+            $table->string('email')->nullable(); // Approved members retain the optional email.
             $table->string('fishr_registration_number')->nullable()->unique();
             $table->unsignedBigInteger('position_id');
             $table->string('position_other_text')->nullable();
