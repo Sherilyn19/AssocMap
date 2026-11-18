@@ -4,7 +4,7 @@
     $module = 'projects';
     $moduleLabel = 'Projects';
     $projectRoutePrefix = $prefix.'.projects';
-    $statuses = ['planned' => 'Planned', 'ongoing' => 'Ongoing', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled', 'completed' => 'Completed', 'terminated' => 'Terminated'];
+    $statuses = ['ongoing' => 'Ongoing', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled', 'completed' => 'Completed', 'terminated' => 'Terminated'];
     $cards = ['current' => ['Current Projects', '', 'folder-kanban'], 'ongoing' => ['Ongoing', 'ongoing', 'trend'], 'completed' => ['Completed', 'completed', 'check'], 'terminated' => ['Terminated', 'terminated', 'close'], 'archived' => ['Archived Records', 'archived', 'archive']];
 @endphp
 @section('content')

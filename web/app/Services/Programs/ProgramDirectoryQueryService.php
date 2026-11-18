@@ -40,7 +40,7 @@ class ProgramDirectoryQueryService
     public function summary(UserProfile $actor, string $module): array
     {
         $statuses = match ($module) {
-            'projects' => ['planned', 'ongoing', 'suspended', 'cancelled', 'completed', 'terminated'],
+            'projects' => ['ongoing', 'suspended', 'cancelled', 'completed', 'terminated'],
             'trainings' => ['scheduled', 'completed', 'cancelled'],
             'program-activities' => ['planned', 'ongoing', 'completed', 'cancelled'],
         };
