@@ -193,6 +193,19 @@ class MemberDirectoryUiTest extends TestCase
         $this->get('/admin/members?q=unmatched')->assertOk()->assertSee('No matching members');
     }
 
+    // Show the saved decision date without exposing another association's records.
+    public function test_review_dates_appear_in_officer_applications_and_admin_member_details(): void
+    {
+        $this->application(201, ['status' => 'approved', 'reviewed_by' => $this->id(2), 'reviewed_at' => '2026-02-01 08:00:00']);
+        $this->application(202, ['status' => 'rejected', 'reviewed_by' => $this->id(2), 'reviewed_at' => '2026-02-02 08:00:00', 'rejection_reason' => 'Missing information']);
+        $this->member(101, ['source_application_id' => $this->id(201)]);
+        $this->identity = $this->id(2);
+        $this->get('/field-officer/member-applications?status=approved')->assertOk()->assertSee('Date Approved')->assertSee('Reviewed By');
+        $this->get('/field-officer/member-applications?status=rejected')->assertOk()->assertSee('Date Rejected')->assertSee('Missing information');
+        $this->identity = $this->id(1);
+        $this->get('/admin/members')->assertOk()->assertSee('Application approval')->assertSee('Date Approved')->assertSee('Reviewed By');
+    }
+
     public function test_application_account_isolation_counts_and_private_evidence_are_preserved(): void
     {
         $this->identity = $this->id(4);

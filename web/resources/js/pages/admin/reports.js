@@ -25,8 +25,8 @@ function initReportControls(root, form, readFilters, defaultYear) {
     }
 
     toggle.hidden = false;
-    // Use the compact association report controls in the desktop admin workspace too.
-    const associationReport = Boolean(root.closest?.('.association-workspace') || (root.closest?.('.admin-workspace') && window.matchMedia('(min-width: 768px)').matches));
+    // Share compact report controls across desktop staff workspaces.
+    const associationReport = Boolean(root.closest?.('.association-workspace') || (root.closest?.(':is(.admin-workspace, .field-officer-workspace)') && window.matchMedia('(min-width: 768px)').matches));
     setOpen(!associationReport);
     toggle.addEventListener('click', () => setOpen(panel.hidden));
     if (associationReport) toggle.closest('.section-heading')?.addEventListener('click', event => {
@@ -62,11 +62,11 @@ export function initReports() {
     const preview = root.querySelector('[data-report-result]');
     const status = root.querySelector('[data-report-status]');
     // Share the presentation without changing admin filters or report data.
-    const associationReport = Boolean(root.closest?.('.association-workspace') || (root.closest?.('.admin-workspace') && window.matchMedia('(min-width: 768px)').matches));
+    const associationReport = Boolean(root.closest?.('.association-workspace') || (root.closest?.(':is(.admin-workspace, .field-officer-workspace)') && window.matchMedia('(min-width: 768px)').matches));
     const plain = value => {
         if (!associationReport || typeof value !== 'string') return value;
         // Admin reports may cover several associations, not only one.
-        if (root.closest?.('.admin-workspace') && value === 'Archived records are retained within the current authorized association scope. Counts describe recorded data only.') {
+        if (root.closest?.(':is(.admin-workspace, .field-officer-workspace)') && value === 'Archived records are retained within the current authorized association scope. Counts describe recorded data only.') {
             return 'Archived records are included for associations covered by this report. Counts reflect only information recorded in the system.';
         }
         const incomeNote = value.match(/^(\d+) quarterly entries excluded: quarterly income cannot be allocated to the selected month\.$/);

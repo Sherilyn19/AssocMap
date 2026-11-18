@@ -16,7 +16,7 @@
         <div class="table-scroll" role="region" aria-label="{{ ucfirst($statusFilter) }} member applications" tabindex="0">
             <table class="data-table member-register-table">
                 <caption class="sr-only">{{ ucfirst($statusFilter) }} member applications from assigned associations</caption>
-                <thead><tr>@foreach(['Applicant', 'Association', 'Position', 'Submitted', 'Status', 'Actions'] as $heading)<th scope="col">{{ $heading }}</th>@endforeach</tr></thead>
+                <thead><tr>@foreach(['Applicant', 'Association', 'Position', 'Submitted'] as $heading)<th scope="col">{{ $heading }}</th>@endforeach @if(in_array($statusFilter, ['approved', 'rejected'], true))<th scope="col">{{ $statusFilter === 'approved' ? 'Date Approved' : 'Date Rejected' }}</th>@endif @foreach(['Status', 'Actions'] as $heading)<th scope="col">{{ $heading }}</th>@endforeach</tr></thead>
                 <tbody>
                     @foreach($applications as $application)
                         @php
@@ -42,17 +42,25 @@
                                 'Submitted Date' => $application->created_at?->format('M j, Y g:i A'),
                             ];
                             if (filled($application->position_other_text)) $details['Other Position'] = $application->position_other_text;
-                            if ($application->reviewed_at) {
-                                $details['Reviewed Date'] = $application->reviewed_at->format('M j, Y g:i A');
-                                $details['Reviewer'] = $application->reviewedBy?->display_name;
+                            // Keep personal details separate from association and application records.
+                            $personalLabels = array_flip(['Full Name', 'Birth Date', 'Sex', 'Contact Number', 'FishR Registration Number']);
+                            $personalDetails = array_intersect_key($details, $personalLabels);
+                            $applicationDetails = array_diff_key($details, $personalLabels);
+                            // Show the decision date in Philippine time when a decision exists.
+                            $decisionDetails = [];
+                            if (in_array($application->status, ['approved', 'rejected'], true)) {
+                                $decisionDetails[$application->status === 'approved' ? 'Date Approved' : 'Date Rejected'] = $application->reviewed_at?->copy()->timezone('Asia/Manila')->format('M j, Y g:i A').' PHT';
+                                if (!$application->reviewed_at) $decisionDetails[$application->status === 'approved' ? 'Date Approved' : 'Date Rejected'] = null;
+                                $decisionDetails['Reviewed By'] = $application->reviewedBy?->display_name;
                             }
-                            if ($application->status === 'rejected') $details['Rejection Reason'] = $application->rejection_reason;
+                            if ($application->status === 'rejected') $decisionDetails['Rejection Reason'] = $application->rejection_reason;
                         @endphp
                         <tr>
                             <th scope="row">{{ $fullName }}<small>FishR: {{ $application->fishr_registration_number ?: '—' }}</small></th>
                             <td>{{ $application->association?->name ?? '—' }}<small>{{ $barangay?->name ?? '—' }} · {{ $barangay?->municipality?->name ?? '—' }}</small>@if(!$reviewable)<small>Association read only</small>@endif</td>
                             <td>{{ $application->position?->name ?? '—' }}</td>
                             <td>{{ $application->created_at?->format('M j, Y') ?? '—' }}</td>
+                            @if(in_array($statusFilter, ['approved', 'rejected'], true))<td>{{ $application->reviewed_at?->copy()->timezone('Asia/Manila')->format('M j, Y g:i A') ?? 'Not recorded' }}@if($application->reviewed_at)<small>PHT</small>@endif</td>@endif
                             <td><span class="badge badge-{{ $tone }}">{{ ucfirst($application->status) }}</span></td>
                             <td><div class="row-actions member-row-actions">
                                 <button type="button" class="button button-quiet" data-dialog="application-{{ $application->id }}" aria-label="View application for {{ $fullName }}"><x-icon name="eye" />{{ $application->status === 'pending' && $reviewable ? 'Review' : 'View' }}</button>
@@ -64,10 +72,13 @@
                         </tr>
                         @push('dialogs')
                             <x-modal :id="'application-'.$application->id" title="Application Details">
-                                <div class="member-record-dialog">
+                                <div class="member-record-dialog application-details-dialog">
                                 <div class="member-detail-banner"><span class="member-avatar"><x-icon name="user" /></span><div><h3>{{ $fullName }}</h3><p>{{ $application->association?->name }}</p></div><span class="badge badge-{{ $tone }}">{{ ucfirst($application->status) }}</span></div>
                                 @if(!$reviewable)<p class="notice">This association is archived or inactive. Application history is read-only.</p>@endif
-                                <dl class="detail-grid">@foreach($details as $label => $value)<div><dt>{{ $label }}</dt><dd>{{ filled($value) ? $value : '—' }}</dd></div>@endforeach</dl>
+                                {{-- Group the applicant and review information for easier reading. --}}
+                                <section class="application-details-section" aria-label="Applicant information"><h3><x-icon name="user" />Applicant information</h3><dl class="detail-grid">@foreach($personalDetails as $label => $value)<div><dt>{{ $label }}</dt><dd>{{ filled($value) ? $value : '—' }}</dd></div>@endforeach</dl></section>
+                                <section class="application-details-section" aria-label="Association and application details"><h3><x-icon name="building" />Association and application details</h3><dl class="detail-grid">@foreach($applicationDetails as $label => $value)<div><dt>{{ $label }}</dt><dd>{{ filled($value) ? $value : '—' }}</dd></div>@endforeach</dl></section>
+                                @if($decisionDetails)<section class="application-details-section" aria-label="Review decision"><h3><x-icon name="clipboard-check" />Review decision</h3><dl class="detail-grid">@foreach($decisionDetails as $label => $value)<div><dt>{{ $label }}</dt><dd>{{ filled($value) ? $value : 'Not recorded' }}</dd></div>@endforeach</dl></section>@endif
                                 @include('partials.member-application-evidence', ['photoRoute' => 'field-officer.member-applications.photo'])
                                 <div class="modal-actions"><button type="button" class="button" data-close-dialog>Close</button></div>
                                 </div>

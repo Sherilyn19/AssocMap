@@ -1,6 +1,29 @@
-<div class="member-detail-banner"><span class="member-avatar"><x-icon name="user" /></span><div><h3>{{ $fullName }}</h3><p>@if($member->association)<a href="{{ $workflow->to($workflowPrefix.'.associations.show', ['association' => $member->association_id, 'section' => 'members']) }}">{{ $member->association->name }}</a>@else Association unavailable @endif</p></div><span class="badge badge-{{ $member->archived_at ? 'neutral' : ($member->member_status === 'active' ? 'success' : 'warning') }}">{{ $member->archived_at ? 'Archived' : ucfirst($member->member_status) }}</span></div>
-<dl class="detail-grid">
-    @foreach(['Member Name' => $fullName, 'Association' => $member->association?->name, 'Municipality / City' => $member->association?->locationBarangay()?->municipality?->name, 'Barangay' => $member->association?->locationBarangay()?->name, 'Specific Area' => $member->association?->area?->address, 'Birth Date' => $member->birth_date?->format('M j, Y'), 'Sex' => $member->sex?->name, 'Contact Number' => $member->contact_number, 'FishR Registration Number' => $member->fishr_registration_number, 'Position' => $member->position?->name, 'Other Position Text' => $member->position_other_text, 'Classifications' => $member->classifications->pluck('name')->implode(', ') ?: 'None recorded', 'Date Registered' => $member->date_registered?->format('M j, Y'), 'Membership Status' => ucfirst($member->member_status), 'Archived' => $member->archived_at ? 'Yes' : 'No', 'Archived At' => $member->archived_at?->format('M j, Y g:i A')] as $label => $value)
-        <div><dt>{{ $label }}</dt><dd>{{ filled($value) ? $value : '—' }}</dd></div>
-    @endforeach
-</dl>
+@php
+    // Keep personal details separate from membership and location details.
+    $initials = mb_strtoupper(mb_substr($member->first_name ?? '', 0, 1).mb_substr($member->last_name ?? '', 0, 1));
+    $personal = ['Member Name' => $fullName, 'Birth Date' => $member->birth_date?->format('M j, Y'), 'Sex' => $member->sex?->name, 'Contact Number' => $member->contact_number, 'FishR Registration Number' => $member->fishr_registration_number];
+    $membership = ['Association' => $member->association?->name, 'Municipality / City' => $member->association?->locationBarangay()?->municipality?->name, 'Barangay' => $member->association?->locationBarangay()?->name, 'Specific Area' => $member->association?->area?->address, 'Position' => $member->position?->name, 'Other Position Text' => $member->position_other_text, 'Classifications' => $member->classifications->pluck('name')->implode(', ') ?: 'None recorded', 'Date Registered' => $member->date_registered?->format('M j, Y'), 'Membership Status' => ucfirst($member->member_status), 'Archived' => $member->archived_at ? 'Yes' : 'No', 'Archived At' => $member->archived_at?->format('M j, Y g:i A'), 'Last Updated' => $member->updated_at ? $member->updated_at->copy()->timezone('Asia/Manila')->format('M j, Y g:i A').' PHT' : null];
+@endphp
+{{-- Use the protected application photo and show initials when it is unavailable. --}}
+<div class="member-detail-banner">
+    @if($member->source_application_id)
+        <div class="member-evidence-photo member-profile-photo" data-member-evidence-photo>
+            <span class="member-avatar" data-evidence-fallback aria-label="Photo unavailable; showing initials" hidden>{{ $initials ?: '—' }}</span>
+            <p class="member-evidence-status" data-evidence-status role="status" aria-live="polite" hidden>Loading photo…</p>
+            <a class="member-evidence-link" data-evidence-open href="{{ route('field-officer.member-applications.photo', $member->source_application_id) }}" aria-label="Open {{ $fullName }}'s photo"><img src="{{ route('field-officer.member-applications.photo', $member->source_application_id) }}" alt="Photo of {{ $fullName }}" loading="lazy" decoding="async" width="80" height="80"></a>
+            <dialog class="member-evidence-viewer" data-evidence-viewer aria-label="Member photo"><button type="button" class="member-evidence-close" data-evidence-close aria-label="Close photo"><x-icon name="close" /></button><p class="member-evidence-status" data-evidence-viewer-status role="status" aria-live="polite">Loading photo…</p><img data-evidence-image alt="Photo of {{ $fullName }}" hidden></dialog>
+        </div>
+    @else
+        <span class="member-avatar" aria-hidden="true">{{ $initials ?: '—' }}</span>
+    @endif
+    <div><h3>{{ $fullName }}</h3><p>@if($member->association)<a href="{{ $workflow->to($workflowPrefix.'.associations.show', ['association' => $member->association_id, 'section' => 'members']) }}">{{ $member->association->name }}</a>@else Association unavailable @endif</p></div>
+    <span class="badge badge-{{ $member->archived_at ? 'neutral' : ($member->member_status === 'active' ? 'success' : 'warning') }}">{{ $member->archived_at ? 'Archived' : ucfirst($member->member_status) }}</span>
+</div>
+{{-- Group the information so each detail is easy to find. --}}
+@foreach(['Personal Information' => ['user', $personal], 'Association and Membership' => ['building', $membership]] as $heading => [$icon, $items])
+    <section class="member-detail-card"><h3><x-icon :name="$icon" />{{ $heading }}</h3><dl class="detail-grid">@foreach($items as $label => $value)<div><dt>{{ $label }}</dt><dd>{{ filled($value) ? $value : '—' }}</dd></div>@endforeach</dl></section>
+@endforeach
+{{-- Show the saved decision only for members with an approved application. --}}
+@if($member->sourceApplication?->status === 'approved')
+    <section class="member-detail-card"><h3><x-icon name="clipboard-check" />Application Approval</h3><dl class="detail-grid"><div><dt>Date Approved</dt><dd>{{ $member->sourceApplication->reviewed_at?->copy()->timezone('Asia/Manila')->format('M j, Y g:i A') ?? 'Not recorded' }}@if($member->sourceApplication->reviewed_at) PHT @endif</dd></div><div><dt>Reviewed By</dt><dd>{{ $member->sourceApplication->reviewedBy?->display_name ?? 'Not recorded' }}</dd></div></dl></section>
+@endif

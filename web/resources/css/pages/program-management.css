@@ -206,6 +206,39 @@
 .activity-management .program-register-table .activity-actions-cell { width: 1%; max-width: none; }
 .activity-management .activity-row-actions { flex-wrap: nowrap; gap: 8px; }
 .activity-management .activity-read-only { margin: 0; white-space: nowrap; }
+/* Match Field Officer training details and schedules to the admin design. */
+@media (min-width: 768px) {
+    /* Keep project details consistent with the staff detail pages. */
+    .field-officer-polish [data-workspace-title="Project Details"] .workflow-navigation .back-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
+    .field-officer-polish [data-workspace-title="Project Details"] .workflow-navigation .back-link:hover { border-color: #9bbad8; background: #edf4fb; }
+    .field-officer-polish [data-workspace-title="Project Details"] :is(.program-information h2, .program-information h3, .detail-grid dt) { text-transform: uppercase; font-weight: 700; }
+    .field-officer-polish [data-workspace-title="Project Details"] .detail-grid > div { min-width: 0; padding: 10px 0; border-bottom: 1px solid #dce7f1; overflow-wrap: anywhere; }
+    .field-officer-polish [data-workspace-title="Training Details"] .workflow-navigation .back-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
+    .field-officer-polish [data-workspace-title="Training Details"] .workflow-navigation .back-link:hover { border-color: #9bbad8; background: #edf4fb; }
+    .field-officer-polish [data-workspace-title="Training Details"] :is(.program-information h2, .program-information h3, .detail-grid dt) { text-transform: uppercase; font-weight: 700; }
+    .field-officer-polish [data-workspace-title="Training Details"] .detail-grid > div { min-width: 0; padding: 10px 0; border-bottom: 1px solid #dce7f1; overflow-wrap: anywhere; }
+    .field-officer-polish [data-workspace-title="Training Management"] .admin-timeline-date { position: relative; min-width: 150px; padding-left: 42px; }
+    .field-officer-polish [data-workspace-title="Training Management"] .admin-timeline-date::before { content: ''; position: absolute; left: 25px; top: 0; bottom: 0; border-left: 2px solid #dbe6ee; }
+    .field-officer-polish [data-workspace-title="Training Management"] .admin-timeline-marker { position: absolute; left: 20px; top: 23px; width: 12px; height: 12px; border: 3px solid #fff; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 1px #9bbad8; }
+}
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .field-officer-polish [data-workspace-title="Training Management"] .admin-timeline-marker { transition: box-shadow 180ms ease; }
+    .field-officer-polish [data-workspace-title="Training Management"] tr:hover .admin-timeline-marker { box-shadow: 0 0 0 4px #dbe6ee; }
+}
+/* Match the Field Officer activity details and timeline to the admin view. */
+@media (min-width: 768px) {
+    .field-officer-polish .activity-management .workflow-navigation .back-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
+    .field-officer-polish .activity-management .workflow-navigation .back-link:hover { border-color: #9bbad8; background: #edf4fb; }
+    .field-officer-polish .activity-management :is(.program-information h2, .program-information h3, .detail-grid dt) { text-transform: uppercase; font-weight: 700; }
+    .field-officer-polish .activity-management .detail-grid > div { min-width: 0; padding: 10px 0; border-bottom: 1px solid #dce7f1; overflow-wrap: anywhere; }
+    .field-officer-polish .activity-management .admin-timeline-date { position: relative; min-width: 150px; padding-left: 42px; }
+    .field-officer-polish .activity-management .admin-timeline-date::before { content: ''; position: absolute; left: 25px; top: 0; bottom: 0; border-left: 2px solid #dbe6ee; }
+    .field-officer-polish .activity-management .admin-timeline-marker { position: absolute; left: 20px; top: 23px; width: 12px; height: 12px; border: 3px solid #fff; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 1px #9bbad8; }
+}
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .field-officer-polish .activity-management .admin-timeline-marker { transition: box-shadow 180ms ease; }
+    .field-officer-polish .activity-management tr:hover .admin-timeline-marker { box-shadow: 0 0 0 4px #dbe6ee; }
+}
 .activity-management .activity-actions summary { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--border-color); border-radius: 7px; color: #46617c; list-style: none; }
 .activity-management .activity-actions summary::-webkit-details-marker { display: none; }
 .activity-management .activity-actions summary .icon { width: 18px; height: 18px; transform: rotate(90deg); }

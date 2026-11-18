@@ -77,6 +77,8 @@
                         ['Acronym', $dashboard['association']['acronym'], 'building'],
                         ['SAAD Phase II join date', $dashboard['association']['joined_on'], 'calendar'],
                         ['Association ID', $dashboard['association']['id'], 'receipt'],
+                        // This is the date of the last change to the association record.
+                        ['Last updated', $dashboard['association']['updated_at'] ?? null, 'calendar'],
                     ],
                     'Registered location' => [
                         ['Address', $dashboard['association']['address'], 'map-pinned'],

@@ -149,25 +149,25 @@
 .gis-editor-spatial .field { margin-top: 18px; }
 .gis-editor-map { height: 460px; min-height: 350px; border: 1px solid var(--border-color); border-radius: 8px; }
 .gis-editor-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-/* Align the administrator's GIS editor with Area Management detail pages. */
+/* Keep staff GIS editors aligned with Area Management detail pages. */
 @media (min-width: 768px) {
-    .admin-workspace [data-gis-editor] .gis-heading { padding: 24px; border-top: 3px solid var(--primary); border-radius: 12px; box-shadow: var(--shadow-sm); }
-    .admin-workspace [data-gis-editor] .gis-heading > div { min-width: 0; overflow-wrap: anywhere; }
-    .admin-workspace [data-gis-editor] .gis-heading p { margin-top: 8px; max-width: 760px; }
-    .admin-workspace [data-gis-editor] .gis-heading h1 { text-transform: uppercase; }
-    .admin-workspace [data-gis-editor] .workflow-navigation { margin: 0 0 20px; }
-    .admin-workspace [data-gis-editor] .workflow-navigation .back-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
-    .admin-workspace [data-gis-editor] .workflow-navigation nav a { font-weight: 600; text-decoration: none; }
-    .admin-workspace [data-gis-editor] .workflow-navigation .back-link:hover { border-color: #9bbad8; background: #edf4fb; }
-    .admin-workspace [data-gis-editor] :is(.gis-editor-fields, .gis-editor-spatial) { border: 1px solid #dbe6ee; border-radius: 12px; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
-    .admin-workspace [data-gis-editor] :is(.gis-editor-fields, .gis-editor-spatial) > h2 { display: flex; align-items: center; gap: 9px; font-weight: 700; text-transform: uppercase; }
-    .admin-workspace [data-gis-editor] :is(.gis-editor-fields, .gis-editor-spatial) > h2 .icon { width: 19px; height: 19px; color: var(--primary); flex: none; }
-    .admin-workspace [data-gis-editor] .field label { font-weight: 700; }
-    .admin-workspace [data-gis-editor] .gis-public-fields { margin-top: 22px; padding: 16px; border: 1px solid #dbe6ee; border-radius: 9px; }
-    .admin-workspace [data-gis-editor] .gis-public-fields legend { padding: 0 6px; color: #263f58; font-weight: 700; }
-    .admin-workspace [data-gis-editor] .gis-save-actions { gap: 12px; }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .gis-heading { padding: 24px; border-top: 3px solid var(--primary); border-radius: 12px; box-shadow: var(--shadow-sm); }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .gis-heading > div { min-width: 0; overflow-wrap: anywhere; }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .gis-heading p { margin-top: 8px; max-width: 760px; }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .gis-heading h1 { text-transform: uppercase; }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .workflow-navigation { margin: 0 0 20px; }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .workflow-navigation .back-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .workflow-navigation nav a { font-weight: 600; text-decoration: none; }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .workflow-navigation .back-link:hover { border-color: #9bbad8; background: #edf4fb; }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] :is(.gis-editor-fields, .gis-editor-spatial) { border: 1px solid #dbe6ee; border-radius: 12px; box-shadow: 0 4px 16px rgb(16 47 80 / 5%); }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] :is(.gis-editor-fields, .gis-editor-spatial) > h2 { display: flex; align-items: center; gap: 9px; font-weight: 700; text-transform: uppercase; }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] :is(.gis-editor-fields, .gis-editor-spatial) > h2 .icon { width: 19px; height: 19px; color: var(--primary); flex: none; }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .field label { font-weight: 700; }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .gis-public-fields { margin-top: 22px; padding: 16px; border: 1px solid #dbe6ee; border-radius: 9px; }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .gis-public-fields legend { padding: 0 6px; color: #263f58; font-weight: 700; }
+    :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .gis-save-actions { gap: 12px; }
 }
-@media (min-width: 768px) and (prefers-reduced-motion: no-preference) { .admin-workspace [data-gis-editor] .workflow-navigation a { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; } }
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) { :is(.admin-workspace, .field-officer-workspace) [data-gis-editor] .workflow-navigation a { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease; } }
 .gis-coordinate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .gis-public-fields { border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; min-width: 0; background: #f7faff; }
 .gis-public-fields legend { padding: 0 6px; font-weight: 600; }

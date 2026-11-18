@@ -10,7 +10,8 @@
 @section('content')
 <section class="program-management" data-workspace-module="projects" data-workspace-title="Project Management" data-project-actions>
     <header class="card program-heading"><div>@if($prefix !== 'admin')<p class="eyebrow">Field Officer</p>@endif<h1 tabindex="-1">Project Management</h1><p>{{ $prefix === 'admin' ? 'Manage association projects, implementation progress, and project resources.' : 'Manage projects and resources within your assigned associations.' }}</p></div>@if($prefix !== 'admin')<a class="button button-primary" href="{{ route($projectRoutePrefix.'.index', $filters + ['editor' => 'create']) }}"><x-icon name="plus" />Add Project</a>
-        <x-contextual-report :prefix="$prefix" type="projects" :related="true"
+        {{-- Keep the report link without repeating its scope in the header. --}}
+        <x-contextual-report :prefix="$prefix" type="projects" :related="true" :show-scope="false"
             :filters="$filters['year'] !== '' ? ['program_year' => (int) $filters['year']] : []"
             :scope="($filters['year'] !== '' ? 'Program year '.$filters['year'].'. ' : 'All program years. ').($prefix === 'admin' ? 'All authorized associations, including archived associations. ' : 'Your currently assigned active, unarchived associations. ').'Current project statuses, including archived projects; no event reporting period. Search, association-name, status, sorting and pagination selections from this register are not applied. Open a project for a single-project report.'" />
     @endif</header>

@@ -83,6 +83,13 @@
 .admin-member-modal .member-detail-card .detail-grid { margin: 0; gap: 18px; }
 .admin-member-modal .member-detail-card dt { color: #71869b; font-size: 10px; font-weight: 700; text-transform: uppercase; }
 .admin-member-modal .member-detail-card dd { margin: 5px 0 0; color: #263f58; font-size: 13px; overflow-wrap: anywhere; }
+/* Keep member information easy to scan in the field officer workspace. */
+.member-record-dialog .member-detail-card { min-width: 0; margin-top: 18px; }
+.member-record-dialog .member-detail-card h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid #dce6ef; color: #193a5a; font-weight: 700; text-transform: uppercase; }
+.member-record-dialog .member-detail-card h3 .icon { width: 18px; height: 18px; flex-shrink: 0; }
+.member-record-dialog .detail-grid > div { min-width: 0; }
+.member-record-dialog .detail-grid dd { overflow-wrap: anywhere; }
+.member-edit-dialog .member-detail-banner { margin-bottom: 18px; }
 @media (max-width: 480px) { .admin-member-modal .modal-heading { padding: 14px 16px; } .admin-member-modal .member-record-dialog { padding: 14px; } .admin-member-modal .member-detail-card { padding: 15px; } }
 .member-record-dialog { min-width: 0; }
 .member-record-dialog .member-detail-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 18px; margin-bottom: 24px; border: 1px solid #dae7f3; border-radius: 9px; background: #f4f8fd; }
@@ -100,6 +107,8 @@
 .modal:has(.application-details-dialog) .modal-heading h2 { text-transform: uppercase; font-weight: 700; }
 .application-details-dialog .member-detail-banner { margin-bottom: 18px; background: #f8fbfe; border-color: #dce7f1; }
 .application-details-dialog .application-details-section { padding: 18px; border: 1px solid #dce7f1; border-radius: 9px; background: #fff; }
+/* Separate the applicant information from the review decision. */
+.application-details-dialog .application-details-section + .application-details-section { margin-top: 16px; }
 .application-details-dialog .application-details-section > h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid #edf1f5; color: #526679; }
 .application-details-dialog .application-details-section > h3 .icon { width: 17px; height: 17px; color: #6986a1; }
 .application-details-dialog .detail-grid dt { font-weight: 700; text-transform: uppercase; }

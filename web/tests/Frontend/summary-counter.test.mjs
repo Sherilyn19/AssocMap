@@ -288,12 +288,17 @@ test('does not depend on requests, storage, navigation, feedback or global mutat
     assert.equal(f.value.textContent, '45');
 });
 
-test('report dashboard values stay static while other modules retain summary counters', () => {
+test('report counters animate whole-number values using the shared accessible counter', () => {
     const reports = readFileSync(new URL('../../resources/js/pages/admin/reports.js', import.meta.url), 'utf8');
-    const blade = readFileSync(new URL('../../resources/views/admin/reports/index.blade.php', import.meta.url), 'utf8');
+    // Reports keep the exact value and use the same counter as other workspaces.
     assert.match(reports, /function render\(result\)/);
     assert.match(reports, /render\(initial.result\)/);
     assert.match(reports, /render\(result\);/);
-    assert.doesNotMatch(reports, /data-summary-counter/);
-    assert.doesNotMatch(blade, /x-summary-counter/);
+    assert.match(reports, /associationReport && \/\^\\d\+\$\/\.test\(String\(measure\.value\)\)/);
+    assert.match(reports, /initSummaryCounters\(primary\)/);
+    const counter = fixture('42');
+    counter.initSummaryCounters();
+    assert.equal(counter.accessible(), '42');
+    counter.finish();
+    assert.equal(counter.value.textContent, '42');
 });

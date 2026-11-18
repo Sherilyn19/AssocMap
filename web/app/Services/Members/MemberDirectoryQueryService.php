@@ -41,7 +41,9 @@ class MemberDirectoryQueryService
         $geography = app(AssociationGeographyService::class);
 
         return $query->with(['association:'.implode(',', $geography->associationColumns(['id', 'name', 'area_id', 'status', 'archived_at'])),
-            ...$geography->displayRelations('association'), 'sex:id,name', 'position:id,name', 'classifications'])
+            ...$geography->displayRelations('association'), 'sex:id,name', 'position:id,name', 'classifications',
+            // Load approval details for members the current user is allowed to see.
+            'sourceApplication:id,status,reviewed_at,reviewed_by', 'sourceApplication.reviewedBy:id,display_name'])
             ->paginate(25, total: $this->paginationTotal($filters, $summary, 'current'))->appends($filters);
     }
 

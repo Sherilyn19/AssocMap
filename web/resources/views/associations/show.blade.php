@@ -24,6 +24,8 @@
         <div class="association-section-heading"><h2 id="association-information-title"><x-icon name="building" /> Association information</h2></div>
         <dl class="association-info-grid">
             <div><dt>Association name</dt><dd>{{ $association->name }}</dd></div><div><dt>Acronym</dt><dd>{{ $association->acronym ?? 'Not recorded' }}</dd></div><div><dt>SAAD Phase II joining</dt><dd>{{ $association->saad_phase2_join_date?->format('M d, Y') ?? 'Not recorded' }}</dd></div><div><dt>Created</dt><dd>{{ $association->created_at?->timezone('Asia/Manila')->format('M d, Y') ?? 'Not recorded' }}</dd></div><div><dt>Primary Field Officer</dt><dd>{{ $association->primaryFieldOfficer?->display_name ?? 'Not available' }}</dd></div><div><dt>President @if($prefix === 'field-officer')<x-area-info label="About the president">The president shown is an active member whose record is not archived. Registration records are listed below.</x-area-info>@endif</dt><dd>@include('associations.partials.person-name', ['person' => $association->currentPresident])</dd></div>
+            {{-- Show when the association record was last changed. --}}
+            <div><dt>Last updated</dt><dd>{{ $association->updated_at ? $association->updated_at->copy()->timezone('Asia/Manila')->format('M d, Y g:i A').' PHT' : 'Not recorded' }}</dd></div>
         </dl>
         @if($prefix === 'admin')<p class="association-section-note">The president is the recorded active, nonarchived member holding the President position. Registration records are available below.</p>@endif
     </section>

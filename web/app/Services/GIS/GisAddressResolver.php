@@ -24,7 +24,7 @@ class GisAddressResolver
             $area->province ?? null, $area->region ?? null], fn ($value) => is_string($value) && trim($value) !== '');
         if ($address === '') {
             return ['address' => null, 'context' => implode(', ', $context),
-                'message' => 'No reliable address is available in the existing area records.'];
+                'message' => 'No confirmed address is available for this association.'];
         }
         if (mb_strlen($address) > 2000) {
             return ['address' => null, 'context' => implode(', ', $context),
