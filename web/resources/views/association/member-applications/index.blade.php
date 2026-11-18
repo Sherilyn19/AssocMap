@@ -5,7 +5,7 @@
     $applicationRegister = true;
     $indexRoute = 'association.member-applications.index';
     $cards = ['total' => ['All Applications', '', 'users'], 'pending' => ['Pending Review', 'pending', 'clipboard-check'], 'approved' => ['Approved', 'approved', 'check'], 'rejected' => ['Rejected', 'rejected', 'close']];
-    $summaryNote = 'Applications submitted by your account for the linked association.';
+    $summaryNote = 'Your submissions and public applications for the linked association.';
     $association = $associationAccount->association;
     $canSubmit = $association && !$association->archived_at && $association->status === 'active';
     $submissionErrors = $errors->any() && !$errors->hasAny(['q', 'status', 'sort', 'page', 'association']);
@@ -47,6 +47,7 @@
                                 'Birth Date' => $application->birth_date?->format('M j, Y'),
                                 'Sex' => $application->sex?->name,
                                 'Contact Number' => $application->contact_number,
+                                'Email' => $application->email,
                                 'FishR Registration Number' => $application->fishr_registration_number,
                                 'Position' => $application->position?->name,
                                 'Member Classifications' => $application->classifications->pluck('name')->implode(', ') ?: 'None recorded',
@@ -59,7 +60,8 @@
                             if ($application->status === 'rejected') $details['Rejection Reason'] = $application->rejection_reason;
                         @endphp
                         <tr>
-                            <th scope="row">{{ $fullName }}<small>FishR: {{ $application->fishr_registration_number ?: '—' }}</small></th>
+                            {{-- Distinguish public submissions from applications entered by the association. --}}
+                            <th scope="row">{{ $fullName }} @if($application->submission_source === 'public_gis')<span class="badge badge-neutral">Public applicant</span>@endif<small>FishR: {{ $application->fishr_registration_number ?: '—' }}</small></th>
                             <td>{{ $association?->name ?? '—' }}</td>
                             <td>{{ $application->position?->name ?? '—' }}</td>
                             <td>{{ $application->created_at?->format('M j, Y') ?? '—' }}</td>
@@ -69,7 +71,7 @@
                         @push('dialogs')
                             <x-modal :id="'application-'.$application->id" title="Application Details">
                                 <div class="member-record-dialog application-details-dialog">
-                                <div class="member-detail-banner"><span class="member-avatar"><x-icon name="user" /></span><div><h3>{{ $fullName }}</h3><p>{{ $association?->name }}</p></div><span class="badge badge-{{ $tone }}">{{ ucfirst($application->status) }}</span></div>
+                                <div class="member-detail-banner"><span class="member-avatar"><x-icon name="user" /></span><div><h3>{{ $fullName }}</h3><p>{{ $association?->name }}</p>@if($application->submission_source === 'public_gis')<span class="badge badge-neutral">Public applicant</span>@endif</div><span class="badge badge-{{ $tone }}">{{ ucfirst($application->status) }}</span></div>
                                 <section class="application-details-section" aria-label="Applicant information"><h3><x-icon name="user" />Applicant information</h3><dl class="detail-grid">@foreach($details as $label => $value)<div><dt>{{ $label }}</dt><dd>{{ filled($value) ? $value : '—' }}</dd></div>@endforeach</dl></section>
                                 @include('partials.member-application-evidence', ['photoRoute' => 'association.member-applications.photo'])
                                 </div>
@@ -105,7 +107,7 @@
                     ['name' => 'last_name', 'label' => 'Last Name', 'required' => true, 'max' => 120],
                     ['name' => 'suffix', 'label' => 'Suffix', 'required' => false, 'max' => 20],
                     ['name' => 'birth_date', 'label' => 'Birth Date', 'required' => true, 'type' => 'date'],
-                    ['name' => 'contact_number', 'label' => 'Contact Number', 'required' => false, 'max' => 30, 'type' => 'tel'],
+                    ['name' => 'contact_number', 'label' => 'Mobile Number', 'required' => true, 'max' => 30, 'type' => 'tel'],
                     ['name' => 'fishr_registration_number', 'label' => 'FishR Registration Number', 'required' => false, 'max' => 100],
                 ] as $field)
                     <div class="field">

@@ -84,8 +84,9 @@ class StoreMemberRequest extends FormRequest
                 'exists:sex_categories,id',
             ],
 
+            // New member records need a contact number for follow-up.
             'contact_number' => [
-                'nullable',
+                'required',
                 'string',
                 'max:30',
             ],

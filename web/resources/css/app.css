@@ -18,6 +18,8 @@
 @import './layouts/admin-footer.css';
 @import './layouts/admin-responsive.css';
 @import './pages/public-landing.css';
+/* Public application styles extend the existing public-page design. */
+@import './pages/public-application.css';
 @import './pages/gis-workspace.css';
 @import './pages/user-management.css';
 @import './pages/area-management.css';

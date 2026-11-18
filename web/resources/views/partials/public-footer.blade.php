@@ -30,6 +30,10 @@
             <a href="{{ route('public.gis') }}">
                 Public GIS Map
             </a>
+            {{-- Keep the application guidance available across public pages. --}}
+            <a href="{{ route('public.application.guide') }}">
+                Membership Application Guide
+            </a>
             <a href="{{ route('login') }}">
                 Account login
             </a>

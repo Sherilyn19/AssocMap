@@ -84,8 +84,9 @@ class StoreMemberApplicationRequest extends FormRequest
                 'exists:sex_categories,id',
             ],
 
+            // A mobile number gives the reviewing officer a way to follow up.
             'contact_number' => [
-                'nullable',
+                'required',
                 'string',
                 'max:30',
             ],

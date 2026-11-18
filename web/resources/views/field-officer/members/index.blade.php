@@ -3,7 +3,8 @@
     $workflow = app(\App\View\WorkflowNavigation::class);
     $workflowPrefix = 'field-officer';
     $nameOf = fn ($member) => collect([$member->first_name, $member->middle_name, $member->last_name, $member->suffix])->filter(fn ($part) => filled($part))->implode(' ');
-    $fields = ['first_name' => ['First Name', 'text', 120, true], 'middle_name' => ['Middle Name', 'text', 120, false], 'last_name' => ['Last Name', 'text', 120, true], 'suffix' => ['Suffix', 'text', 20, false], 'birth_date' => ['Birth Date', 'date', null, true], 'contact_number' => ['Contact Number', 'tel', 30, false], 'fishr_registration_number' => ['FishR Registration Number', 'text', 100, false]];
+    // Profile edits require a mobile number while older records remain viewable.
+    $fields = ['first_name' => ['First Name', 'text', 120, true], 'middle_name' => ['Middle Name', 'text', 120, false], 'last_name' => ['Last Name', 'text', 120, true], 'suffix' => ['Suffix', 'text', 20, false], 'birth_date' => ['Birth Date', 'date', null, true], 'contact_number' => ['Mobile Number', 'tel', 30, true], 'fishr_registration_number' => ['FishR Registration Number', 'text', 100, false]];
     $applicationRegister = false;
     $indexRoute = 'field-officer.members.index';
     $cards = ['active' => ['Active Members', 'active', 'check'], 'inactive' => ['Legacy Inactive', 'inactive', 'user'], 'archived' => ['Archived Members', 'archived', 'archive']];

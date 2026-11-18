@@ -4,9 +4,20 @@
         @if($gisAdministrator ?? false)@slot('headerContext')<div class="gis-header-info"><span>About GIS records</span><x-area-info label="About GIS record history">History includes locations of archived associations and projects. Historical locations allow geometry correction only. The Lifecycle filter applies to the GIS location itself.</x-area-info></div>@endslot @endif
         @slot('actions')
         @if($gisManager)<a href="{{ $gisBaseUrl }}/create" class="button button-primary"><x-icon name="plus" />Add GIS location</a>@endif
-        @unless($gisManager)<span class="gis-access-label"><x-icon name="eye" />{{ $gisPublic ? 'Public viewer' : 'Read-only viewer' }}</span>@endunless
+        {{-- The map script enables Apply only after a visitor selects a location. --}}
+        @if($gisPublic)
+            <button type="button" class="button button-primary" data-gis-apply data-apply-template="{{ route('public.application.create', ['location' => '00000000-0000-4000-8000-000000000000']) }}" disabled>Apply for Membership</button>
+            <a class="button" href="{{ route('public.application.guide') }}">Membership Application Guide</a>
+        @elseif(!$gisManager)<span class="gis-access-label"><x-icon name="eye" />Read-only viewer</span>@endif
         @endslot
     @endcomponent
+    @if($gisPublic)
+        {{-- Help visitors understand how to begin a membership application. --}}
+        <aside class="gis-apply-note" aria-label="Membership application tip">
+            <span class="gis-apply-note-icon" aria-hidden="true">✦</span>
+            <p><strong>Interested in joining an association?</strong> Explore the map or location list, choose a location that interests you, then select <strong>Apply for Membership</strong> to get started! <span class="gis-apply-guide">Not sure where to begin? Visit the <a href="{{ route('public.application.guide') }}">Membership Application Guide</a>.</span></p>
+        </aside>
+    @endif
     <div class="card gis-search-panel">
         <div class="gis-toolbar">
             <div class="gis-view-switch" role="group" aria-label="GIS view">

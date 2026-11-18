@@ -21,11 +21,11 @@ class MemberApplicationPhotoController extends Controller
             return $this->unavailable(403);
         }
 
-        // Only allow each account to see photos within its permitted work.
+        // Public photos remain private to the linked association and assigned officer.
         $allowed = match ($actor->role?->code) {
             'system_admin' => $memberApplication->status === 'approved'
                 && $memberApplication->member()->useWritePdo()->exists(),
-            'association_account' => $memberApplication->submitted_by_user_id === $actor->id
+            'association_account' => ($memberApplication->submitted_by_user_id === $actor->id || $memberApplication->submission_source === 'public_gis')
                 && AssociationAccount::query()->useWritePdo()->where('user_id', $actor->id)
                     ->where('association_id', $memberApplication->association_id)->where('is_active', true)->exists(),
             'field_officer' => Association::query()->useWritePdo()->whereKey($memberApplication->association_id)

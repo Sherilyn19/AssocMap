@@ -183,6 +183,9 @@ class MemberApplicationService
                 'contact_number' =>
                     $application->contact_number,
 
+                // Preserve the applicant's optional email for later contact.
+                'email' => $application->email,
+
                 'fishr_registration_number' =>
                     $application->fishr_registration_number,
 

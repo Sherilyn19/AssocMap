@@ -17,10 +17,32 @@ import { mountSummaryCounters } from './components/summary-counter.js';
 import { initContextualReports } from './components/contextual-report.js';
 import { initDashboardGisGallery } from './pages/dashboard-gis-gallery.js';
 import { initMemberEvidencePhotos } from './pages/member-evidence-photos.js';
+import { countApplicationWords } from './pages/public-application.js';
 
 initFeedback();
 initDisclosures();
 initDialogs();
+// Give applicants immediate feedback; the server also enforces the word limit.
+const publicReason = document.querySelector('#public-reason');
+if (publicReason) {
+    const counter = document.querySelector('[data-word-count]');
+    const updateReasonCount = () => {
+        const count = countApplicationWords(publicReason.value);
+        counter.textContent = `${count} / 500 words · ${publicReason.value.length} / 5,000 characters`;
+        publicReason.setCustomValidity(count > 500 ? 'Please use no more than 500 words.' : '');
+    };
+    publicReason.addEventListener('input', updateReasonCount);
+    updateReasonCount();
+}
+// Show the follow-up message after the submission confirmation.
+const applicationSuccess = document.querySelector('[data-application-success]');
+if (applicationSuccess && typeof applicationSuccess.showModal === 'function') {
+    applicationSuccess.showModal();
+    applicationSuccess.querySelector('[data-application-next]').addEventListener('click', () => {
+        applicationSuccess.close();
+        document.querySelector('#application-next').showModal();
+    });
+}
 const sidebar = initWorkspaceSidebar();
 initAdminNavigation(sidebar, initWorkspaceHeaderScroll());
 initPublicNavigation();

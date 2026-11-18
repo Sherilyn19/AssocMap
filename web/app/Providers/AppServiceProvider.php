@@ -29,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
         }
 
         RateLimiter::for('api-auth', fn (Request $request) => Limit::perMinute(60)->by('api-auth-ip:'.$request->ip()));
+        // Limit repeated public submissions without requiring an external verification service.
+        RateLimiter::for('public-application', fn (Request $request) => [
+            Limit::perMinute(3)->by('public-application-minute:'.$request->ip()),
+            Limit::perHour(20)->by('public-application-hour:'.$request->ip()),
+        ]);
         RateLimiter::for('invitation-activation', function (Request $request) {
             return [
                 Limit::perMinute(30)->by('activation-ip:'.$request->ip()),
