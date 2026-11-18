@@ -18,6 +18,7 @@
         @endif
     </header>
     <x-workflow-navigation :back="$workflowBack" :parents="$breadcrumbs" :current="$row['title']" />
+    <div class="activity-overview-grid">
     <section class="card program-information">
         <h2>General Information</h2>
         @if($row['association_archived'])
@@ -32,6 +33,11 @@
         </dl>
         <h3>Description</h3><p class="program-preserve-text">{{ $row['description'] ?: 'Not recorded' }}</p>
     </section>
+    <section class="card activity-gallery-card" data-activity-gallery data-activity-id="{{ $record->id }}" data-base="{{ url($prefix.'/program-activities') }}" data-manager="true" data-csrf="{{ csrf_token() }}">
+        <p class="notice notice-error" data-activity-gallery-error hidden>Photo gallery is temporarily unavailable.</p>
+        @include('components.gis-photos', ['gisManager' => true, 'gisPublic' => false, 'gisAdministrator' => false, 'activityGallery' => true])
+    </section>
+    </div>
     <section class="card program-information">
         <h2>Program Information and Relationships</h2>
         <dl class="detail-grid">

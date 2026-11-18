@@ -86,6 +86,7 @@ Route::middleware([
     */
 
     require __DIR__.'/admin/program-activities.php';
+    $activityPhotoPrefix = 'admin'; require __DIR__.'/shared/program-activity-photos.php';
 
     /*
     |--------------------------------------------------------------------------
@@ -146,6 +147,7 @@ Route::middleware([
     */
 
     require __DIR__.'/field-officer/program-activities.php';
+    $activityPhotoPrefix = 'field-officer'; require __DIR__.'/shared/program-activity-photos.php';
 
     /*
     |--------------------------------------------------------------------------
@@ -175,6 +177,7 @@ Route::middleware([
 
     require __DIR__.'/association/trainings.php';
     require __DIR__.'/association/program-activities.php';
+    $activityPhotoPrefix = 'association'; require __DIR__.'/shared/program-activity-photos.php';
 
     require __DIR__.'/association/member-applications.php';
 });
