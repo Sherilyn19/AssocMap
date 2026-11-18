@@ -172,20 +172,19 @@ export function createGisPhotos(root, { base, manager, csrf, kind = 'gis', limit
         }));
         const pending = find('[data-photo-pending]'); pending.replaceChildren();
         (gallery.pending || []).forEach((photo, index) => {
+            // Removed activity photos should no longer appear in the gallery.
+            if (kind === 'activity' && photo.status === 'deleting') return;
             const item = document.createElement('li');
             if (kind === 'gis') {
                 item.textContent = photo.status === 'deleting' ? 'Removal awaiting cleanup. ' : 'Upload pending verification. ';
                 if (photo.retry_after > 0) item.append(`Check again after ${Math.ceil(photo.retry_after / 60)} minute(s). `);
             } else if (canManage) {
                 const label = document.createElement('span');
-                // Identify each recovery action, including removals awaiting cleanup.
-                label.textContent = photo.status === 'deleting'
-                    ? `Photo removal ${index + 1} awaiting cleanup`
-                    : `Unfinished photo ${index + 1}`;
+                label.textContent = `Unfinished photo ${index + 1}`;
                 item.append(label);
             }
             const recoveryLabel = kind === 'activity'
-                ? (photo.status === 'deleting' ? 'Retry cleanup' : 'Check photo')
+                ? 'Check photo'
                 : 'Check saved state';
             if (canManage && photo.retry_after === 0) item.append(button(recoveryLabel, () => mutate(
                 context => request(context.endpoint + '/' + photo.id + '/reconcile', 'POST'), 'Saved state checked.')));
