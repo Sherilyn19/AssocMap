@@ -18,7 +18,8 @@
         </header>
         <dl class="audit-detail-grid">
             <div><dt>Performed at</dt><dd><time datetime="{{ $event->performed_at->toIso8601String() }}">{{ $event->performed_at->setTimezone($timezone)->format('M j, Y') }}<span class="audit-secondary">{{ $event->performed_at->setTimezone($timezone)->format('H:i:s.u T') }}</span></time></dd></div>
-            <div><dt>Actor (current profile name)</dt><dd>{{ $event->actor?->display_name ?? 'Deleted or unavailable actor' }}</dd></div>
+            {{-- A public submission is anonymous to the account system, not a deleted user. --}}
+            <div><dt>Actor (current profile name)</dt><dd>{{ $event->action_type === 'SUBMIT PUBLIC MEMBER APPLICATION' && !$event->actor_user_id ? 'Public applicant' : ($event->actor?->display_name ?? 'Deleted or unavailable actor') }}</dd></div>
             <div><dt>Actor identifier</dt><dd class="audit-identifier">{{ $event->actor_user_id ?? 'No retained actor identifier' }}</dd></div>
             <div><dt>Entity type</dt><dd>{{ $event->entity_type ?? 'No entity type recorded' }}</dd></div>
             <div><dt>Entity identifier</dt><dd class="audit-identifier">{{ $event->entity_id ?? 'No entity identifier recorded' }}</dd></div>

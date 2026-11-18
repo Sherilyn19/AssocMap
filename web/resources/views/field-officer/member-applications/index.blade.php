@@ -10,7 +10,6 @@
 <section class="member-management" data-workspace-module="member-applications" data-workspace-title="Member Applications">
     <header class="card member-heading"><div><p class="eyebrow">Field Officer</p><h1 tabindex="-1">Member Applications</h1><p>Review applicants and application evidence from your assigned associations.</p></div><a class="button" href="{{ route('field-officer.members.index') }}"><x-icon name="users" />Member Register</a></header>
     @include('members.partials.summary')
-    @if($associationPending)<p class="notice">{{ $associationPending }} public application(s) awaiting association review.</p>@endif
     <section class="card member-register" aria-labelledby="application-register-title">
         <div class="member-section-heading"><div><h2 id="application-register-title">{{ ucfirst($statusFilter) }} applications</h2><p>{{ number_format($applications->total()) }} matching application(s)</p></div><p>Review the applicant details and evidence before deciding.</p></div>
         @include('members.partials.filters')

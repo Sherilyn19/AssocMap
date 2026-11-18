@@ -369,7 +369,7 @@ class MemberDirectoryUiTest extends TestCase
         $this->applicationAuditFixture();
         $this->application(201, ['submitted_by_user_id' => null, 'submission_source' => 'public_gis', 'first_name' => 'PublicApplicant']);
         $this->identity = $this->id(2);
-        $this->get('/field-officer/member-applications')->assertOk()->assertDontSee('PublicApplicant')->assertSee('1 public application(s)');
+        $this->get('/field-officer/member-applications')->assertOk()->assertDontSee('PublicApplicant')->assertDontSee('awaiting association review');
         $this->patch(route('field-officer.member-applications.approve', $this->id(201)), ['decision_confirmed' => '1'])
             ->assertSessionHasErrors('application');
         $this->identity = $this->id(5);
@@ -388,6 +388,21 @@ class MemberDirectoryUiTest extends TestCase
         $this->patch(route('association.member-applications.review', $this->id(201)), ['action' => 'decline', 'note' => 'Unable to verify the applicant.'])->assertSessionHasNoErrors()->assertSessionHas('declined_contact');
         $this->get('/association/member-applications?status=declined')->assertOk()->assertSee('Endorsement declined')->assertSee('PublicApplicant');
         $this->get('/association/member-applications?status=pending')->assertOk()->assertDontSee('PublicApplicant');
+    }
+
+    public function test_rejecting_endorsed_public_application_opens_rejected_list_without_pending_notice(): void
+    {
+        $this->applicationAuditFixture();
+        $this->application(201, ['submitted_by_user_id' => null, 'submission_source' => 'public_gis', 'endorsement_stage' => 'endorsed', 'first_name' => 'RejectedPublicApplicant']);
+        $this->application(202, ['submitted_by_user_id' => null, 'submission_source' => 'public_gis', 'first_name' => 'AssociationPendingApplicant']);
+        $this->identity = $this->id(2);
+        $this->patch(route('field-officer.member-applications.reject', ['memberApplication' => $this->id(201), 'status' => 'pending', 'q' => 'old-filter']), [
+            'rejection_reason' => 'Eligibility could not be verified.', 'decision_confirmed' => '1',
+        ])->assertRedirect(route('field-officer.member-applications.index', ['status' => 'rejected']))
+            ->assertSessionHas('approved_contact.decision', 'rejected');
+        $this->assertDatabaseHas('member_applications', ['id' => $this->id(201), 'status' => 'rejected']);
+        $this->get('/field-officer/member-applications?status=rejected')->assertOk()
+            ->assertSee('RejectedPublicApplicant')->assertDontSee('AssociationPendingApplicant')->assertDontSee('awaiting association review');
     }
 
     public function test_http_review_decisions_preserve_admission_and_audit_and_reject_replayed_or_invalid_decisions(): void

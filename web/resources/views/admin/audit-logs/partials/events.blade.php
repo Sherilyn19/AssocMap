@@ -8,7 +8,8 @@
                 <tr>
                     <td class="audit-timestamp"><time datetime="{{ $event->performed_at->toIso8601String() }}"><span>{{ $event->performed_at->setTimezone($timezone)->format('M j, Y') }}</span><small>{{ $event->performed_at->setTimezone($timezone)->format('H:i:s T') }}</small></time></td>
                     <th scope="row" class="audit-event-cell"><span class="audit-event-name">{{ $event->action_type }}</span><small>{{ $event->module }}</small></th>
-                    <td><span class="audit-actor-name @if(!$event->actor) audit-actor-unavailable @endif">{{ $event->actor?->display_name ?? 'Deleted or unavailable actor' }}</span><small class="audit-identifier">{{ $event->actor_user_id ?? 'No retained actor identifier' }}</small></td>
+                    {{-- Public submissions intentionally have no signed-in account. --}}
+                    <td><span class="audit-actor-name @if(!$event->actor) audit-actor-unavailable @endif">{{ $event->action_type === 'SUBMIT PUBLIC MEMBER APPLICATION' && !$event->actor_user_id ? 'Public applicant' : ($event->actor?->display_name ?? 'Deleted or unavailable actor') }}</span><small class="audit-identifier">{{ $event->actor_user_id ?? 'No retained actor identifier' }}</small></td>
                     <td><span class="badge badge-neutral audit-entity-type">{{ $event->entity_type ?? 'No entity type recorded' }}</span><small class="audit-identifier">{{ $event->entity_id ?? 'No entity identifier recorded' }}</small></td>
                     <td class="audit-row-action"><a class="button button-quiet" href="{{ route('admin.audit-logs.show', $event->id) }}" aria-label="View audit event {{ $event->id }}"><x-icon name="eye" />View event</a></td>
                 </tr>

@@ -37,8 +37,14 @@ class MemberMutationAuthorizationTest extends TestCase
         $this->assertSame('returned', $application->fresh()->endorsement_stage);
         $service->associationReview($application, $account, 'endorse', 'Livelihood confirmed.');
         $this->assertSame(['endorse', 'return', 'endorse'], DB::table('member_application_review_events')->orderBy('rowid')->pluck('action')->all());
+        // Audit the decisions without putting the private review notes in the general log.
+        $events = DB::table('audit_logs')->where('entity_id', $application->id)->orderBy('rowid')->get();
+        $this->assertSame(['ENDORSE MEMBER APPLICATION', 'RETURN MEMBER APPLICATION', 'ENDORSE MEMBER APPLICATION'], $events->pluck('action_type')->all());
+        $this->assertSame([$account->id, $officer->id, $account->id], $events->pluck('actor_user_id')->all());
+        $this->assertStringNotContainsString('Livelihood confirmed', $events->last()->new_values ?? '');
         $service->reject($application, $officer, 'Unable to verify eligibility.');
         $this->assertSame('rejected', $application->fresh()->status);
+        $this->assertDatabaseHas('audit_logs', ['entity_id' => $application->id, 'actor_user_id' => $officer->id, 'action_type' => 'REJECT MEMBER APPLICATION']);
     }
 
     public function test_decline_requires_a_note_and_prevents_officer_review(): void
@@ -55,6 +61,7 @@ class MemberMutationAuthorizationTest extends TestCase
         }
         $service->associationReview($application, $account, 'decline', 'Unable to confirm association eligibility.');
         $this->assertSame('declined', $application->fresh()->endorsement_stage);
+        $this->assertDatabaseHas('audit_logs', ['entity_id' => $application->id, 'actor_user_id' => $account->id, 'action_type' => 'DECLINE MEMBER APPLICATION']);
         try {
             $service->reject($application, $this->sec2Actor('officer'), 'Attempted bypass');
             $this->fail('A declined application must not enter final review.');
