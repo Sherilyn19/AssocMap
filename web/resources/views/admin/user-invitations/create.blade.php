@@ -83,7 +83,6 @@
             </div>
             <p class="field-help" role="status" aria-live="polite" data-invitation-status></p>
         </div>
-        <aside class="form-aside"><div class="card"><h3>Account activation</h3><p>Supabase Auth sends the invitation through its configured email provider. A successful request does not confirm delivery.</p><p>If the outcome is uncertain, reconcile the operation before sending again. Existing accounts are never overwritten.</p></div></aside>
     </form>
 </div>
 @endsection
