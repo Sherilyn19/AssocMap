@@ -144,6 +144,8 @@ class StoreMonitoringRequest extends FormRequest
                 'required',
                 'integer',
                 'between:2000,2100',
+                // Existing records keep their original reporting period when edited.
+                ...($record === null ? ['max:'.min(now()->year, 2100)] : []),
             ],
 
             'quarter_id' => [
@@ -424,6 +426,7 @@ class StoreMonitoringRequest extends FormRequest
         return [
             'project_id.in' => 'Project cannot be changed after the Monitoring record has been created.',
             'year.in' => 'Year cannot be changed after the Monitoring record has been created.',
+            'year.max' => 'Monitoring year cannot be in the future.',
             'quarter_id.in' => 'Quarter cannot be changed after the Monitoring record has been created.',
             'production.*.unit.max' => 'Production unit must not exceed 50 characters.',
             'production.*.monthly_details.required' => 'Record all three months of the selected quarter. Enter zero explicitly for months without production.',

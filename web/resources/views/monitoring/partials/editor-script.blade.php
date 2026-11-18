@@ -480,6 +480,8 @@ function initializeMonitoringEditor() {
         activateTab(form, 'overview');
         for (const key of ['project_id', 'year', 'quarter_id', 'monitoring_date', 'site_validated', 'project_status', 'issues_encountered', 'actions_taken', 'overall_remarks']) {
             let value = (record && key !== 'project_status' ? record[key] : values[key]) ?? '';
+            // Default only fresh records; preserve restored drafts and saved reporting periods.
+            if (key === 'year' && !record && !restore && !value) value = form.elements.year.dataset.currentYear;
             if (key === 'site_validated' && typeof value === 'boolean') value = value ? '1' : '0';
             form.elements[key].value = value;
         }

@@ -3,7 +3,8 @@ export function refreshQuarterAvailability({ form, occupiedPeriods, editingRecor
     const select = form.elements.quarter_id;
     const year = Number(form.elements.year.value);
     const project = selectedProject();
-    const ready = Boolean(project) && /^\d{4}$/.test(form.elements.year.value) && year >= 2000 && year <= 2100;
+    const currentYear = Number(form.elements.year.dataset.currentYear);
+    const ready = Boolean(project) && /^\d{4}$/.test(form.elements.year.value) && year >= 2000 && year <= currentYear;
     const used = new Set(occupiedPeriods.filter(period => ready && String(period.project_id) === String(project.id)
         && Number(period.year) === year).map(period => String(period.quarter_id)));
     const options = Array.from(select.options).filter(option => option.value);
