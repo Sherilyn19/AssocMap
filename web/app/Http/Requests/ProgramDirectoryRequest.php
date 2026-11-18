@@ -28,7 +28,7 @@ class ProgramDirectoryRequest extends FormRequest
     public function rules(): array
     {
         $statuses = match (true) {
-            $this->routeIs('*.projects.index') => ['planned', 'ongoing', 'suspended', 'cancelled', 'completed', 'terminated', 'archived'],
+            $this->routeIs('*.projects.index') => ['ongoing', 'suspended', 'cancelled', 'completed', 'terminated', 'archived'],
             $this->routeIs('*.program-activities.index') => ['planned', 'ongoing', 'completed', 'cancelled', 'archived'],
             default => ['scheduled', 'completed', 'cancelled', 'archived'],
         };

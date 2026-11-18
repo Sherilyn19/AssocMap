@@ -4,7 +4,7 @@
     $prefix = $projectRoutePrefix ?? 'admin.projects';
     $rows = collect($module['rows']);
     $restore = $errors->any() && old('project_form') === 'editor' && !old('project_record_id');
-    $statuses = ['planned' => 'Planned', 'ongoing' => 'Ongoing', 'completed' => 'Completed', 'terminated' => 'Terminated', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled'];
+    $statuses = ['ongoing' => 'Ongoing', 'completed' => 'Completed', 'terminated' => 'Terminated', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled'];
     $columns = ['title' => 'Project Title', 'association' => 'Association', 'municipality' => 'Municipality', 'component' => 'SAAD Classification', 'fisheries_category' => 'Fisheries Category', 'commodity' => 'Commodity', 'program_year' => 'Program Year', 'implementation_start_date' => 'Implementation Date'];
 @endphp
 <header class="page-header"><div><div class="eyebrow">{{ $prefix === 'admin.projects' ? 'Program Operations' : 'Field Officer' }}</div><h1 tabindex="-1">Projects</h1><p>{{ $prefix === 'admin.projects' ? 'Manage association projects and material deliveries.' : 'Manage projects for your assigned associations.' }}</p></div></header>

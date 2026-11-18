@@ -28,7 +28,7 @@ class AssociationProjectsRequest extends FormRequest
             return [
                 'search' => ['nullable', 'string', 'max:120'],
                 'year' => ['nullable', 'integer', 'between:2000,2100'],
-                'status' => ['nullable', 'string', Rule::in(['planned', 'ongoing', 'completed', 'suspended', 'cancelled', 'terminated', 'archived'])],
+                'status' => ['nullable', 'string', Rule::in(['ongoing', 'completed', 'suspended', 'cancelled', 'terminated', 'archived'])],
                 'page' => ['nullable', 'integer', 'min:1', 'max:1000000'],
             ];
         }

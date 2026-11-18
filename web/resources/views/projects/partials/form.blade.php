@@ -11,7 +11,7 @@
     $monitoringReturnUrl = $returnRecord
         ? route($monitoringPrefix.'.workspace', [$returnRecord, $resourceSection === 'products' ? 'production' : 'materials'])
         : route($monitoringPrefix.'.index');
-    $statuses = ['planned' => 'Planned', 'ongoing' => 'Ongoing', 'completed' => 'Completed', 'terminated' => 'Terminated', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled'];
+    $statuses = ['ongoing' => 'Ongoing', 'completed' => 'Completed', 'terminated' => 'Terminated', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled'];
     $delivery = ['planned' => 'Planned', 'not_delivered' => 'Not Delivered', 'partially_delivered' => 'Partially Delivered', 'delivered' => 'Delivered'];
     $productTypes = ['raw' => 'Raw', 'processed' => 'Processed', 'other' => 'Other'];
     $fields = [
@@ -43,7 +43,7 @@
             <input type="hidden" name="commodity_id" value="{{ $restore ? old('commodity_id') : ($editing['commodity_id'] ?? '') }}">
             <div class="field" id="project-new-commodity" hidden><label for="project-new-name">New Commodity Name *</label><input id="project-new-name" name="new_commodity_name" maxlength="255" value="{{ $restore ? old('new_commodity_name') : ($editing['new_commodity_name'] ?? '') }}" disabled></div>
         </div>
-        <h3>Implementation</h3><div class="form-grid">@foreach(array_slice($fields, 4) as $field)<x-field :field="$field" prefix="project" :value="$initialValues[$field['name']] ?? ($field['name'] === 'status' ? 'planned' : '')" />@endforeach</div>
+        <h3>Implementation</h3><div class="form-grid">@foreach(array_slice($fields, 4) as $field)<x-field :field="$field" prefix="project" :value="$initialValues[$field['name']] ?? ($field['name'] === 'status' ? 'ongoing' : '')" />@endforeach</div>
         <h3 id="project-materials-heading" tabindex="-1">Project Materials</h3><p>Removing a row requests deletion when saved. Materials with monitoring history cannot be removed.</p>
         <input type="hidden" name="materials" value=""><div id="project-materials"></div><button type="button" class="button" id="project-add-material"><x-icon name="plus" />Add Material</button>
         <h3 id="project-products-heading" tabindex="-1">Project Products</h3><p>Removing a row requests deletion when saved. Products with monitoring history cannot be removed.</p>
@@ -160,7 +160,7 @@
         form.elements.project_record_id.value = record?.id ?? '';
         if (!editingRecord) document.getElementById('project-editor-title').textContent = 'Add Project';
         for (const key of ['association_id', 'title', 'description', 'fisheries_category_id', 'program_year', 'implementation_start_date', 'implementation_end_date', 'status', 'remarks', 'new_commodity_name']) {
-            form.elements[key].value = values[key] ?? (key === 'status' ? 'planned' : '');
+            form.elements[key].value = values[key] ?? (key === 'status' ? 'ongoing' : '');
         }
         filterCommodities(values.new_commodity_name ? 'new' : (values.commodity_id ?? ''));
         materials.replaceChildren();

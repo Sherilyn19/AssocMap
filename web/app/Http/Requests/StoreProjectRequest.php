@@ -82,7 +82,6 @@ class StoreProjectRequest extends FormRequest
             'status' => [
                 'required',
                 Rule::in([
-                    'planned',
                     'ongoing',
                     'suspended',
                     'cancelled',

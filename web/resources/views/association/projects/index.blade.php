@@ -17,7 +17,7 @@
                 <details class="member-filter-disclosure" @if(filled($filters['year']) || filled($filters['status'])) open @endif><summary class="button"><x-icon name="filter" />Filters <x-icon name="chevron-down" /></summary><div class="member-filter-panel"><div class="member-filter-grid">
                     <div class="field"><label for="my-project-year">Program year</label><select id="my-project-year" name="year"><option value="">All years</option>@foreach($years as $year)<option value="{{ $year }}" @selected((string) $filters['year'] === (string) $year)>{{ $year }}</option>@endforeach</select></div>
                     <div class="field"><label for="my-project-status">Project status / archive</label><select id="my-project-status" name="status">
-                        @foreach(['' => 'All projects', 'planned' => 'Planned', 'ongoing' => 'Ongoing', 'completed' => 'Completed', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled', 'terminated' => 'Terminated', 'archived' => 'Archived records'] as $value => $label)
+                        @foreach(['' => 'All projects', 'ongoing' => 'Ongoing', 'completed' => 'Completed', 'suspended' => 'Suspended', 'cancelled' => 'Cancelled', 'terminated' => 'Terminated', 'archived' => 'Archived records'] as $value => $label)
                             <option value="{{ $value }}" @selected($filters['status'] === $value)>{{ $label }}</option>
                         @endforeach
                     </select></div>

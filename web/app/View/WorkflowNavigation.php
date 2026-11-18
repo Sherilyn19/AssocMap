@@ -99,7 +99,7 @@ final class WorkflowNavigation
             $own = str_starts_with($name, 'association.');
             $projects = str_contains($name, '.projects.');
             $members = str_contains($name, '.members.');
-            $statuses = $projects ? ['planned', 'ongoing', 'suspended', 'cancelled', 'completed', 'terminated', 'archived']
+            $statuses = $projects ? ['ongoing', 'suspended', 'cancelled', 'completed', 'terminated', 'archived']
                 : ($members ? ['active', 'inactive', 'archived'] : (str_contains($name, '.trainings.') ? ['scheduled', 'completed', 'cancelled', 'archived'] : ['planned', 'ongoing', 'completed', 'cancelled', 'archived']));
             $rules += [$own ? 'search' : 'q' => ['nullable', 'string', 'max:120'], 'year' => ['nullable', 'integer', 'between:2000,2100'], 'page' => $page];
             if ($members) {
