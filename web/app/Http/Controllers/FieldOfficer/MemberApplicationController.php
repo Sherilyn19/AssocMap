@@ -23,17 +23,13 @@ class MemberApplicationController extends Controller
         $statusFilter = $filters['status'];
         $associations = $directory->associations($currentUser, true);
         if ($filters['association'] !== '') abort_unless($associations->contains('id', $filters['association']), 404);
-        // Share only an oversight count until public applications are endorsed.
-        $associationPending = MemberApplication::query()->useWritePdo()->where('submission_source', 'public_gis')->where('status', 'pending')
-            ->where(fn ($q) => $q->whereNull('endorsement_stage')->orWhere('endorsement_stage', 'returned'))
-            ->whereHas('association', fn ($q) => $q->where('primary_field_officer_id', $currentUser->id))->count();
         $scope = MemberApplication::query()->useWritePdo()->where(fn ($q) => $q->where('submission_source', '!=', 'public_gis')
             ->orWhere('status', '!=', 'pending')->orWhere('endorsement_stage', 'endorsed'))->whereHas('association',
             fn ($query) => $query->where('primary_field_officer_id', $currentUser->id));
         $summary = $directory->applicationSummary($scope);
         $applications = $directory->applications($scope, $filters, true, $summary);
 
-        return view('field-officer.member-applications.index', compact('applications', 'statusFilter', 'filters', 'associations', 'summary', 'associationPending'));
+        return view('field-officer.member-applications.index', compact('applications', 'statusFilter', 'filters', 'associations', 'summary'));
     }
 
     public function returnToAssociation(Request $request, MemberApplication $memberApplication, MemberApplicationService $service): RedirectResponse
@@ -91,7 +87,8 @@ class MemberApplicationController extends Controller
             throw $exception->redirectTo(MemberApplicationReturn::url($request, 'field-officer.member-applications.index'));
         }
 
-        return redirect()->to(MemberApplicationReturn::url($request, 'field-officer.member-applications.index'))
+        // Show the completed decision in the Rejected section without stale list filters.
+        return redirect()->route('field-officer.member-applications.index', ['status' => 'rejected'])
             ->with('approved_contact', ['name' => trim($reviewed->first_name.' '.$reviewed->last_name), 'phone' => $reviewed->contact_number, 'email' => $reviewed->email, 'decision' => 'rejected'])
             ->with(
                 'success',

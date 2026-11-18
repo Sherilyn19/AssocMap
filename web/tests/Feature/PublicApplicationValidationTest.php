@@ -62,7 +62,10 @@ final class PublicApplicationValidationTest extends TestCase
 
         $this->assertDatabaseHas('member_applications', ['association_id' => $association->id, 'submission_source' => 'public_gis',
             'status' => 'pending', 'email' => 'maria@example.test', 'public_location_title' => 'Published site']);
-        $this->assertDatabaseHas('audit_logs', ['actor_user_id' => null, 'action_type' => 'SUBMIT PUBLIC MEMBER APPLICATION']);
+        // The public event identifies the application without inventing an account actor.
+        $applicationId = DB::table('member_applications')->value('id');
+        $this->assertDatabaseHas('audit_logs', ['actor_user_id' => null, 'action_type' => 'SUBMIT PUBLIC MEMBER APPLICATION',
+            'module' => 'Member Applications', 'entity_type' => 'member_application', 'entity_id' => $applicationId]);
         $payload['applicant_photo'] = UploadedFile::fake()->image('applicant.jpg');
         $this->post('/membership/apply/'.$site->id, $payload)->assertSessionHasErrors('application');
         $this->assertSame(1, DB::table('member_applications')->count());

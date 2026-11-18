@@ -97,6 +97,15 @@ class AuditLogAccessTest extends TestCase
         $this->assertSame($before, DB::table('audit_logs')->get()->toJson());
     }
 
+    public function test_public_application_event_appears_in_admin_audit_as_public_applicant(): void
+    {
+        $this->event(['actor_user_id' => null, 'action_type' => 'SUBMIT PUBLIC MEMBER APPLICATION',
+            'module' => 'Member Applications', 'entity_type' => 'member_application']);
+        $this->signIn()->get('/admin/audit-logs?module=Member%20Applications')->assertOk()
+            ->assertSee('SUBMIT PUBLIC MEMBER APPLICATION')->assertSee('Public applicant');
+        $this->get('/admin/audit-logs/'.self::EVENT)->assertOk()->assertSee('Public applicant');
+    }
+
     public function test_admin_sees_the_current_actor_and_only_permitted_escaped_snapshot_fields(): void
     {
         $this->event(['new_values' => json_encode(['association_id' => '<script>alert(1)</script>',
