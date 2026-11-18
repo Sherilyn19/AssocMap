@@ -1,6 +1,7 @@
 import { L, createGisMap, fitLayer } from './gis-map.js';
 import { fillOptions, gisRequest, queryUrl, showStatus } from '../core/gis-api.js';
 import { applyFormErrors, showFeedback, showOperationError } from '../core/feedback.js';
+import { initCurrentLocation } from './gis-current-location.js';
 
 function validateGeometry(geometry, boundary) {
     if (!geometry || typeof geometry !== 'object' || Array.isArray(geometry)
@@ -279,7 +280,101 @@ export async function initGis(root) {
         catch (error) { showStatus(status, error.message, true); }
     }
 
-    map.on('click', event => { if (!boundary()) setPoint(event.latlng.lng, event.latlng.lat); });
+    const locationButton = root.querySelector('[data-gis-locate]');
+    let dismissLocation = () => {};
+    if (locationButton) {
+        const locationPreview = L.featureGroup().addTo(map);
+        dismissLocation = initCurrentLocation({
+            button: locationButton, panel: root.querySelector('[data-gis-location-result]'),
+            status: root.querySelector('[data-gis-location-status]'), use: root.querySelector('[data-gis-location-use]'),
+            cancel: root.querySelector('[data-gis-location-cancel]'), geolocation: navigator.geolocation,
+            isBoundary: boundary,
+            preview: (reading, first) => {
+                locationPreview.clearLayers();
+                const point = [reading.latitude, reading.longitude];
+                L.circle(point, { radius: reading.accuracy, color: '#2563eb', fillOpacity: .08, weight: 1, interactive: false, pmIgnore: true }).addTo(locationPreview);
+                L.circleMarker(point, { radius: 7, color: '#2563eb', fillOpacity: .9, interactive: false, pmIgnore: true }).addTo(locationPreview);
+                if (first) map.setView(point, 16);
+            },
+            clearPreview: () => locationPreview.clearLayers(),
+            apply: (reading, isBoundary) => {
+                if (!isBoundary && json.value && !window.confirm('Replace the current draft point with this device location?')) return false;
+                map.setView([reading.latitude, reading.longitude], 16);
+                if (isBoundary) showStatus(status, 'Map moved to your device location. Draw or review the project boundary; the existing boundary was not changed.');
+                else { setPoint(reading.longitude, reading.latitude); showStatus(status, `Device location selected (reported accuracy ±${Math.ceil(reading.accuracy)} m). Verify it before saving.`); }
+                return true;
+            },
+        });
+        window.addEventListener('pagehide', dismissLocation);
+    }
+
+    const searchInput = root.querySelector('[data-gis-address-input]');
+    const searchButton = root.querySelector('[data-gis-address-search]');
+    const searchStatus = root.querySelector('[data-gis-address-status]');
+    const searchResults = root.querySelector('[data-gis-address-results]');
+    let searchController;
+    let searchSequence = 0;
+    if (searchInput && searchButton && searchStatus && searchResults) {
+    searchInput.addEventListener('input', event => {
+        event.stopPropagation();
+        searchSequence++; searchController?.abort(); searchResults.replaceChildren();
+        searchButton.disabled = false; searchButton.textContent = 'Search';
+        showStatus(searchStatus, '');
+    });
+    searchInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter') { event.preventDefault(); searchButton.click(); }
+    });
+    searchButton.addEventListener('click', async () => {
+        const query = searchInput.value.trim();
+        searchResults.replaceChildren();
+        if (query.length < 3) { showStatus(searchStatus, 'Enter at least 3 characters to search.', true); return; }
+        searchController?.abort();
+        const controller = new AbortController(); searchController = controller;
+        const sequence = ++searchSequence;
+        searchButton.disabled = true; searchButton.textContent = 'Searching…';
+        showStatus(searchStatus, 'Searching for locations…');
+        const timeout = setTimeout(() => controller.abort(), 10000);
+        try {
+            const url = new URL('https://photon.komoot.io/api/');
+            url.search = new URLSearchParams({ q: query, limit: '5', lat: '10.3157', lon: '123.8854' }).toString();
+            const response = await fetch(url, { signal: controller.signal, credentials: 'omit', referrerPolicy: 'no-referrer' });
+            if (!response.ok) throw new Error('Search unavailable');
+            const data = await response.json();
+            if (sequence !== searchSequence) return;
+            if (!Array.isArray(data.features)) throw new Error('Invalid response');
+            const matches = data.features.slice(0, 5).filter(feature => {
+                const coords = feature?.geometry?.coordinates;
+                return feature?.geometry?.type === 'Point' && Array.isArray(coords) && coords.length === 2
+                    && coords.every(Number.isFinite) && Math.abs(coords[0]) <= 180 && Math.abs(coords[1]) <= 90;
+            });
+            if (!matches.length) { showStatus(searchStatus, 'No locations found. Try a different address or use the map.'); return; }
+            matches.forEach(feature => {
+                const props = feature.properties || {};
+                const label = [...new Set(['name', 'street', 'housenumber', 'district', 'city', 'state', 'country'].map(key => props[key]).filter(value => typeof value === 'string' && value.trim()).map(value => value.trim()))].join(', ') || 'Unnamed location';
+                const item = document.createElement('li');
+                const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
+                button.addEventListener('click', () => {
+                    const [lng, lat] = feature.geometry.coordinates;
+                    if (!boundary() && json.value && !window.confirm('Replace the current draft point with this search result?')) return;
+                    dismissLocation();
+                    map.setView([lat, lng], 16);
+                    if (boundary()) showStatus(searchStatus, 'Map moved to the result. Draw or review the actual project boundary; your existing boundary was not changed.');
+                    else { setPoint(lng, lat); showStatus(searchStatus, 'Point selected. Verify the location on the map before saving.'); }
+                    searchResults.replaceChildren();
+                });
+                item.append(button); searchResults.append(item);
+            });
+            showStatus(searchStatus, 'Select a result. Search locations may be approximate.');
+        } catch {
+            if (sequence === searchSequence) showStatus(searchStatus, 'Search is unavailable or timed out. Try again, or use the map and coordinates.', true);
+        } finally {
+            clearTimeout(timeout);
+            if (sequence === searchSequence) { searchButton.disabled = false; searchButton.textContent = 'Search'; }
+        }
+    });
+    }
+
+    map.on('click', event => { if (!boundary()) { dismissLocation(); setPoint(event.latlng.lng, event.latlng.lat); } });
     map.on('pm:create', event => { if (boundary()) { editable.addLayer(event.layer); trackLayer(event.layer); synchronizeBoundary(); } });
     [longitude, latitude].forEach(input => input.addEventListener('change', () => {
         if (longitude.value !== '' && latitude.value !== '') setPoint(Number(longitude.value), Number(latitude.value));
@@ -334,6 +429,7 @@ export async function initGis(root) {
             }
             delete payload._token; delete payload._method;
             associationController?.abort(); projectController?.abort();
+            dismissLocation();
             stopGeometryModes();
             saving = true; updateSaveState(); form.inert = true; showStatus(status, 'Saving GIS location…');
             const result = await gisRequest(form.action, { method: seed ? 'PATCH' : 'POST', body: payload, csrf: form.elements._token.value });

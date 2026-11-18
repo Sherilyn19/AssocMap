@@ -103,6 +103,20 @@
 .user-management[data-workspace-title="Account Details"] .user-access-card form { margin-top: 14px; }
 .user-management[data-workspace-title="Account Details"] .user-access-card form .button { margin-top: 12px; }
 .user-management[data-workspace-title="Account Details"] .user-details-heading > div:nth-child(2) { min-width: 0; overflow-wrap: anywhere; }
+/* Keep assignment management consistent with the account details page. */
+.user-assignments .workflow-navigation { margin: 0; }
+.user-assignments .workflow-navigation .back-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #dbe4ef; border-radius: 7px; background: #fff; color: var(--primary); text-decoration: none; }
+.user-assignments .workflow-navigation .back-link:hover { border-color: #9bbad8; background: #edf4fb; }
+.user-assignments .workflow-navigation nav a { font-weight: 600; text-decoration: none; }
+.user-assignments .workflow-navigation nav a:hover { text-decoration: underline; }
+.user-assignments .user-register-heading h2 { display: flex; align-items: center; gap: 9px; font-weight: 700; text-transform: uppercase; }
+.user-assignments .user-register-heading h2 .icon { width: 19px; height: 19px; color: var(--primary); flex: none; }
+.user-assignments .user-assignment-help { padding: 0 22px 18px; color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+.user-assignments .user-assignment-help p + p { margin-top: 8px; }
+.user-assignments .user-assignment-actions { padding: 0 22px 22px; }
+.user-assignments .user-assignment-actions > label { display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
+.user-assignments .user-assignment-actions input { flex: none; margin-top: 4px; }
+.user-assignments .user-assignment-actions .form-actions { margin-top: 18px; }
 .user-management :is(a, summary, button, input, select, [tabindex]):focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
 @media (max-width: 1200px) { .user-management .user-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 760px) {
