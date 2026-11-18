@@ -28,7 +28,7 @@ class MemberApplicationPhotoController extends Controller
             'association_account' => ($memberApplication->submitted_by_user_id === $actor->id || $memberApplication->submission_source === 'public_gis')
                 && AssociationAccount::query()->useWritePdo()->where('user_id', $actor->id)
                     ->where('association_id', $memberApplication->association_id)->where('is_active', true)->exists(),
-            'field_officer' => Association::query()->useWritePdo()->whereKey($memberApplication->association_id)
+            'field_officer' => ($memberApplication->submission_source !== 'public_gis' || $memberApplication->status !== 'pending' || $memberApplication->endorsement_stage === 'endorsed') && Association::query()->useWritePdo()->whereKey($memberApplication->association_id)
                 ->where('primary_field_officer_id', $actor->id)->exists(),
             default => false,
         };

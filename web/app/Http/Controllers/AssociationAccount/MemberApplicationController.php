@@ -17,11 +17,21 @@ use App\Services\Members\MemberExecutivePositionService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use PDOException;
 use Symfony\Component\HttpFoundation\Response;
 
 class MemberApplicationController extends Controller
 {
+    public function review(Request $request, MemberApplication $memberApplication, MemberApplicationService $service): RedirectResponse
+    {
+        $data = $request->validate(['action' => ['required', 'in:endorse,decline'], 'note' => ['required', 'string', 'max:1000']]);
+        $service->associationReview($memberApplication, $request->attributes->get('current_user'), $data['action'], $data['note']);
+        $response = redirect()->route('association.member-applications.index')->with('success', $data['action'] === 'endorse' ? 'Application endorsed to the Field Officer.' : 'Endorsement declined. Please contact the applicant.');
+        if ($data['action'] === 'decline') $response->with('declined_contact', ['name' => trim($memberApplication->first_name.' '.$memberApplication->last_name), 'phone' => $memberApplication->contact_number, 'email' => $memberApplication->email]);
+        return $response;
+    }
     // Show applications and choices for the linked association.
     public function index(MemberRegisterRequest $request, MemberExecutivePositionService $executivePositions, MemberDirectoryQueryService $directory): View
     {
@@ -48,6 +58,9 @@ class MemberApplicationController extends Controller
             ->where(fn ($query) => $query->where('submitted_by_user_id', $currentUser->id)
                 ->orWhere('submission_source', 'public_gis'));
         $summary = $directory->applicationSummary($scope);
+        // Count only public applications requiring this association's attention.
+        $associationReviewCount = (clone $scope)->where('submission_source', 'public_gis')->where('status', 'pending')
+            ->where(fn ($query) => $query->whereNull('endorsement_stage')->orWhere('endorsement_stage', 'returned'))->count();
         $applications = $directory->applications($scope, $filters, false, $summary);
 
         $sexCategories = SexCategory::query()
@@ -91,6 +104,7 @@ class MemberApplicationController extends Controller
                 'statusFilter' => $statusFilter,
                 'filters' => $filters,
                 'summary' => $summary,
+                'associationReviewCount' => $associationReviewCount,
             ]
         );
     }

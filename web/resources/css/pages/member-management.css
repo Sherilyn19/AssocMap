@@ -107,6 +107,9 @@
 .modal:has(.application-details-dialog) .modal-heading h2 { text-transform: uppercase; font-weight: 700; }
 .application-details-dialog .member-detail-banner { margin-bottom: 18px; background: #f8fbfe; border-color: #dce7f1; }
 .application-details-dialog .application-details-section { padding: 18px; border: 1px solid #dce7f1; border-radius: 9px; background: #fff; }
+.member-review-history-item { padding: 12px 0; border-bottom: 1px solid #e5edf4; overflow-wrap: anywhere; }
+.member-review-history-item small { display: block; margin-top: 4px; color: #52677a; }
+.member-review-history-item p { white-space: pre-wrap; margin-top: 8px; }
 /* Separate the applicant information from the review decision. */
 .application-details-dialog .application-details-section + .application-details-section { margin-top: 16px; }
 .application-details-dialog .application-details-section > h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid #edf1f5; color: #526679; }

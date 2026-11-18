@@ -35,7 +35,7 @@ class MemberRegisterRequest extends FormRequest
         return [
             'q' => ['nullable', 'string', 'max:120'],
             'status' => ['nullable', 'string', Rule::in($this->applicationRegister()
-                ? ['pending', 'approved', 'rejected'] : ['active', 'inactive', 'archived'])],
+                ? ($this->routeIs('association.*') ? ['pending', 'approved', 'rejected', 'declined'] : ['pending', 'approved', 'rejected']) : ['active', 'inactive', 'archived'])],
             'association' => $this->routeIs('association.*') ? ['prohibited'] : ['nullable', 'uuid'],
             'sort' => ['nullable', 'string', Rule::in(['az', 'za', 'newest', 'oldest'])],
             'page' => ['nullable', 'integer', 'min:1', 'max:1000000'],

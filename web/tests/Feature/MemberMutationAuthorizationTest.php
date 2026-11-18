@@ -17,6 +17,52 @@ class MemberMutationAuthorizationTest extends TestCase
 {
     use MemberMutationFixture;
 
+    public function test_public_application_requires_endorsement_and_preserves_return_history(): void
+    {
+        $context = $this->sec2Context('approve');
+        $application = $context['application'];
+        $application->update(['submission_source' => 'public_gis']);
+        $service = app(\App\Services\Members\MemberApplicationService::class);
+        $officer = $this->sec2Actor('officer');
+        try {
+            $service->approve($application, $officer);
+            $this->fail('A public application must be endorsed before approval.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('application', $exception->errors());
+        }
+        $account = $this->sec2Actor('account');
+        $service->associationReview($application, $account, 'endorse', 'Verified with the association.');
+        $this->assertSame('endorsed', $application->fresh()->endorsement_stage);
+        $service->returnToAssociation($application, $officer, 'Please verify the livelihood.');
+        $this->assertSame('returned', $application->fresh()->endorsement_stage);
+        $service->associationReview($application, $account, 'endorse', 'Livelihood confirmed.');
+        $this->assertSame(['endorse', 'return', 'endorse'], DB::table('member_application_review_events')->orderBy('rowid')->pluck('action')->all());
+        $service->reject($application, $officer, 'Unable to verify eligibility.');
+        $this->assertSame('rejected', $application->fresh()->status);
+    }
+
+    public function test_decline_requires_a_note_and_prevents_officer_review(): void
+    {
+        $application = $this->sec2Context('approve')['application'];
+        $application->update(['submission_source' => 'public_gis']);
+        $service = app(\App\Services\Members\MemberApplicationService::class);
+        $account = $this->sec2Actor('account');
+        try {
+            $service->associationReview($application, $account, 'decline', '   ');
+            $this->fail('A decline reason must be required.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('note', $exception->errors());
+        }
+        $service->associationReview($application, $account, 'decline', 'Unable to confirm association eligibility.');
+        $this->assertSame('declined', $application->fresh()->endorsement_stage);
+        try {
+            $service->reject($application, $this->sec2Actor('officer'), 'Attempted bypass');
+            $this->fail('A declined application must not enter final review.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('application', $exception->errors());
+        }
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -53,10 +99,19 @@ class MemberMutationAuthorizationTest extends TestCase
         $queries = DB::getQueryLog();
         DB::disableQueryLog();
         $this->assertNotEquals($before, $this->sec2State());
-        $budget = ['update' => 7, 'archive' => 8, 'unarchive' => 12, 'approve' => 15, 'reject' => 6,
-            'assign' => 10, 'replace' => 13, 'remove' => 9, 'submit' => 11];
-        $this->assertCount($budget[$operation], $queries, 'Retain the measured pre-SEC-2 service query count.');
+        // Application decisions include the existing audit-log insert in the transaction.
+        $budget = ['update' => 7, 'archive' => 8, 'unarchive' => 12, 'approve' => 16, 'reject' => 7,
+            'assign' => 10, 'replace' => 13, 'remove' => 9, 'submit' => 12];
+        $this->assertCount($budget[$operation], $queries, 'Keep the service query count bounded, including audit writes.');
         $this->assertCount($budget[$operation] - ($operation === 'submit' ? 2 : 0), $transactionQueries);
+        if (in_array($operation, ['approve', 'reject', 'submit'], true)) {
+            $this->assertSame(1, DB::table('audit_logs')->where('entity_type', 'member_application')
+                ->where('action_type', match ($operation) {
+                    'approve' => 'APPROVE MEMBER APPLICATION',
+                    'reject' => 'REJECT MEMBER APPLICATION',
+                    'submit' => 'SUBMIT MEMBER APPLICATION',
+                })->count());
+        }
         $this->assertCount(1, array_filter($transactionQueries,
             fn ($sql) => str_contains($sql, 'from "user_invitations"')), 'Eligibility is queried once and reused by audit.');
     }

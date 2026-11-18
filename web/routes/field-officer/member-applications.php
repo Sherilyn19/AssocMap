@@ -5,6 +5,9 @@ use App\Http\Controllers\MemberApplicationPhotoController;
 use App\Http\Middleware\MemberApplicationEvidenceHeaders;
 use Illuminate\Support\Facades\Route;
 
+Route::patch('/field-officer/member-applications/{memberApplication}/return', [FieldOfficerMemberApplicationController::class, 'returnToAssociation'])
+    ->whereUuid('memberApplication')->middleware(MemberApplicationEvidenceHeaders::class)->name('field-officer.member-applications.return');
+
 Route::get(
     '/field-officer/member-applications',
     [
