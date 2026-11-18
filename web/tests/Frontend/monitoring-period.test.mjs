@@ -8,13 +8,25 @@ const source = readFileSync(new URL('../../resources/views/monitoring/partials/e
 const submitGuard = source.match(/form\.addEventListener\('submit', event => \{\n([\s\S]*?)        refreshUnique\('production'\)/)?.[1];
 assert.ok(submitGuard, 'Monitoring submission must check quarter availability.');
 
+test('a new record defaults to the current year without overwriting drafts or saved periods', () => {
+    const yearDefault = source.match(/if \(key === 'year' && !record && !restore && !value\) value = form\.elements\.year\.dataset\.currentYear;/)?.[0];
+    assert.ok(yearDefault);
+    const chooseYear = (value, record, restore) => runInNewContext(`${yearDefault}\nvalue`, {
+        key: 'year', value, record, restore, form: { elements: { year: { dataset: { currentYear: '2026' } } } },
+    });
+    assert.equal(chooseYear('', null, false), '2026');
+    assert.equal(chooseYear('2024', null, false), '2024');
+    assert.equal(chooseYear('', null, true), '');
+    assert.equal(chooseYear('2023', { year: '2023' }, false), '2023');
+});
+
 function editor(periods = [], editingRecord = null) {
     const options = [{ value: '', textContent: 'Select a quarter…', dataset: {}, disabled: false },
         ...[11, 22, 33, 44].map((id, index) => ({ value: String(id), textContent: 'Q' + (index + 1), dataset: {}, disabled: false }))];
     const quarter = { value: '', options, disabled: Boolean(editingRecord), validityMessage: '',
         setCustomValidity(message) { this.validityMessage = message; } };
     const project = { value: 'project-a' };
-    const year = { value: '2026' };
+    const year = { value: '2026', dataset: { currentYear: '2026' } };
     const button = { disabled: false };
     const status = { hidden: false, textContent: '', focused: false, focus() { this.focused = true; } };
     const form = { elements: { quarter_id: quarter, project_id: project, year },
@@ -57,7 +69,7 @@ test('changing project or year recalculates available quarters', () => {
     fixture.project.value = 'project-b';
     fixture.refresh();
     assert.deepEqual(fixture.available(), ['11', '33', '44']);
-    fixture.year.value = '2027';
+    fixture.year.value = '2025';
     fixture.refresh();
     assert.deepEqual(fixture.available(), ['11', '22', '33', '44']);
 });
@@ -89,7 +101,7 @@ test('missing projects and invalid years cannot proceed', () => {
     fixture.project.value = '';
     assert.equal(fixture.refresh(), false);
     fixture.project.value = 'project-a';
-    for (const year of ['', '1999', '2101', '2026.5']) {
+    for (const year of ['', '1999', '2027', '2101', '2026.5']) {
         fixture.year.value = year;
         assert.equal(fixture.refresh(), false);
         assert.equal(fixture.button.disabled, true);
@@ -99,7 +111,7 @@ test('missing projects and invalid years cannot proceed', () => {
 test('available quarters restore creation after switching away from a full year', () => {
     const fixture = editor([11, 22, 33, 44].map(quarter_id => ({ project_id: 'project-a', year: 2026, quarter_id })));
     fixture.refresh();
-    fixture.year.value = '2027';
+    fixture.year.value = '2025';
     assert.equal(fixture.refresh(), true);
     assert.equal(fixture.quarter.disabled, false);
     assert.equal(fixture.button.disabled, false);
@@ -122,7 +134,7 @@ test('repeated refreshes retain original labels and remove the occupied suffix w
     const unavailableLabel = fixture.quarter.options[1].textContent;
     fixture.refresh();
     assert.equal(fixture.quarter.options[1].textContent, unavailableLabel);
-    fixture.year.value = '2027';
+    fixture.year.value = '2025';
     fixture.refresh();
     assert.equal(fixture.quarter.options[1].textContent, 'Q1');
     assert.equal(fixture.quarter.options[1].disabled, false);
@@ -158,7 +170,7 @@ test('boundary years and string period identities use the same availability rule
     fixture.year.value = '2000';
     assert.equal(fixture.refresh(), true);
     assert.deepEqual(fixture.available(), ['22', '33', '44']);
-    fixture.year.value = '2100';
+    fixture.year.value = '2026';
     assert.equal(fixture.refresh(), true);
     assert.deepEqual(fixture.available(), ['11', '22', '33', '44']);
 });

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Http\Controllers\MonitoringWorkspaceController;
+use App\Http\Requests\StoreMonitoringRequest;
 use App\Models\MonitoringRecord;
 use App\Models\UserProfile;
 use App\Services\Monitoring\MonitoringService;
@@ -148,6 +149,17 @@ class MonitoringPeriodTest extends TestCase
     {
         return ['project_id' => self::PROJECT, 'year' => 2026, 'quarter_id' => $quarter,
             'monitoring_date' => '2026-01-15', 'site_validated' => true, 'project_status' => 'ongoing'];
+    }
+
+    public function test_new_monitoring_year_allows_current_and_past_years_but_rejects_future_years(): void
+    {
+        $request = StoreMonitoringRequest::create('/admin/monitoring', 'POST');
+        $yearRules = $request->rules()['year'];
+        $currentYear = (int) now()->year;
+        foreach ([$currentYear, $currentYear - 1, 2000] as $year) {
+            $this->assertTrue(validator(['year' => $year], ['year' => $yearRules])->passes());
+        }
+        $this->assertTrue(validator(['year' => $currentYear + 1], ['year' => $yearRules])->fails());
     }
 
     private function insertPeriod(string $id = self::RECORD, string $project = self::PROJECT, int $quarter = 11): void

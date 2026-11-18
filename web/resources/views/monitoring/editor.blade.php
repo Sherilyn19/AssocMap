@@ -13,7 +13,7 @@
     $projectLabelCounts = $projectChoices->countBy('label');
     $fields = [
         ['project_id', 'Project', 'select', $projectChoices->map(fn ($choice) => ['value' => $choice['value'], 'label' => $choice['label'].($projectLabelCounts[$choice['label']] > 1 ? ' · Option '.$choice['position'] : '')])->all()],
-        ['year', 'Monitoring Year', 'number'],
+        ['year', 'Monitoring Year', 'year'],
         ['quarter_id', 'Quarter', 'select', $quarters->map(fn ($quarter) => ['value' => $quarter->id, 'label' => 'Q'.$quarter->quarter_number])->all()],
         ['monitoring_date', 'Monitoring Date', 'date'],
         ['site_validated', 'Site Validated', 'select', [['value' => '1', 'label' => 'Yes'], ['value' => '0', 'label' => 'No']]],
@@ -111,8 +111,16 @@
                 @foreach(array_slice($fields, 1, 3) as $field)
                     @php([$name, $label, $type] = $field)
                     <div class="field"><label for="monitoring-{{ $name }}">{{ $label }} <span class="field-hint">*</span></label>
-                        @if($type === 'select')<select name="{{ $name }}" id="monitoring-{{ $name }}" required aria-describedby="monitoring-quarter-availability"><option value="">Select a quarter…</option>@foreach($field[3] as $choice)<option value="{{ $choice['value'] }}">{{ $choice['label'] }}</option>@endforeach</select>
-                        @else<input type="{{ $type }}" name="{{ $name }}" id="monitoring-{{ $name }}" required @if($name === 'year') min="2000" max="2100" step="1" @endif>@endif
+                        @if($type === 'year')
+                            {{-- Retain an existing future period for editing, while new records only use current or past years. --}}
+                            @php($selectedMonitoringYear = $record?->year ?? ($restore ? old('year') : min(now()->year, 2100)))
+                            <select name="year" id="monitoring-year" data-current-year="{{ min(now()->year, 2100) }}" required>
+                                <option value="" @selected($selectedMonitoringYear === null || $selectedMonitoringYear === '')>Select a year…</option>
+                                @if($record && $record->year > now()->year)<option value="{{ $record->year }}" @selected((string) $selectedMonitoringYear === (string) $record->year)>{{ $record->year }}</option>@endif
+                                @for($year = min(now()->year, 2100); $year >= 2000; $year--)<option value="{{ $year }}" @selected((string) $selectedMonitoringYear === (string) $year)>{{ $year }}</option>@endfor
+                            </select>
+                        @elseif($type === 'select')<select name="{{ $name }}" id="monitoring-{{ $name }}" required aria-describedby="monitoring-quarter-availability"><option value="">Select a quarter…</option>@foreach($field[3] as $choice)<option value="{{ $choice['value'] }}">{{ $choice['label'] }}</option>@endforeach</select>
+                        @else<input type="{{ $type }}" name="{{ $name }}" id="monitoring-{{ $name }}" required>@endif
                     </div>
                 @endforeach
             </div>
