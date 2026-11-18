@@ -88,7 +88,7 @@ class StoreMemberApplicationRequest extends FormRequest
             'contact_number' => [
                 'required',
                 'string',
-                'max:30',
+                \App\Support\PhilippineMobileNumber::RULE,
             ],
 
             'classification_ids' => [
@@ -126,6 +126,7 @@ class StoreMemberApplicationRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'contact_number.regex' => \App\Support\PhilippineMobileNumber::MESSAGE,
             'endorsement_letter.required' => 'Enter a nonblank endorsement letter.',
             'endorsement_letter.string' => 'The endorsement letter must be plain text.',
             'endorsement_letter.max' => 'The endorsement letter must not exceed 10,000 characters.',

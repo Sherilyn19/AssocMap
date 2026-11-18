@@ -45,7 +45,7 @@ class UpdateMemberProfileRequest extends FormRequest
             'birth_date' => ['required', 'date', 'before_or_equal:today'],
             'sex_id' => ['required', 'integer', 'exists:sex_categories,id'],
             // Existing records remain readable; profile updates require a contact number.
-            'contact_number' => ['required', 'string', 'max:30'],
+            'contact_number' => ['required', 'string', \App\Support\PhilippineMobileNumber::RULE],
             'fishr_registration_number' => ['nullable', 'string', 'max:100',
                 Rule::unique('members', 'fishr_registration_number')->ignore($this->route('member')?->id)],
         ];
@@ -62,7 +62,8 @@ class UpdateMemberProfileRequest extends FormRequest
 
     public function messages(): array
     {
-        return ['fishr_registration_number.unique' => 'This FishR registration number is already assigned to another member.',
+        return ['contact_number.regex' => \App\Support\PhilippineMobileNumber::MESSAGE,
+            'fishr_registration_number.unique' => 'This FishR registration number is already assigned to another member.',
             'birth_date.before_or_equal' => 'Birth date cannot be in the future.'];
     }
 }

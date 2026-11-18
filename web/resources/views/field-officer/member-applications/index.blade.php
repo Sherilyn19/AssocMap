@@ -25,7 +25,8 @@
                             $area = $application->association?->area;
                             $barangay = $application->association?->locationBarangay();
                             $tone = match ($application->status) { 'approved' => 'success', 'rejected' => 'danger', default => 'warning' };
-                            $restoreRejection = old('review_application_id') === $application->id;
+                            $restoreRejection = old('review_application_id') === $application->id && old('review_decision') === 'reject';
+                            $restoreApproval = old('review_application_id') === $application->id && old('review_decision') === 'approve';
                             $details = [
                                 'Full Name' => $fullName,
                                 'Association' => $application->association?->name,
@@ -86,32 +87,38 @@
                             </x-modal>
                             @if($application->status === 'pending' && $reviewable)
                                 <x-modal :id="'approve-'.$application->id" title="Approve Application">
-                                    <p>Approve the application for <strong>{{ $fullName }}</strong>? Approval will create an active member record for this association.</p>
+                                    <div class="member-review-warning"><strong>Please confirm your decision</strong><p>Approving <strong>{{ $fullName }}</strong> will create an active member record. Review the application carefully before continuing; this decision cannot be changed here.</p></div>
+                                    @include('field-officer.member-applications.contact-options')
                                     {{-- Keep the selected list filters after review. --}}
                                     <form method="POST" action="{{ route('field-officer.member-applications.approve', array_merge(request()->query->all(), ['memberApplication' => $application])) }}">
                                         @csrf
                                         @method('PATCH')
+                                        <input type="hidden" name="review_application_id" value="{{ $application->id }}"><input type="hidden" name="review_decision" value="approve">
+                                        <label class="member-review-confirm"><input type="checkbox" name="decision_confirmed" value="1" required><span>I have reviewed this application and confirm that I want to approve it.</span></label>
                                         <div class="modal-actions"><button type="button" class="button" data-close-dialog>Cancel</button><button type="submit" class="button button-primary">Approve Application</button></div>
                                     </form>
                                 </x-modal>
                                 <x-modal :id="'reject-'.$application->id" title="Reject Application">
-                                    <p>Reject the application for <strong>{{ $fullName }}</strong>? Provide a reason for this decision.</p>
+                                    <div class="member-review-warning is-rejection"><strong>Please confirm your decision</strong><p>Rejecting the application for <strong>{{ $fullName }}</strong> records your decision and reason. Review the application carefully; this decision cannot be changed here.</p></div>
+                                    @include('field-officer.member-applications.contact-options')
                                     <form method="POST" action="{{ route('field-officer.member-applications.reject', array_merge(request()->query->all(), ['memberApplication' => $application])) }}" @if($restoreRejection) data-feedback-error-bag="default" @endif onsubmit="this.elements.rejection_reason.value = this.elements.rejection_reason.value.trim(); return this.reportValidity();">
                                         @csrf
                                         @method('PATCH')
                                         <input type="hidden" name="review_application_id" value="{{ $application->id }}">
+                                        <input type="hidden" name="review_decision" value="reject">
                                         <div class="field">
                                             <label for="reason-{{ $application->id }}">Rejection Reason <span class="field-hint">*</span></label>
                                             <textarea id="reason-{{ $application->id }}" name="rejection_reason" rows="4" required maxlength="1000" aria-describedby="reason-help-{{ $application->id }}" @if($restoreRejection && $errors->has('rejection_reason')) aria-invalid="true" @endif oninput="this.setCustomValidity(this.value.trim() ? '' : 'Enter a rejection reason.');">{{ $restoreRejection ? old('rejection_reason') : '' }}</textarea>
                                             <small class="field-help" id="reason-help-{{ $application->id }}">Required. Maximum 1,000 characters.</small>
                                             @if($restoreRejection) @error('rejection_reason')<span class="field-error" role="alert">{{ $message }}</span>@enderror @endif
                                         </div>
+                                        <label class="member-review-confirm"><input type="checkbox" name="decision_confirmed" value="1" required><span>I have reviewed this application and confirm that I want to reject it.</span></label>
                                         <div class="modal-actions"><button type="button" class="button" data-close-dialog>Cancel</button><button type="submit" class="button button-danger">Reject Application</button></div>
                                     </form>
                                 </x-modal>
-                                @if($restoreRejection && $errors->has('rejection_reason'))
+                                @if(($restoreRejection || $restoreApproval) && $errors->any())
                                     @push('scripts')
-                                        document.getElementById(@json('reject-'.$application->id)).dataset.feedbackRestore = 'true';
+                                        document.getElementById(@json(($restoreApproval ? 'approve-' : 'reject-').$application->id)).dataset.feedbackRestore = 'true';
                                     @endpush
                                 @endif
                             @endif
@@ -132,7 +139,7 @@
     @push('dialogs')
         <dialog id="approved-contact" class="modal" aria-labelledby="approved-contact-title" data-feedback-restore="true">
             <div class="modal-heading"><h2 id="approved-contact-title">How would you like to contact this applicant?</h2></div>
-            <p>The application for <strong>{{ $approvedContact['name'] }}</strong> was approved. You can contact the applicant to explain the next steps.</p>
+            <p>The application for <strong>{{ $approvedContact['name'] }}</strong> was {{ $approvedContact['decision'] ?? 'approved' }}. You can contact the applicant to explain the decision and next steps.</p>
             <div class="member-contact-options">
                 @if(filled($approvedContact['phone']))
                     @php($phoneLink = preg_replace('/[^0-9+]/', '', $approvedContact['phone']))

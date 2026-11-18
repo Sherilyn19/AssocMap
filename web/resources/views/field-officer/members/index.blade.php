@@ -4,7 +4,7 @@
     $workflowPrefix = 'field-officer';
     $nameOf = fn ($member) => collect([$member->first_name, $member->middle_name, $member->last_name, $member->suffix])->filter(fn ($part) => filled($part))->implode(' ');
     // Profile edits require a mobile number while older records remain viewable.
-    $fields = ['first_name' => ['First Name', 'text', 120, true], 'middle_name' => ['Middle Name', 'text', 120, false], 'last_name' => ['Last Name', 'text', 120, true], 'suffix' => ['Suffix', 'text', 20, false], 'birth_date' => ['Birth Date', 'date', null, true], 'contact_number' => ['Mobile Number', 'tel', 30, true], 'fishr_registration_number' => ['FishR Registration Number', 'text', 100, false]];
+    $fields = ['first_name' => ['First Name', 'text', 120, true], 'middle_name' => ['Middle Name', 'text', 120, false], 'last_name' => ['Last Name', 'text', 120, true], 'suffix' => ['Suffix', 'text', 20, false], 'birth_date' => ['Birth Date', 'date', null, true], 'contact_number' => ['Mobile Number (Philippines)', 'tel', 11, true], 'fishr_registration_number' => ['FishR Registration Number', 'text', 100, false]];
     $applicationRegister = false;
     $indexRoute = 'field-officer.members.index';
     $cards = ['active' => ['Active Members', 'active', 'check'], 'inactive' => ['Legacy Inactive', 'inactive', 'user'], 'archived' => ['Archived Members', 'archived', 'archive']];
@@ -92,7 +92,8 @@
                     @foreach($fields as $field => [$label, $type, $maximum, $required])
                         @php($value = $restoring && old('member_action') === 'profile' ? old($field) : ($field === 'birth_date' ? $member->birth_date?->format('Y-m-d') : $member->{$field}))
                         <div class="field"><label for="member-{{ $member->id }}-{{ $field }}">{{ $label }} <span class="field-hint">{{ $required ? '*' : 'Optional' }}</span></label>
-                            <input id="member-{{ $member->id }}-{{ $field }}" name="{{ $field }}" type="{{ $type }}" value="{{ is_scalar($value) ? $value : '' }}" @required($required) @if($maximum) maxlength="{{ $maximum }}" @endif @if($field === 'birth_date') max="{{ now()->toDateString() }}" @endif @if($restoring && $errors->has($field)) aria-invalid="true" aria-describedby="member-{{ $member->id }}-{{ $field }}-error" @endif>
+                            <input id="member-{{ $member->id }}-{{ $field }}" name="{{ $field }}" type="{{ $type }}" value="{{ is_scalar($value) ? $value : '' }}" @required($required) @if($maximum) maxlength="{{ $maximum }}" @endif @if($field === 'birth_date') max="{{ now()->toDateString() }}" @endif @if($field === 'contact_number') data-ph-mobile inputmode="numeric" autocomplete="tel-national" pattern="09[0-9]{9}" placeholder="09123456789" aria-describedby="member-{{ $member->id }}-mobile-help{{ $restoring && $errors->has($field) ? ' member-'.$member->id.'-'.$field.'-error' : '' }}" @elseif($restoring && $errors->has($field)) aria-describedby="member-{{ $member->id }}-{{ $field }}-error" @endif @if($restoring && $errors->has($field)) aria-invalid="true" @endif>
+                            @if($field === 'contact_number')<small id="member-{{ $member->id }}-mobile-help">PH · 11 digits, starting with 09</small>@endif
                             @if($restoring) @error($field)<span class="field-error" id="member-{{ $member->id }}-{{ $field }}-error">{{ $message }}</span>@enderror @endif
                         </div>
                     @endforeach

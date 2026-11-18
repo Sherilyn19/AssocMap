@@ -22,6 +22,10 @@ import { countApplicationWords } from './pages/public-application.js';
 initFeedback();
 initDisclosures();
 initDialogs();
+// Keep new input numeric; the server checks the complete Philippine format.
+document.querySelectorAll('[data-ph-mobile]').forEach(input => {
+    input.addEventListener('input', () => { input.value = input.value.replace(/[^0-9]/g, '').slice(0, 11); });
+});
 // Give applicants immediate feedback; the server also enforces the word limit.
 const publicReason = document.querySelector('#public-reason');
 if (publicReason) {

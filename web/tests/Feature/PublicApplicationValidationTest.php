@@ -99,4 +99,13 @@ final class PublicApplicationValidationTest extends TestCase
         }
         $this->post($url, [])->assertStatus(429);
     }
+
+    public function test_public_application_validates_philippine_mobile_number_format(): void
+    {
+        $url = '/membership/apply/11111111-1111-4111-8111-111111111111';
+        foreach (['0912345678', '08123456789'] as $number) {
+            $this->post($url, ['contact_number' => $number])->assertSessionHasErrors('contact_number');
+        }
+        $this->post($url, ['contact_number' => '09123456789'])->assertSessionDoesntHaveErrors('contact_number');
+    }
 }

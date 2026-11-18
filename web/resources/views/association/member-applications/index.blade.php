@@ -107,12 +107,13 @@
                     ['name' => 'last_name', 'label' => 'Last Name', 'required' => true, 'max' => 120],
                     ['name' => 'suffix', 'label' => 'Suffix', 'required' => false, 'max' => 20],
                     ['name' => 'birth_date', 'label' => 'Birth Date', 'required' => true, 'type' => 'date'],
-                    ['name' => 'contact_number', 'label' => 'Mobile Number', 'required' => true, 'max' => 30, 'type' => 'tel'],
+                    ['name' => 'contact_number', 'label' => 'Mobile Number (Philippines)', 'required' => true, 'max' => 11, 'type' => 'tel'],
                     ['name' => 'fishr_registration_number', 'label' => 'FishR Registration Number', 'required' => false, 'max' => 100],
                 ] as $field)
                     <div class="field">
                         <label for="application-{{ $field['name'] }}">{{ $field['label'] }} <span class="field-hint">{{ $field['required'] ? '*' : 'Optional' }}</span></label>
-                        <input id="application-{{ $field['name'] }}" name="{{ $field['name'] }}" type="{{ $field['type'] ?? 'text' }}" value="{{ old($field['name']) }}" @required($field['required']) @if(isset($field['max'])) maxlength="{{ $field['max'] }}" @endif @if($field['name'] === 'birth_date') max="{{ now()->toDateString() }}" @endif aria-describedby="application-{{ $field['name'] }}-error" @if($errors->has($field['name'])) aria-invalid="true" @endif>
+                        <input id="application-{{ $field['name'] }}" name="{{ $field['name'] }}" type="{{ $field['type'] ?? 'text' }}" value="{{ old($field['name']) }}" @required($field['required']) @if(isset($field['max'])) maxlength="{{ $field['max'] }}" @endif @if($field['name'] === 'birth_date') max="{{ now()->toDateString() }}" @endif @if($field['name'] === 'contact_number') data-ph-mobile inputmode="numeric" autocomplete="tel-national" pattern="09[0-9]{9}" placeholder="09123456789" @endif aria-describedby="@if($field['name'] === 'contact_number') application-mobile-help @endif application-{{ $field['name'] }}-error" @if($errors->has($field['name'])) aria-invalid="true" @endif>
+                        @if($field['name'] === 'contact_number')<small id="application-mobile-help">PH · 11 digits, starting with 09</small>@endif
                         <span class="field-error" id="application-{{ $field['name'] }}-error">@error($field['name']){{ $message }}@enderror</span>
                     </div>
                 @endforeach

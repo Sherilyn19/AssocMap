@@ -88,7 +88,7 @@ class StoreMemberRequest extends FormRequest
             'contact_number' => [
                 'required',
                 'string',
-                'max:30',
+                \App\Support\PhilippineMobileNumber::RULE,
             ],
 
             'fishr_registration_number' => [
@@ -131,6 +131,7 @@ class StoreMemberRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'contact_number.regex' => \App\Support\PhilippineMobileNumber::MESSAGE,
             'birth_date.before_or_equal' =>
                 'Birth date cannot be in the future.',
 

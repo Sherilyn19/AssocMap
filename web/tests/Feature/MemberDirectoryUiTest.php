@@ -375,9 +375,10 @@ class MemberDirectoryUiTest extends TestCase
         $this->application(202);
         $this->application(203);
         $this->identity = $this->id(2);
-        $this->get(route('field-officer.member-applications.index'))->assertOk()->assertSee('approve-'.$this->id(201));
+        $this->get(route('field-officer.member-applications.index'))->assertOk()->assertSee('approve-'.$this->id(201))
+            ->assertSee('Contact the applicant')->assertSee('decision_confirmed')->assertSee('applicant@example.test');
         $this->from(route('field-officer.member-applications.index'))
-            ->patch(route('field-officer.member-applications.approve', $this->id(201)))
+            ->patch(route('field-officer.member-applications.approve', $this->id(201)), ['decision_confirmed' => '1'])
             ->assertRedirect(route('field-officer.member-applications.index'))->assertSessionHasNoErrors()
             ->assertSessionHas('approved_contact.email', 'applicant@example.test');
         $this->assertDatabaseHas('member_applications', [
@@ -395,8 +396,8 @@ class MemberDirectoryUiTest extends TestCase
         // Record the decision separately from an officer appointment.
         $this->assertDatabaseHas('audit_logs', ['action_type' => 'APPROVE MEMBER APPLICATION',
             'entity_id' => $this->id(201), 'actor_user_id' => $this->id(2)]);
-        $this->patchJson(route('field-officer.member-applications.reject', $this->id(203)), ['rejection_reason' => 'Synthetic reason'])
-            ->assertRedirect()->assertSessionHasNoErrors();
+        $this->patchJson(route('field-officer.member-applications.reject', $this->id(203)), ['rejection_reason' => 'Synthetic reason', 'decision_confirmed' => '1'])
+            ->assertRedirect()->assertSessionHasNoErrors()->assertSessionHas('approved_contact.decision', 'rejected');
         $this->assertDatabaseHas('member_applications', [
             'id' => $this->id(203), 'status' => 'rejected', 'reviewed_by' => $this->id(2), 'rejection_reason' => 'Synthetic reason',
         ]);
@@ -406,13 +407,27 @@ class MemberDirectoryUiTest extends TestCase
         foreach ([201, 203] as $application) {
             foreach (['approve', 'reject'] as $decision) {
                 $this->patchJson(route('field-officer.member-applications.'.$decision, $this->id($application)),
-                    ['rejection_reason' => 'Another decision'])->assertStatus(409)->assertJsonValidationErrors('application');
+                    ['rejection_reason' => 'Another decision', 'decision_confirmed' => '1'])->assertStatus(409)->assertJsonValidationErrors('application');
                 $this->assertSame($before, $this->applicationSnapshot());
             }
         }
-        $this->patchJson(route('field-officer.member-applications.reject', $this->id(202)), ['rejection_reason' => ' '])
+        $this->patchJson(route('field-officer.member-applications.reject', $this->id(202)), ['rejection_reason' => ' ', 'decision_confirmed' => '1'])
             ->assertUnprocessable()->assertJsonValidationErrors('rejection_reason');
         $this->assertSame($before, $this->applicationSnapshot());
+    }
+
+    public function test_review_requires_an_explicit_confirmation_for_each_decision(): void
+    {
+        $this->applicationAuditFixture();
+        $this->application(201);
+        $this->identity = $this->id(2);
+        foreach (['approve', 'reject'] as $decision) {
+            $this->patchJson(route('field-officer.member-applications.'.$decision, $this->id(201)), [
+                'rejection_reason' => 'Synthetic reason',
+            ])->assertUnprocessable()->assertJsonValidationErrors('decision_confirmed');
+        }
+        $this->assertDatabaseHas('member_applications', ['id' => $this->id(201), 'status' => 'pending']);
+        $this->assertDatabaseCount('members', 0);
     }
 
     public function test_http_review_denials_preserve_applications_members_classifications_and_audit_history(): void
@@ -422,19 +437,19 @@ class MemberDirectoryUiTest extends TestCase
             $this->application($application, ['association_id' => $this->id($association)]);
         }
         $this->identity = $this->id(2);
-        $this->patchJson(route('field-officer.member-applications.reject', $this->id(201)), ['rejection_reason' => 'Positive control'])
+        $this->patchJson(route('field-officer.member-applications.reject', $this->id(201)), ['rejection_reason' => 'Positive control', 'decision_confirmed' => '1'])
             ->assertRedirect()->assertSessionHasNoErrors();
         $this->assertDatabaseHas('member_applications', ['id' => $this->id(201), 'status' => 'rejected']);
         $before = $this->applicationSnapshot();
         foreach (['approve', 'reject'] as $decision) {
             foreach ([202 => 'reviewer', 203 => 'association_id', 204 => 'association_id'] as $application => $error) {
                 $this->patchJson(route('field-officer.member-applications.'.$decision, $this->id($application)),
-                    ['rejection_reason' => 'Synthetic reason'])->assertUnprocessable()->assertJsonValidationErrors($error);
+                    ['rejection_reason' => 'Synthetic reason', 'decision_confirmed' => '1'])->assertUnprocessable()->assertJsonValidationErrors($error);
             }
             foreach ([1, 4] as $actor) {
                 $this->identity = $this->id($actor);
                 $this->patchJson(route('field-officer.member-applications.'.$decision, $this->id(202)),
-                    ['rejection_reason' => 'Synthetic reason'])->assertForbidden();
+                    ['rejection_reason' => 'Synthetic reason', 'decision_confirmed' => '1'])->assertForbidden();
             }
             $this->identity = $this->id(2);
         }
