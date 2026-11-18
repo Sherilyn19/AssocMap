@@ -7,6 +7,7 @@ use App\Models\GisLocation;
 use App\Models\MonitoringMaterial;
 use App\Models\MonitoringVisitReport;
 use App\Models\Project;
+use App\Models\ProgramActivityRecord;
 use Illuminate\Database\Eloquent\Model;
 
 final class PhotoRules
@@ -30,6 +31,7 @@ final class PhotoRules
         GisLocation::class => ['gis_location_id', 5],
         MonitoringVisitReport::class => ['monitoring_visit_report_id', 5],
         MonitoringMaterial::class => ['monitoring_material_id', 5],
+        ProgramActivityRecord::class => ['program_activity_id', 20],
     ];
 
     public static function parent(Model $parent): array

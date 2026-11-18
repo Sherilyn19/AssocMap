@@ -10,6 +10,7 @@
 <section class="program-management association-record-detail" data-workspace-module="association-program-activities" data-workspace-title="Program Activity Details" data-association-program-activities>
     <header class="card program-heading"><div><p class="eyebrow">{{ $association->name }}</p><h1 tabindex="-1">Program Activity Details</h1><p class="training-detail-title"><x-icon name="calendar" /> <span>{{ $activity->title }}</span></p></div></header>
     <x-workflow-navigation :back="$workflowBack" :parents="$breadcrumbs" :current="$activity->title" />
+    <div class="activity-overview-grid">
     <section class="card program-information" aria-labelledby="activity-information-title">
         <h2 id="activity-information-title"><x-icon name="calendar" /> Program Activity information</h2>
         <p>Read-only information for your association.</p>
@@ -25,5 +26,10 @@
         </dl>
         <h3>Description</h3><p class="program-preserve-text">{{ filled($activity->description) ? $activity->description : 'Not recorded' }}</p>
     </section>
+    <section class="card activity-gallery-card" data-activity-gallery data-activity-id="{{ $activity->id }}" data-base="{{ url('association/program-activities') }}" data-manager="false" data-csrf="{{ csrf_token() }}">
+        <p class="notice notice-error" data-activity-gallery-error hidden>Photo gallery is temporarily unavailable.</p>
+        @include('components.gis-photos', ['gisManager' => false, 'gisPublic' => false, 'gisAdministrator' => false, 'activityGallery' => true])
+    </section>
+    </div>
 </section>
 @endsection

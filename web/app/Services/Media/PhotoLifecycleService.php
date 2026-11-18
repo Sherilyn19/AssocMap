@@ -6,6 +6,7 @@ use App\Exceptions\MediaLifecycleException;
 use App\Models\GisLocation;
 use App\Models\MediaPhoto;
 use App\Models\Project;
+use App\Models\ProgramActivityRecord;
 use App\Models\UserProfile;
 use App\Services\Audit\AuditLogService;
 use App\Services\GIS\GisQueryService;
@@ -67,9 +68,10 @@ final class PhotoLifecycleService
             }
             $row = new MediaPhoto;
             $row->forceFill([$column => $locked->getKey(), 'uploaded_by' => $actorId,
-                'request_id' => strtolower($requestId), 'disk' => 'media_private', 'object_prefix' => 'media/'.Str::uuid(),
+                'request_id' => strtolower($requestId), 'disk' => 'media_private',
+                'object_prefix' => ($locked instanceof ProgramActivityRecord ? 'program-activities/' : 'media/').Str::uuid(),
                 'input_sha256' => $fingerprint, 'state' => 'reserved', 'replaces_photo_id' => $replaces,
-                'caption' => $caption, 'display_order' => $locked instanceof Project ? 0 : min(4, $count),
+                'caption' => $caption, 'display_order' => $locked instanceof Project ? 0 : min($limit - 1, $count),
                 'lease_until' => now()->addMinutes(PhotoRules::LEASE_MINUTES)])->save();
             $this->event($request, 'RESERVE PHOTO', $row);
 
@@ -468,8 +470,9 @@ final class PhotoLifecycleService
         if ($row->image_format === null) {
             return [];
         }
+        $prefix = $row->program_activity_id !== null ? 'program-activities/' : 'media/';
         if ($row->disk !== 'media_private'
-            || ! preg_match('~\Amedia/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z~', $row->object_prefix)
+            || ! preg_match('~\A'.preg_quote($prefix, '~').'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z~', $row->object_prefix)
             || ! in_array($row->image_format, ['jpg', 'png'], true)) {
             throw new MediaLifecycleException('invalid_object_reference');
         }

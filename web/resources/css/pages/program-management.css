@@ -363,3 +363,21 @@
     .program-management:is([data-association-projects], :is([data-association-trainings], [data-association-program-activities])) .member-filter-disclosure > summary { transition: background-color 180ms ease, border-color 180ms ease; }
     .program-management:is([data-association-projects], :is([data-association-trainings], [data-association-program-activities])) .member-filter-disclosure > summary .icon:last-child { transition: transform 180ms ease; }
 }
+.activity-overview-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); gap: 20px; align-items: start; }
+.activity-overview-grid > * { min-width: 0; }
+.activity-gallery-card .gis-photos { border-top: 0; }
+.activity-gallery-card .gis-photo-grid figure:first-child { grid-column: auto; }
+.activity-gallery-card .gis-photo-grid figure { position: relative; }
+.activity-gallery-card .gis-photo-grid .activity-photo-remove { position: absolute; z-index: 2; top: 6px; right: 6px; display: grid; place-items: center; width: 32px; height: 32px; min-height: 32px; padding: 0; border-radius: 50%; background: #fff; color: #a12727; font-size: 22px; line-height: 1; box-shadow: 0 2px 8px #102f5033; }
+.activity-gallery-card .activity-pending-remove { width: 32px; height: 32px; min-height: 32px; padding: 0; border-radius: 50%; font-size: 22px; line-height: 1; }
+.activity-gallery-card .gis-photo-grid figure:first-child img { aspect-ratio: 4 / 3; }
+.activity-gallery-pages { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 14px; }
+.activity-gallery-pages[hidden] { display: none; }
+.activity-gallery-card .gis-photo-status.is-saving { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 10px; background: #edf6f8; color: #185b68; }
+.activity-gallery-card .gis-photo-status.is-saving::before { content: ''; width: 18px; height: 18px; flex: none; border: 2px solid #bad9df; border-top-color: #176c73; border-radius: 50%; }
+.activity-gallery-card .gis-photos [data-photo-pending] { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.activity-gallery-card .gis-photos [data-photo-pending]:empty { display: none; }
+.activity-gallery-card .gis-photos [data-photo-pending] li { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.activity-gallery-card .gis-photos [data-photo-pending] li span { color: #52677a; font-size: 12px; }
+@media (prefers-reduced-motion: no-preference) { .activity-gallery-card .gis-photo-status.is-saving::before { animation: gis-photo-spin .8s linear infinite; } }
+@media (max-width: 900px) { .activity-overview-grid { grid-template-columns: minmax(0, 1fr); } }

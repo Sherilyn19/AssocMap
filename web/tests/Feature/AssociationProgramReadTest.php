@@ -147,6 +147,46 @@ class AssociationProgramReadTest extends TestCase
             '/association/program-activities', '/association/program-activities/'.$this->id(151)];
     }
 
+    public function test_activity_gallery_respects_association_scope_and_is_read_only(): void
+    {
+        Schema::create('media_photos', function (Blueprint $table) {
+            $table->uuid('id')->primary(); $table->uuid('program_activity_id'); $table->string('state');
+            $table->integer('display_order')->default(0); $table->timestamp('lease_until')->nullable();
+        });
+        DB::table('media_photos')->insert(['id' => $this->id(801), 'program_activity_id' => $this->id(151), 'state' => 'ready']);
+        $base = '/association/program-activities/';
+        $this->getJson($base.$this->id(151).'/photos')->assertOk()->assertJsonCount(1, 'photos')
+            ->assertJsonPath('can_manage', false)->assertJsonPath('limit', 20);
+        $this->getJson($base.$this->id(153).'/photos')->assertNotFound();
+        $this->postJson($base.$this->id(151).'/photos')->assertStatus(405);
+    }
+
+    public function test_activity_gallery_limits_field_officers_to_their_assigned_associations(): void
+    {
+        Schema::create('media_photos', function (Blueprint $table) {
+            $table->uuid('id')->primary(); $table->uuid('program_activity_id'); $table->string('state');
+            $table->integer('display_order')->default(0); $table->timestamp('lease_until')->nullable();
+        });
+        DB::table('associations')->where('id', $this->id(11))->update(['primary_field_officer_id' => $this->id(3)]);
+        $this->identity = $this->id(4);
+        $base = '/field-officer/program-activities/';
+        $this->getJson($base.$this->id(151).'/photos')->assertOk()->assertJsonPath('can_manage', true);
+        $this->getJson($base.$this->id(153).'/photos')->assertNotFound();
+        $this->getJson($base.$this->id(154).'/photos')->assertOk()->assertJsonPath('can_manage', false);
+    }
+
+    public function test_administrator_can_manage_program_wide_gallery_but_not_archived_activity(): void
+    {
+        Schema::create('media_photos', function (Blueprint $table) {
+            $table->uuid('id')->primary(); $table->uuid('program_activity_id'); $table->string('state');
+            $table->integer('display_order')->default(0); $table->timestamp('lease_until')->nullable();
+        });
+        $this->identity = $this->id(3);
+        $base = '/admin/program-activities/';
+        $this->getJson($base.$this->id(155).'/photos')->assertOk()->assertJsonPath('can_manage', true);
+        $this->getJson($base.$this->id(154).'/photos')->assertOk()->assertJsonPath('can_manage', false);
+    }
+
     public function test_connected_account_programs_restore_own_registers_and_never_link_foreign_parents(): void
     {
         foreach (['trainings' => 101, 'program-activities' => 151] as $module => $id) {

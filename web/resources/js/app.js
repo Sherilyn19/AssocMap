@@ -103,6 +103,16 @@ document.addEventListener('keydown', (event) => {
 });
 
 const gisRoot = document.querySelector('[data-gis-workspace], [data-gis-editor]');
+const activityGallery = document.querySelector('[data-activity-gallery]');
+if (activityGallery) {
+    import('./pages/gis-photos.js').then(({ createGisPhotos }) => {
+        const gallery = createGisPhotos(activityGallery.querySelector('[data-gis-photos]'), {
+            base: activityGallery.dataset.base, manager: activityGallery.dataset.manager === 'true',
+            csrf: activityGallery.dataset.csrf, kind: 'activity', limit: 20,
+        });
+        gallery.select(activityGallery.dataset.activityId);
+    }).catch(() => { activityGallery.querySelector('[data-activity-gallery-error]').hidden = false; });
+}
 if (gisRoot) {
     const module = gisRoot.hasAttribute('data-gis-editor') ? import('./pages/gis-editor.js') : import('./pages/gis-workspace.js');
     module.then(({ initGis }) => initGis(gisRoot)).catch(() => {

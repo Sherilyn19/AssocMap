@@ -1,6 +1,6 @@
 import { photoInputError } from '../components/photo-input.js';
 
-export function createGisPhotos(root, { base, manager, csrf }) {
+export function createGisPhotos(root, { base, manager, csrf, kind = 'gis', limit = 5 }) {
     const find = selector => root.querySelector(selector);
     const status = find('[data-photo-status]');
     const form = find('[data-photo-upload]');
@@ -11,7 +11,7 @@ export function createGisPhotos(root, { base, manager, csrf }) {
     const confirmation = find('[data-photo-confirm]');
     const grid = find('[data-photo-grid]');
     let current, opener, removalId, previewUrl, requestId, busy = false, canManage = false, slots = 0, photos = [], photoIndex = 0;
-    let photoRequest = 0;
+    let photoRequest = 0, galleryPage = 0;
     // The public viewer receives its new presentation only on desktop.
     const desktopPublic = () => root.closest('[data-gis-public="true"]') && window.matchMedia('(min-width: 768px)').matches;
     // Use the same photo loading experience for the desktop administrator gallery.
@@ -25,10 +25,15 @@ export function createGisPhotos(root, { base, manager, csrf }) {
     };
     const controls = () => {
         root.querySelectorAll('button, input').forEach(control => { control.disabled = busy; });
+        if (find('[data-gallery-previous]')) {
+            find('[data-gallery-previous]').disabled = busy || galleryPage === 0;
+            find('[data-gallery-next]').disabled = busy || (galleryPage + 1) * 4 >= photos.length;
+        }
         if (form) {
             form.hidden = !canManage;
-            input.disabled = busy || !canManage || slots >= 5;
-            form.querySelector('[type=submit]').disabled = input.disabled || !input.files[0];
+            input.disabled = busy || !canManage || slots >= limit;
+            const submit = form.querySelector('[type=submit]');
+            if (submit) submit.disabled = input.disabled || !input.files[0];
         }
         root.setAttribute('aria-busy', String(busy));
     };
@@ -64,7 +69,7 @@ export function createGisPhotos(root, { base, manager, csrf }) {
         find('[data-photo-prev]').disabled = index === 0;
         find('[data-photo-next]').disabled = index === photos.length - 1;
         find('[data-photo-viewer-count]').textContent = `${index + 1} / ${photos.length}`;
-        display.alt = `Location photo ${index + 1} of ${photos.length}`;
+        display.alt = `${kind === 'activity' ? 'Activity' : 'Location'} photo ${index + 1} of ${photos.length}`;
         const imageStatus = find('[data-photo-image-status]');
         const activeRequest = ++photoRequest;
         if (!enhancedViewer()) {
@@ -104,9 +109,20 @@ export function createGisPhotos(root, { base, manager, csrf }) {
         if (!Array.isArray(gallery.photos)) throw new Error('Gallery response unavailable.');
         photos = gallery.photos; slots = gallery.used_slots || 0; canManage = manager && gallery.can_manage === true;
         root.dataset.photoState = photos.length ? 'ready' : 'empty';
-        find('[data-photo-count]').textContent = manager ? `${slots} / 5 slots` : `${photos.length} approved ${photos.length === 1 ? 'photo' : 'photos'}`;
+        find('[data-photo-count]').textContent = manager ? `${slots} / ${limit} slots` : `${photos.length} ${kind === 'gis' ? 'approved ' : ''}${photos.length === 1 ? 'photo' : 'photos'}`;
         const existing = new Map(Array.from(grid.children, node => [node.dataset.photoId, node]));
-        grid.replaceChildren(...photos.map((photo, index) => {
+        const pageCount = Math.max(1, Math.ceil(photos.length / 4));
+        galleryPage = Math.min(galleryPage, pageCount - 1);
+        const visiblePhotos = kind === 'activity' ? photos.slice(galleryPage * 4, galleryPage * 4 + 4) : photos;
+        const pageControls = find('[data-gallery-pages]');
+        if (pageControls) {
+            pageControls.hidden = pageCount <= 1;
+            find('[data-gallery-page]').textContent = `${galleryPage + 1} / ${pageCount}`;
+            find('[data-gallery-previous]').disabled = galleryPage === 0;
+            find('[data-gallery-next]').disabled = galleryPage >= pageCount - 1;
+        }
+        grid.replaceChildren(...visiblePhotos.map(photo => {
+            const index = photos.indexOf(photo);
             const previous = existing.get(photo.id);
             const figure = document.createElement('figure'); figure.dataset.photoId = photo.id;
             const open = button('View photo ' + (index + 1), () => openPhoto(photo, open));
@@ -114,7 +130,7 @@ export function createGisPhotos(root, { base, manager, csrf }) {
             const caption = document.createElement('span'); caption.textContent = 'View photo ' + (index + 1);
             open.replaceChildren(caption);
             const image = previous?.querySelector('img') || document.createElement('img');
-            image.alt = 'Location photo ' + (index + 1); image.loading = 'lazy'; image.decoding = 'async';
+            image.alt = (kind === 'activity' ? 'Activity' : 'Location') + ' photo ' + (index + 1); image.loading = 'lazy'; image.decoding = 'async';
             image.width = photo.thumbnail_width; image.height = photo.thumbnail_height;
             // Show a loading state in the public desktop gallery and retry with the display image if needed.
             if (enhancedViewer()) {
@@ -137,14 +153,16 @@ export function createGisPhotos(root, { base, manager, csrf }) {
             }
             if (!image.getAttribute('src')) image.src = photo.thumbnail_url;
             open.prepend(image); figure.append(open);
-            if (manager) {
+            if (manager && kind === 'gis') {
                 const label = document.createElement('figcaption'); label.textContent = photo.approved ? 'Approved for eligible public display' : 'Private'; figure.append(label);
             }
             if (canManage) {
-                figure.append(button(photo.approved ? 'Withdraw approval' : 'Approve for public display', () => mutate(
+                if (kind === 'gis') figure.append(button(photo.approved ? 'Withdraw approval' : 'Approve for public display', () => mutate(
                     context => request(context.endpoint + '/' + photo.id + '/approval', 'POST', formBody({ _method: 'PATCH', approved: photo.approved ? '0' : '1' })),
                     photo.approved ? 'Approval withdrawn.' : 'Photo approved. Public delivery also requires an eligible published location.')));
-                figure.append(button('Remove photo ' + (index + 1), event => remove(photo.id, event.currentTarget)));
+                const removeButton = button('Remove photo ' + (index + 1), event => remove(photo.id, event.currentTarget));
+                if (kind === 'activity') { removeButton.textContent = '×'; removeButton.classList.add('activity-photo-remove'); }
+                figure.append(removeButton);
                 if (index > 0) figure.append(button('Move photo ' + (index + 1) + ' earlier', () => {
                     const ids = photos.map(item => item.id); [ids[index - 1], ids[index]] = [ids[index], ids[index - 1]];
                     void mutate(context => request(context.endpoint + '/order', 'POST', formBody({ _method: 'PATCH', ids })), 'Photo order saved.');
@@ -153,16 +171,26 @@ export function createGisPhotos(root, { base, manager, csrf }) {
             return figure;
         }));
         const pending = find('[data-photo-pending]'); pending.replaceChildren();
-        (gallery.pending || []).forEach(photo => {
+        (gallery.pending || []).forEach((photo, index) => {
             const item = document.createElement('li');
-            item.textContent = photo.status === 'deleting' ? 'Removal awaiting cleanup. ' : 'Upload pending verification. ';
-            if (photo.retry_after > 0) item.append(`Check again after ${Math.ceil(photo.retry_after / 60)} minute(s). `);
+            if (kind === 'gis') {
+                item.textContent = photo.status === 'deleting' ? 'Removal awaiting cleanup. ' : 'Upload pending verification. ';
+                if (photo.retry_after > 0) item.append(`Check again after ${Math.ceil(photo.retry_after / 60)} minute(s). `);
+            } else if (photo.status !== 'deleting') {
+                const label = document.createElement('span');
+                label.textContent = `Unfinished photo ${index + 1}`;
+                item.append(label);
+            }
             if (canManage && photo.retry_after === 0) item.append(button('Check saved state', () => mutate(
                 context => request(context.endpoint + '/' + photo.id + '/reconcile', 'POST'), 'Saved state checked.')));
-            if (canManage && photo.status !== 'deleting') item.append(button('Remove pending photo', event => remove(photo.id, event.currentTarget)));
-            pending.append(item);
+            if (canManage && photo.status !== 'deleting') {
+                const removeButton = button(kind === 'activity' ? `Remove unfinished photo ${index + 1}` : 'Remove pending photo', event => remove(photo.id, event.currentTarget));
+                if (kind === 'activity') { removeButton.textContent = '×'; removeButton.classList.add('activity-pending-remove'); }
+                item.append(removeButton);
+            }
+            if (item.hasChildNodes()) pending.append(item);
         });
-        message(photos.length ? '' : (manager ? 'No ready photos. Pending uploads appear below.' : 'No approved photos are available for this location.'));
+        message(photos.length ? '' : (manager ? 'No ready photos. Pending uploads appear below.' : (kind === 'gis' ? 'No approved photos are available for this location.' : 'No photos have been added yet.')));
         controls();
     };
     const load = async context => {
@@ -176,9 +204,15 @@ export function createGisPhotos(root, { base, manager, csrf }) {
             if (current === context) { root.dataset.photoState = 'unavailable'; grid.replaceChildren(); display.removeAttribute('src'); viewer.close(); canManage = false; message(error.message); }
         } finally { if (current === context) { busy = false; controls(); } }
     };
-    const mutate = async (action, success) => {
+    const mutate = async (action, success, isUpload = false) => {
         if (!current || busy || !canManage) return;
-        const context = current; busy = true; controls(); message('Saving photo changes...');
+        const context = current; busy = true; controls();
+        const uploadButton = form?.querySelector('[type=submit]');
+        if (kind === 'activity' && isUpload) {
+            status.classList.add('is-saving');
+            if (uploadButton) uploadButton.textContent = 'Saving photo…';
+            message('Saving your photo… Please wait.');
+        } else message('Saving photo changes...');
         try {
             await action(context);
             if (current !== context) return;
@@ -188,21 +222,34 @@ export function createGisPhotos(root, { base, manager, csrf }) {
             if (current !== context) return;
             try { await load(context); } catch { grid.replaceChildren(); canManage = false; }
             if (current === context) message(error.message);
-        } finally { if (current === context) { busy = false; controls(); } }
+        } finally {
+            if (current === context) {
+                busy = false; status.classList.remove('is-saving');
+                if (uploadButton && kind === 'activity' && isUpload) uploadButton.textContent = 'Upload photo';
+                controls();
+            }
+        }
+    };
+    const uploadSelected = () => {
+        const error = photoInputError(input.files[0]);
+        if (error) { message(error); return; }
+        const body = formBody({ photo: input.files[0], request_id: requestId ||= crypto.randomUUID() });
+        void mutate(async context => { await request(context.endpoint, 'POST', body); if (current === context) resetFile(); }, 'Photo uploaded privately.', true);
     };
     input?.addEventListener('change', () => {
         const file = input.files[0]; resetFile(false);
         const error = photoInputError(file); input.setCustomValidity(error); message(error);
         if (!error) { requestId = crypto.randomUUID(); previewUrl = URL.createObjectURL(file); preview.src = previewUrl; preview.hidden = false; }
         controls();
+        if (!error && kind === 'activity') uploadSelected();
     });
     form?.addEventListener('submit', event => {
-        event.preventDefault(); const error = photoInputError(input.files[0]);
-        if (error) { message(error); return; }
-        const body = formBody({ photo: input.files[0], request_id: requestId ||= crypto.randomUUID() });
-        void mutate(async context => { await request(context.endpoint, 'POST', body); if (current === context) resetFile(); }, 'Photo uploaded privately.');
+        event.preventDefault();
+        if (kind !== 'activity') uploadSelected();
     });
     find('[data-photo-refresh]').addEventListener('click', refresh);
+    find('[data-gallery-previous]')?.addEventListener('click', () => { if (galleryPage > 0) { galleryPage--; void refresh(); } });
+    find('[data-gallery-next]')?.addEventListener('click', () => { if ((galleryPage + 1) * 4 < photos.length) { galleryPage++; void refresh(); } });
     // Keep the existing photo controls usable with a mouse or keyboard.
     find('[data-photo-close]').addEventListener('click', () => viewer.close());
     find('[data-photo-prev]').addEventListener('click', () => showPhoto(photoIndex - 1));
@@ -219,8 +266,8 @@ export function createGisPhotos(root, { base, manager, csrf }) {
         confirmation.addEventListener('close', () => { opener?.isConnected && opener.focus(); });
     }
     const clear = () => {
-        current?.controller.abort(); current = null; busy = false; canManage = false; photos = []; slots = 0;
-        resetFile(); viewer.close(); confirmation?.close(); display.removeAttribute('src');
+        current?.controller.abort(); current = null; busy = false; canManage = false; photos = []; slots = 0; galleryPage = 0;
+        resetFile(); status.classList.remove('is-saving'); viewer.close(); confirmation?.close(); display.removeAttribute('src');
         grid.replaceChildren(); find('[data-photo-pending]').replaceChildren(); root.hidden = true;
     };
     window.addEventListener('pagehide', clear, { once: true });
